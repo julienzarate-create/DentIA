@@ -1,5 +1,5 @@
 <!--
-  DentIA v3.23
+  DentIA v3.24
   © 2025 — Tous droits réservés
   Ce logiciel est protégé par le droit d'auteur.
   Toute reproduction ou redistribution à des fins commerciales
@@ -11,7 +11,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DentIA v3.23</title>
+<title>DentIA v3.24</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Palanquin&family=Roboto:wght@400;700&family=Poppins:wght@400;700&family=Merriweather:wght@400;700&family=Oswald:wght@400;700&family=Arvo:wght@400;700&family=Bitter:wght@400;700&family=Outfit:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -232,7 +232,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
 <div class="sidebar">
   <div class="sb-logo" onclick="goHome()" style="cursor:pointer" title="Retour à l'accueil">
     <div class="mark">🦷</div>
-    <div><h1>DentIA</h1><small>v3.23</small></div>
+    <div><h1>DentIA</h1><small>v3.24</small></div>
   </div>
   <nav class="sb-nav">
     <div class="sb-section">Consultation</div>
@@ -245,10 +245,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
       Enregistrement en cours
     </button>
     <div class="sb-section">Cabinet</div>
-    <button class="sb-item" id="nav-patients" onclick="goNav('patients',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-      Patients
-    </button>
     <button class="sb-item" id="nav-historique" onclick="goNav('historique',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
       Historique
@@ -306,9 +302,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
         <button id="c-hist-regen-btn" onclick="regenerateDocsWithAI()" style="display:none;padding:3px 9px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:11px;cursor:pointer;text-transform:none;letter-spacing:0">🔄 Réactualiser avec l'IA</button>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <input type="text" id="c-nom" placeholder="Nom" autocomplete="off" style="flex:1;min-width:110px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;color:var(--ink)">
-        <input type="text" id="c-prenom" placeholder="Prénom" autocomplete="off" style="flex:1;min-width:110px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;color:var(--ink)">
-        <input type="date" id="c-ddn" autocomplete="off" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;color:var(--ink2)">
+        <select id="c-civilite" onchange="syncPatientToDocs()" style="padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;color:var(--ink2)"><option value="">Civilité</option><option value="M">Monsieur</option><option value="Mme">Madame</option></select>
+        <input type="text" id="c-nom" placeholder="Nom" autocomplete="off" oninput="syncPatientToDocs()" style="flex:1;min-width:110px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;color:var(--ink)">
+        <input type="text" id="c-prenom" placeholder="Prénom" autocomplete="off" oninput="syncPatientToDocs()" style="flex:1;min-width:110px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;color:var(--ink)">
+        <input type="date" id="c-ddn" autocomplete="off" onchange="syncPatientToDocs()" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;color:var(--ink2)">
         <button id="c-update-btn" onclick="updateDocsWithPatient()" style="display:none;padding:8px 14px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">🔄 Mettre à jour</button>
       </div>
     </div>
@@ -419,6 +416,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
             <button id="c-logos-edit-btn" onclick="toggleCLogosEdit()" style="padding:6px 13px;background:var(--s2);border:1px solid var(--border);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;color:var(--ink2)">✏️ Modifier</button>
             <button id="c-logos-save-btn" onclick="saveCLogos()" style="display:none;padding:6px 13px;background:var(--green);color:#fff;border:none;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer">✓ Enregistrer</button>
             <button id="c-logos-dictee-btn" onclick="toggleSmartDictee()" title="Dicter fidèlement une information complémentaire à ajouter à la SmartNote" style="padding:6px 13px;background:#fef9c3;border:1px solid #fde047;color:#854d0e;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer">🎙️ Dicter la SmartNote</button>
+            <!-- v3.24 : indicateur visuel de dictée en cours, réutilise le pattern pastille rouge pulsante déjà utilisé pour l'enregistrement principal -->
+            <span id="c-logos-dictee-indicator" style="display:none;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--red);font-weight:500"><span class="rdot on"></span>Dictée en cours…</span>
           </div>
           <div class="logos-box" id="c-logos-dictee-box" style="display:none;margin-top:10px;background:#fefce8;border:1px solid #fde047">
             <h4>🎙️ SmartNote (dictée)</h4>
@@ -432,16 +431,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
         </div>
       </div>
     </div>
-  </div>
-  <div class="cpage" id="page-patients">
-    <div class="pg-title">Patients</div>
-    <div class="pg-sub">Accédez aux dossiers et à l'historique de vos patients.</div>
-    <div class="info-box">💾 Données stockées localement dans Chrome sur cet ordinateur.</div>
-    <div class="search-row">
-      <input type="text" id="p-search" placeholder="Rechercher…" oninput="filterPatients()">
-      <button class="btn-green" onclick="newPatient()">+ Nouveau patient</button>
-    </div>
-    <div id="p-list"></div>
   </div>
   <div class="cpage" id="page-historique">
     <div class="pg-title">Historique</div>
@@ -458,6 +447,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
     <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:20px">
       <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:12px">Patient</div>
       <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <div style="min-width:120px">
+          <label style="font-size:11px;color:var(--ink2);display:block;margin-bottom:4px">Civilité</label>
+          <select id="doc-civilite" onchange="onDocPatientChange()" style="width:100%;padding:8px 10px;border:1px solid var(--border2);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink);background:var(--surface);outline:none;box-sizing:border-box"><option value="">—</option><option value="M">Monsieur</option><option value="Mme">Madame</option></select>
+        </div>
         <div style="flex:1;min-width:140px">
           <label style="font-size:11px;color:var(--ink2);display:block;margin-bottom:4px">Nom</label>
           <input type="text" id="doc-nom" placeholder="Dupont" oninput="onDocPatientChange()" style="width:100%;padding:8px 10px;border:1px solid var(--border2);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink);background:var(--surface);outline:none;box-sizing:border-box">
@@ -626,6 +619,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
         <div class="sg">
           <div>
             <div class="fg"><label>Prénom et nom</label><input type="text" id="s-name" placeholder="Ex : Dr Marie Dupont"></div>
+            <!-- v3.24 : utilisé uniquement pour l'accord grammatical de "soussigné(e)" dans le Certificat — le titre reste toujours "Docteur" automatiquement -->
+            <div class="fg"><label>Genre (pour l'accord de "soussigné(e)" dans le Certificat)</label><select id="s-genre"><option value="h">Homme</option><option value="f">Femme</option></select></div>
             <div class="fg"><label>Spécialité</label><input type="text" id="s-spec" placeholder="Ex : Chirurgien-dentiste"></div>
             <div class="fg"><label>N° RPPS</label><input type="text" id="s-rpps" placeholder="11 chiffres"></div>
             <div class="fg"><label>N° AM / Adeli</label><input type="text" id="s-adeli" placeholder="9 chiffres"></div>
@@ -735,14 +730,35 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
         <div id="settings-correspondants-list"></div>
       </div>
       <div class="panel-tab" id="stab-6" style="display:none">
-        <!-- v3.23 : liste des tailles d'implant valides, utilisée pour signaler les tailles
-             suspectes dans la SmartNote générée (diamètres/longueurs mal transcrits) -->
-        <p style="font-size:12px;color:var(--ink2);margin-bottom:14px">Renseignez les tailles d'implants que vous utilisez habituellement (une ou deux marques suffisent). SmartNote signalera en surbrillance toute taille détectée dans une consultation qui ne figure pas dans cette liste, car elle est probablement mal transcrite.</p>
-        <div style="display:flex;gap:8px;margin-bottom:14px">
-          <input type="text" id="implant-size-input" placeholder="ex : 5.0 x 10" style="flex:1;border:1px solid var(--border2);border-radius:8px;padding:7px 10px;font-family:'DM Sans',sans-serif;font-size:12px;outline:none;color:var(--ink);background:var(--surface)">
-          <button class="btn-green" onclick="addImplantSize()">+ Ajouter</button>
+        <!-- v3.24 : refonte en 3 listes indépendantes (marques / diamètres / longueurs) — remplace
+             l'ancienne liste unique de tailles complètes. Ces listes servent uniquement de référence
+             pour que la SmartNote conserve fidèlement marque/taille d'implant (aucune vérification ni
+             surbrillance automatique, retirée en v3.24 à la demande de l'utilisateur). -->
+        <p style="font-size:12px;color:var(--ink2);margin-bottom:14px">Renseignez séparément vos marques, diamètres et longueurs d'implants habituels. Ces informations aident l'IA à toujours retranscrire fidèlement la marque et la taille d'un implant mentionné en consultation, sans jamais les résumer ni les oublier.</p>
+        <div style="margin-bottom:20px">
+          <div style="font-size:13px;font-weight:700;margin-bottom:8px">Marques</div>
+          <div style="display:flex;gap:8px;margin-bottom:10px">
+            <input type="text" id="implant-brand-input" placeholder="ex : Nobel Replace" onkeydown="if(event.key==='Enter')addImplantItem('brand')" style="flex:1;border:1px solid var(--border2);border-radius:8px;padding:7px 10px;font-family:'DM Sans',sans-serif;font-size:12px;outline:none;color:var(--ink);background:var(--surface)">
+            <button class="btn-green" onclick="addImplantItem('brand')">+ Ajouter</button>
+          </div>
+          <div id="implant-brands-list"></div>
         </div>
-        <div id="implant-sizes-list"></div>
+        <div style="margin-bottom:20px">
+          <div style="font-size:13px;font-weight:700;margin-bottom:8px">Diamètres (mm)</div>
+          <div style="display:flex;gap:8px;margin-bottom:10px">
+            <input type="text" id="implant-diameter-input" placeholder="ex : 4.3" onkeydown="if(event.key==='Enter')addImplantItem('diameter')" style="flex:1;border:1px solid var(--border2);border-radius:8px;padding:7px 10px;font-family:'DM Sans',sans-serif;font-size:12px;outline:none;color:var(--ink);background:var(--surface)">
+            <button class="btn-green" onclick="addImplantItem('diameter')">+ Ajouter</button>
+          </div>
+          <div id="implant-diameters-list"></div>
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:700;margin-bottom:8px">Longueurs (mm)</div>
+          <div style="display:flex;gap:8px;margin-bottom:10px">
+            <input type="text" id="implant-length-input" placeholder="ex : 10" onkeydown="if(event.key==='Enter')addImplantItem('length')" style="flex:1;border:1px solid var(--border2);border-radius:8px;padding:7px 10px;font-family:'DM Sans',sans-serif;font-size:12px;outline:none;color:var(--ink);background:var(--surface)">
+            <button class="btn-green" onclick="addImplantItem('length')">+ Ajouter</button>
+          </div>
+          <div id="implant-lengths-list"></div>
+        </div>
       </div>
     </div>
     <div class="panel-footer">
@@ -874,7 +890,24 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
       <div><div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--ink2)">⚙️ Fonctionnalités avancées</div><div style="display:flex;flex-direction:column;gap:8px"><div style="background:var(--s2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--ink2)"><strong>Mode test</strong> — Testez la génération en collant une transcription simulée, sans micro.</div><div style="background:var(--s2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--ink2)"><strong>Retours</strong> — Toutes les modifications IA sont enregistrées automatiquement pour affiner vos prompts.</div><div style="background:var(--s2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--ink2)"><strong>Dictionnaire</strong> — Corrigez automatiquement les erreurs Whisper (ex : "côme bim" → "cone beam").</div></div></div>
       </div>
       <div class="panel-tab" id="aidetab-1" style="display:none">
-        <!-- v3.23 : changelog orienté utilisateur, grandes lignes uniquement -->
+        <!-- v3.24 : à partir de maintenant, chaque version garde SA PROPRE section détaillée dans ce
+             changelog — plus de fusion/remixage de plusieurs versions en un seul résumé groupé (la
+             section "Version 3.19 – 3.22" ci-dessous est un reliquat d'avant cette règle, conservé
+             tel quel pour ne rien perdre de l'historique déjà écrit). -->
+        <div style="margin-bottom:18px"><div style="font-size:13px;font-weight:700;margin-bottom:8px">Version 3.24</div><ul style="margin:0;padding-left:18px;font-size:12px;color:var(--ink2);line-height:1.9">
+          <li>Signature automatique (nom + image si enregistrée) ajoutée en bas de page sur le Courrier confrère, le Certificat et la Lettre patient.</li>
+          <li>Certificat : la civilité, le nom et la date de naissance du patient sont désormais mentionnés dans la première phrase, et "soussigné/soussignée" s'accorde correctement selon votre genre (renseignable dans Paramètres).</li>
+          <li>Lettre patient : la lettre commence désormais par "Bonjour [civilité] [Nom] [Prénom],".</li>
+          <li>Courrier confrère : la ligne "À l'attention de" tient maintenant sur une seule ligne (nom + spécialité), et le corps du courrier commence toujours par "Bonjour," (fini le doublon avec le nom du destinataire).</li>
+          <li>Nouveau champ Civilité sur la fiche patient, synchronisé automatiquement entre "Nouvel enregistrement" et "Mes Documents".</li>
+          <li>L'onglet Patients a été retiré du menu (peu utilisé) — vos consultations restent toutes consultables depuis l'Historique, aucune donnée n'est perdue.</li>
+          <li>Refonte de l'onglet Implants : 3 listes séparées (marques, diamètres, longueurs) au lieu d'une seule liste à remplir manuellement pour chaque combinaison. Le surlignage automatique des tailles a été retiré.</li>
+          <li>Il n'est plus possible de démarrer un second enregistrement audio (Dicter la SmartNote, micro de correction) pendant qu'un enregistrement de consultation est déjà en cours.</li>
+          <li>Une confirmation s'affiche désormais avant de quitter un enregistrement en cours, pour éviter de le perdre par erreur.</li>
+          <li>Toutes les fenêtres d'avertissement de l'application ont été harmonisées avec le style DentIA (fini les popups grises du navigateur).</li>
+          <li>Un indicateur visuel (pastille rouge) signale maintenant clairement qu'une dictée SmartNote est en cours d'enregistrement.</li>
+          <li>"Monsieur", "Madame" et "Docteur" peuvent désormais être abrégés (Mr, Mme, Dr) dans les documents ; le nom de famille du patient s'affiche toujours en majuscules.</li>
+        </ul></div>
         <div style="margin-bottom:18px"><div style="font-size:13px;font-weight:700;margin-bottom:8px">Version 3.23</div><ul style="margin:0;padding-left:18px;font-size:12px;color:var(--ink2);line-height:1.9">
           <li>Correction d'un bug : le message "enregistrement non sauvegardé" ne s'affiche plus par erreur après une SmartNote générée avec succès.</li>
           <li>SmartNote corrige désormais elle-même les mots manifestement mal transcrits par la dictée vocale (ex : "silène" → "sealant"), sans jamais changer le sens ni l'ordre de vos phrases.</li>
@@ -894,6 +927,20 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
   </div>
 </div>
 
+<!-- MODAL CONFIRMATION GÉNÉRIQUE (v3.24) — remplace toutes les popups natives du navigateur
+     (confirm()/alert()) par une fenêtre au style DentIA, réutilisable pour tout message
+     d'avertissement nécessitant une confirmation Annuler/Confirmer. -->
+<div class="modal-overlay" id="modal-confirm" onclick="closeConfirmModal()">
+  <div class="modal" style="max-width:420px" onclick="event.stopPropagation()">
+    <div class="modal-hdr"><strong style="font-size:16px" id="confirm-modal-title">⚠️ Attention</strong><button class="modal-close" onclick="closeConfirmModal()">×</button></div>
+    <div id="confirm-modal-message" style="font-size:13px;color:var(--ink2);line-height:1.6;margin-bottom:4px"></div>
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px">
+      <button class="btn-sec" onclick="closeConfirmModal()">Annuler</button>
+      <button class="btn-green" id="confirm-modal-confirm-btn" style="background:var(--red)">Confirmer</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL DICT -->
 <div class="modal-overlay" id="modal-dict" onclick="closeDictModal()">
   <div class="modal" onclick="event.stopPropagation()">
@@ -903,21 +950,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
     <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px">
       <button class="btn-sec" onclick="closeDictModal()">Annuler</button>
       <button class="btn-green" onclick="addDictEntry()">Ajouter</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL NOUVEAU PATIENT -->
-<div class="modal-overlay" id="modal-newpatient" onclick="closeNewPatientModal()">
-  <div class="modal" onclick="event.stopPropagation()">
-    <div class="modal-hdr"><strong style="font-size:16px">Nouveau patient</strong><button class="modal-close" onclick="closeNewPatientModal()">×</button></div>
-    <div class="fg"><label>Nom</label><input type="text" id="np-nom" placeholder="Nom" autocomplete="off" onkeydown="if(event.key==='Enter')createPatientConfirm()"></div>
-    <div class="fg" style="margin-top:12px"><label>Prénom</label><input type="text" id="np-prenom" placeholder="Prénom" autocomplete="off" onkeydown="if(event.key==='Enter')createPatientConfirm()"></div>
-    <div class="fg" style="margin-top:12px"><label>Date de naissance</label><input type="text" id="np-ddn" placeholder="jj/mm/aaaa" autocomplete="off"></div>
-    <div id="np-err" style="display:none;color:#c0392b;font-size:12px;margin-top:8px"></div>
-    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px">
-      <button class="btn-sec" onclick="closeNewPatientModal()">Annuler</button>
-      <button class="btn-green" onclick="createPatientConfirm()">Créer</button>
     </div>
   </div>
 </div>
@@ -1066,6 +1098,9 @@ Informations à toujours exclure (v3.22) :
 - Ne jamais mentionner la date du jour / date de la consultation — info administrative déjà connue par ailleurs
 - En revanche, garder toute date ou délai lié à un événement clinique mentionné (ex : "chute il y a 10 jours", "extraction il y a 6 mois", "cassé une dent le 25 juin") — ces informations restent cliniquement pertinentes
 
+Implants (v3.24) :
+- Dès qu'un implant est mentionné, conserver TOUJOURS fidèlement sa marque et sa taille exacte (diamètre x longueur) telles qu'entendues, jamais les résumer, les arrondir ou les omettre, même si le reste de la phrase est condensé
+
 [COLLER ICI LE TEXTE]`;
 
 // v3.21 : prompt dédié à la dictée directe (mode démarrage "Dicter la SmartNote" +
@@ -1195,12 +1230,13 @@ Règles :
 - Utiliser le vocabulaire médical dentaire précis et rigoureux
 - Terminer par "Confraternellement"`,
 
-  patient:`Rédige une lettre adressée directement au patient (vouvoiement). Structure en 4 paragraphes :
+  patient:`Rédige une lettre adressée directement au patient (vouvoiement). Structure en 5 paragraphes :
+0. Première ligne, seule sur sa ligne : "Bonjour [CIVILITÉ] [NOM] [Prénom]," en utilisant EXACTEMENT la civilité, le nom (en majuscules) et le prénom du patient fournis en contexte (ex. "Bonjour Mr ROGERER Bernard,"). Si aucune civilité n'est fournie, écrire simplement "Bonjour [NOM] [Prénom],". Si aucun nom n'est fourni du tout, écrire "Bonjour," seul.
 1. Ce qui a été constaté (diagnostic, sans jargon)
 2. Le traitement proposé et pourquoi
 3. Le déroulement pratique (séances, anesthésie, durée)
 4. Les conseils post-opératoires et quand consulter en urgence
-Ton professionnel mais accessible, rassurant. 15 à 20 lignes max. Ne pas signer, pas d'en-tête. Ne mentionner que ce qui est dans la transcription.`,
+Ton professionnel mais accessible, rassurant. 15 à 20 lignes max. Ne pas signer, pas d'en-tête (la signature est ajoutée automatiquement par l'application, ne jamais l'écrire soi-même). Ne mentionner que ce qui est dans la transcription.`,
 
   certif:`Génère un certificat médical dentaire adapté au contexte mentionné dans la transcription.
 
@@ -1209,6 +1245,11 @@ Règles strictes :
 - Ton médical, sobre et factuel. Notation FDI. Pas d'interprétation médico-légale.
 - Ne pas écrire de ligne "Certificat" en doublon avant le titre
 - Titre unique : "Certificat médical initial" pour les traumatismes
+- Ne jamais signer ni ajouter de bloc signature (ajouté automatiquement par l'application)
+
+Identité du praticien et du patient à insérer dans la première phrase (voir "Je soussigné(e)" ci-dessous) :
+- Praticien : utiliser EXACTEMENT le nom et le titre fournis en contexte (ex. "Docteur Julien ZARATE"), et accorder "soussigné"/"soussignée" selon le genre du praticien fourni en contexte (Homme → "soussigné", Femme → "soussignée") — ne jamais laisser "(e)" entre parenthèses, toujours trancher.
+- Patient : insérer EXACTEMENT la civilité (Mr/Mme si fournie), le nom en majuscules, le prénom, et la date de naissance si fournie, du patient donnés en contexte (ex. "Mr ROGERER Bernard, né le 04/05/1988"). Si le genre du patient n'est pas déductible de la civilité fournie, accorder "né(e)" au masculin par défaut ("né le") sauf civilité "Mme" auquel cas utiliser "née le". Si aucun patient n'est fourni, écrire "le patient/la patiente" sans forcer de genre.
 
 Structure du certificat médical initial :
 1. **Circonstances** (si mentionnées) : date, heure, mécanisme
@@ -1219,7 +1260,7 @@ Structure du certificat médical initial :
 6. **Conclusion** : ITT proposée (uniquement si mentionnée)
 
 Structure des autres types :
-1. Je soussigné(e), certifie avoir examiné ce jour…
+1. Je soussigné(e) [Titre + Nom du praticien, accordé selon son genre — voir ci-dessus], certifie avoir examiné ce jour [civilité + nom + prénom du patient, avec date de naissance si fournie]…
 2. Constatations cliniques objectives
 3. Conclusion adaptée au type
 4. "Certificat établi à la demande de l'intéressé(e) et remis en main propre"`,
@@ -1265,7 +1306,7 @@ let cRecMode='consultation'; // v3.20 : 'consultation' (flux classique) ou 'dict
 let cTempsTranscription=0;
 let cGenDocs={};
 let cLastSmartNote=''; // v3.23 : mémorise la dernière SmartNote générée (indépendamment de cGenDocs) pour éviter la fausse alerte "enregistrement non sauvegardé" quand seule la SmartNote est cochée
-let patients=[],historyData=[],dictEntries=[],implantSizes=[],currentDocType='cr';
+let patients=[],historyData=[],dictEntries=[],implantLists={brand:[],diameter:[],length:[]},currentDocType='cr';
 let aiDocRules={};
 let retours=[];
 let smartNoteCompares=[]; // v3.20 : comparatif SmartNote (consultation complète vs "Dicter la SmartNote")
@@ -1314,13 +1355,15 @@ function loadAll(){
   patients=JSON.parse(localStorage.getItem('d3-patients')||'[]');
   historyData=JSON.parse(localStorage.getItem('d3-history')||'[]');
   dictEntries=JSON.parse(localStorage.getItem('d3-dict')||JSON.stringify(DEFAULT_DICT));
-  implantSizes=JSON.parse(localStorage.getItem('d3-implant-sizes')||'[]');
+  implantLists.brand=JSON.parse(localStorage.getItem('d3-implant-brands')||'[]');
+  implantLists.diameter=JSON.parse(localStorage.getItem('d3-implant-diameters')||'[]');
+  implantLists.length=JSON.parse(localStorage.getItem('d3-implant-lengths')||'[]');
   aiDocRules=JSON.parse(localStorage.getItem('d3-ai-doc-rules')||'{}');
   retours=JSON.parse(localStorage.getItem('d3-retours')||'[]');
   smartNoteCompares=JSON.parse(localStorage.getItem('d3-smartnote-compare')||'[]');
   migrateRetourTranscripts();
   const s=getSettings();
-  ['name','spec','rpps','adeli','email','tel','tva','siret','cabinet','adresse','cp','ville','site','apikey','nomenclature','fontsize'].forEach(k=>{const el=document.getElementById('s-'+k);if(el&&s[k])el.value=s[k];});
+  ['name','genre','spec','rpps','adeli','email','tel','tva','siret','cabinet','adresse','cp','ville','site','apikey','nomenclature','fontsize'].forEach(k=>{const el=document.getElementById('s-'+k);if(el&&s[k])el.value=s[k];});
   const retEl=document.getElementById('s-retention');if(retEl)retEl.value=s.retention||'30';
   const supaUrlEl=document.getElementById('s-supa-url');if(supaUrlEl)supaUrlEl.value=localStorage.getItem('d3-supa-url')||'';
   const supaKeyEl=document.getElementById('s-supa-key');if(supaKeyEl)supaKeyEl.value=localStorage.getItem('d3-supa-key')||'';
@@ -1336,7 +1379,7 @@ function getKey(){return localStorage.getItem('d3-apikey')||'';}
 
 function saveSettings(){
   const s={};
-  ['name','spec','rpps','adeli','email','tel','tva','siret','cabinet','adresse','cp','ville','site','nomenclature','fontsize'].forEach(k=>{const el=document.getElementById('s-'+k);if(el)s[k]=el.value;});
+  ['name','genre','spec','rpps','adeli','email','tel','tva','siret','cabinet','adresse','cp','ville','site','nomenclature','fontsize'].forEach(k=>{const el=document.getElementById('s-'+k);if(el)s[k]=el.value;});
   const ret=document.getElementById('s-retention');if(ret)s.retention=ret.value;
   localStorage.setItem('d3-settings',JSON.stringify(s));
   const ak=document.getElementById('s-apikey').value.trim();if(ak)localStorage.setItem('d3-apikey',ak);
@@ -1376,7 +1419,7 @@ function updateStorageInfo(){
 
 function safeSet(key,value){
   try{localStorage.setItem(key,value);}
-  catch(e){if(e.name==='QuotaExceededError'||e.code===22)alert('⚠️ Stockage local plein !\nExportez et supprimez des consultations.');}
+  catch(e){if(e.name==='QuotaExceededError'||e.code===22)showToast('⚠️ Stockage local plein ! Exportez et supprimez des consultations.','error');}
 }
 
 function exportData(){
@@ -1385,7 +1428,7 @@ function exportData(){
 }
 
 function uploadLogo(input){
-  const file=input.files[0];if(!file)return;if(file.size>2000000){alert('Fichier trop volumineux (max 2 Mo).');return;}
+  const file=input.files[0];if(!file)return;if(file.size>2000000){showToast('Fichier trop volumineux (max 2 Mo).','error');return;}
   const reader=new FileReader();
   reader.onload=e=>{
     const img=new Image();img.onload=()=>{
@@ -1393,7 +1436,7 @@ function uploadLogo(input){
       const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(img,0,0,w,h);
       const compressed=canvas.toDataURL('image/png',0.8);
       const kb=Math.round(compressed.length*3/4/1024);
-      if(kb>150&&!confirm(`Logo compressé : ${kb} Ko. Continuer ?`))return;
+      if(kb>150){showConfirmModal(`Logo compressé : ${kb} Ko. Continuer ?`,()=>{localStorage.setItem('d3-logo',compressed);showLogo(compressed);updateStorageInfo();});return;}
       localStorage.setItem('d3-logo',compressed);showLogo(compressed);updateStorageInfo();
     };img.src=e.target.result;
   };reader.readAsDataURL(file);
@@ -1459,14 +1502,15 @@ function openDictModal(){document.getElementById('modal-dict').classList.add('op
 function closeDictModal(){document.getElementById('modal-dict').classList.remove('open');}
 function addDictEntry(){
   const from=document.getElementById('dict-from').value.trim(),to=document.getElementById('dict-to').value.trim();
-  if(!from||!to){alert('Remplissez les deux champs.');return;}
+  if(!from||!to){showToast('Remplissez les deux champs.','error');return;}
   dictEntries.push({from,to,source:'manual'});safeSet('d3-dict',JSON.stringify(dictEntries));renderDict();closeDictModal();
 }
 function deleteDict(i){
-  if(!confirm('Supprimer "'+dictEntries[i].from+'" → "'+dictEntries[i].to+'" ?'))return;
+  showConfirmModal('Supprimer "'+dictEntries[i].from+'" → "'+dictEntries[i].to+'" ?',()=>{
   dictEntries.splice(i,1);
   resolveDictConflicts();
   safeSet('d3-dict',JSON.stringify(dictEntries));renderDict();
+  });
 }
 // v3.23 : un mot n'est plus en conflit s'il ne reste plus qu'une seule correction pour ce mot
 function resolveDictConflicts(){
@@ -1515,37 +1559,39 @@ function exportDict(){
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='dentai-dictionnaire-'+new Date().toISOString().slice(0,10)+'.json';a.click();
 }
 
-// ══ TAILLES D'IMPLANT (v3.23) ══
-function renderImplantSizesList(){
-  const el=document.getElementById('implant-sizes-list');if(!el)return;
-  if(!implantSizes.length){el.innerHTML='<div class="empty">Aucune taille enregistrée. Ajoutez vos tailles habituelles ci-dessus.</div>';return;}
-  el.innerHTML=implantSizes.map((s,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;font-size:12px"><span>${s}</span><button onclick="deleteImplantSize(${i})" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:15px;line-height:1;padding:0">×</button></div>`).join('');
+// ══ IMPLANTS — MARQUES / DIAMÈTRES / LONGUEURS (v3.24) ══
+// v3.24 : refonte de la liste unique de tailles d'implant en 3 listes indépendantes
+// (marques / diamètres / longueurs). Le surlignage automatique des tailles inconnues
+// (existant en v3.23) a été retiré à la demande de l'utilisateur — ces listes servent
+// uniquement à guider la SmartNote pour qu'elle conserve fidèlement marque/taille.
+// BUG-FIX v3.24 : les 3 listes sont regroupées dans un objet (et non 3 variables `let`
+// séparées) car `window[nomVariable]` ne fonctionne pas pour retrouver une variable
+// déclarée en `let`/`const` — seul `var` s'attache à `window`.
+// BUG-FIX v3.24 : les 3 listes sont regroupées dans l'objet global `implantLists` (et non 3
+// variables `let` séparées) car `window[nomVariable]` ne fonctionne pas pour retrouver une
+// variable déclarée en `let`/`const`, et une réassignation dans loadAll() casserait toute
+// référence séparée — l'objet reste la seule source de vérité, chargé et modifié en place.
+const IMPLANT_KIND_CONFIG={
+  brand:{key:'d3-implant-brands',listEl:'implant-brands-list',inputEl:'implant-brand-input',empty:'Aucune marque enregistrée.'},
+  diameter:{key:'d3-implant-diameters',listEl:'implant-diameters-list',inputEl:'implant-diameter-input',empty:'Aucun diamètre enregistré.'},
+  length:{key:'d3-implant-lengths',listEl:'implant-lengths-list',inputEl:'implant-length-input',empty:'Aucune longueur enregistrée.'}
+};
+function renderImplantList(kind){
+  const cfg=IMPLANT_KIND_CONFIG[kind];const el=document.getElementById(cfg.listEl);if(!el)return;
+  const arr=implantLists[kind];
+  if(!arr.length){el.innerHTML=`<div class="empty">${cfg.empty}</div>`;return;}
+  el.innerHTML=arr.map((s,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;font-size:12px"><span>${escHtml(s)}</span><button onclick="deleteImplantItem('${kind}',${i})" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:15px;line-height:1;padding:0">×</button></div>`).join('');
 }
-function addImplantSize(){
-  const input=document.getElementById('implant-size-input');const v=input.value.trim();
-  if(!v){return;}
-  implantSizes.push(v);safeSet('d3-implant-sizes',JSON.stringify(implantSizes));input.value='';renderImplantSizesList();
+function addImplantItem(kind){
+  const cfg=IMPLANT_KIND_CONFIG[kind];const input=document.getElementById(cfg.inputEl);const v=input.value.trim();
+  if(!v)return;
+  implantLists[kind].push(v);safeSet(cfg.key,JSON.stringify(implantLists[kind]));input.value='';renderImplantList(kind);
 }
-function deleteImplantSize(i){
-  implantSizes.splice(i,1);safeSet('d3-implant-sizes',JSON.stringify(implantSizes));renderImplantSizesList();
+function deleteImplantItem(kind,i){
+  const cfg=IMPLANT_KIND_CONFIG[kind];
+  implantLists[kind].splice(i,1);safeSet(cfg.key,JSON.stringify(implantLists[kind]));renderImplantList(kind);
 }
-// Normalise une taille détectée ("5.0x10mm","5,0*10 mm"...) au format "5.0 x 10" pour comparaison
-function normalizeImplantSize(diam,long){
-  return parseFloat(diam.replace(',','.'))+' x '+parseFloat(long.replace(',','.'));
-}
-// Repère les tailles d'implant dans le texte et surligne celles absentes de la liste connue.
-// Ne s'active que si la liste n'est pas vide (sinon on n'a aucune référence pour juger).
-function highlightUnknownImplantSizes(text){
-  const escaped=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  if(!implantSizes.length)return escaped;
-  const knownNorm=implantSizes.map(s=>{const m=s.match(/(\d+(?:[.,]\d+)?)\s*x\s*(\d+(?:[.,]\d+)?)/i);return m?normalizeImplantSize(m[1],m[2]):null;}).filter(Boolean);
-  const re=/(\d+(?:[.,]\d+)?)\s*[x*]\s*(\d+(?:[.,]\d+)?)\s*mm/gi;
-  return escaped.replace(re,(match,d,l)=>{
-    const norm=normalizeImplantSize(d,l);
-    if(knownNorm.includes(norm))return match;
-    return `<mark title="Taille non reconnue dans votre liste (Paramètres → Implants) — vérifiez qu'il n'y a pas d'erreur de transcription" style="background:#fef08a;color:inherit;border-radius:3px;padding:0 2px">${match}</mark>`;
-  });
-}
+function renderAllImplantLists(){renderImplantList('brand');renderImplantList('diameter');renderImplantList('length');}
 function stripAccents(s){return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
 function applyDict(text){
   let result=text;
@@ -1582,12 +1628,21 @@ function updateCharCount(){
 }
 
 // ══ NAV & PANELS ══
+// v3.24 : si un enregistrement de consultation est actif, la navigation est bloquée tant que
+// l'utilisateur n'a pas confirmé vouloir l'arrêter (et le perdre) via la fenêtre dédiée.
 function goNav(page,btn){
+  if(cGoing){
+    showConfirmModal('Un enregistrement est en cours. Si vous continuez, il sera arrêté et perdu.',()=>{cReset();_goNavExecute(page,btn);});
+    return;
+  }
+  _goNavExecute(page,btn);
+}
+function _goNavExecute(page,btn){
   document.querySelectorAll('.cpage').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.sb-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
   if(btn)btn.classList.add('active');
-  if(page==='patients')renderPatients();if(page==='historique')renderHistory();
+  if(page==='historique')renderHistory();
 }
 
 function goNavRecEnCours(){
@@ -1606,8 +1661,12 @@ function setRecEnCours(active){
 function newEnregistrement(){
   // Vérifier si un enregistrement non généré est en cours
   if((cGoing||cChunks.length>0||cTranscript)&&!Object.keys(cGenDocs).length&&!cLastSmartNote){
-    if(!confirm('⚠️ Enregistrement non sauvegardé\n\nVous avez une transcription en cours qui n\'a pas encore généré de documents. Si vous continuez, cet enregistrement sera définitivement perdu.\n\nContinuer quand même ?'))return;
+    showConfirmModal('Vous avez une transcription en cours qui n\'a pas encore généré de documents. Si vous continuez, cet enregistrement sera définitivement perdu.',()=>_newEnregistrementExecute(),'⚠️ Enregistrement non sauvegardé');
+    return;
   }
+  _newEnregistrementExecute();
+}
+function _newEnregistrementExecute(){
   cReset();
   setRecEnCours(false);
   document.querySelectorAll('.cpage').forEach(p=>p.classList.remove('active'));
@@ -1627,12 +1686,12 @@ function openPanel(name){
   document.querySelectorAll(`[id^="${prefix}-"]`).forEach((t,i)=>t.style.display=i===0?'block':'none');
   const nav=overlay.querySelector('.panel-nav');if(nav)nav.querySelectorAll('.pnav-item').forEach((b,i)=>b.classList.toggle('active',i===0));
   if(name==='settings')updateStorageInfo();if(name==='dict')renderDict();if(name==='retours'){renderRetours();renderSmartNoteCompare();}
-  if(name==='settings'){statsOffset=0;setTimeout(()=>renderStats(),100);renderCorrespondantsSettingsList();renderImplantSizesList();}
+  if(name==='settings'){statsOffset=0;setTimeout(()=>renderStats(),100);renderCorrespondantsSettingsList();renderAllImplantLists();}
 }
 
 function closePanel(name){
-  if(name==='myai'&&_aiDirty){if(!confirm('Modifications non sauvegardées. Fermer sans enregistrer ?'))return;_aiDirty=false;}
-  if(name==='settings'&&_settingsDirty){if(!confirm('Modifications non sauvegardées. Fermer sans enregistrer ?'))return;_settingsDirty=false;}
+  if(name==='myai'&&_aiDirty){showConfirmModal('Modifications non sauvegardées. Fermer sans enregistrer ?',()=>{_aiDirty=false;document.getElementById('panel-'+name).classList.remove('open');});return;}
+  if(name==='settings'&&_settingsDirty){showConfirmModal('Modifications non sauvegardées. Fermer sans enregistrer ?',()=>{_settingsDirty=false;document.getElementById('panel-'+name).classList.remove('open');});return;}
   document.getElementById('panel-'+name).classList.remove('open');
 }
 function switchPanelTab(panel,idx,btn){
@@ -1643,34 +1702,10 @@ function switchPanelTab(panel,idx,btn){
 }
 
 // ══ PATIENTS ══
-function renderPatients(filter=''){
-  const el=document.getElementById('p-list');
-  const f=patients.filter(p=>(p.nom+' '+p.prenom).toLowerCase().includes(filter.toLowerCase()));
-  if(!f.length){el.innerHTML='<div class="empty">Aucun patient enregistré.</div>';return;}
-  el.innerHTML=f.map(p=>{const nb=historyData.filter(h=>h.patientId===p.id).length;return`<div class="p-row" onclick="openPatientHistory('${p.id}')"><div><div class="p-name">${p.nom} ${p.prenom}</div><div class="p-sub">${p.ddn||'DDN non renseignée'}</div></div><div class="p-count">${nb} consultation(s)</div></div>`;}).join('');
-}
-function filterPatients(){renderPatients(document.getElementById('p-search').value);}
-function newPatient(){
-  document.getElementById('np-nom').value='';document.getElementById('np-prenom').value='';document.getElementById('np-ddn').value='';
-  document.getElementById('np-err').style.display='none';
-  document.getElementById('modal-newpatient').classList.add('open');
-  document.getElementById('np-nom').focus();
-}
-function closeNewPatientModal(){document.getElementById('modal-newpatient').classList.remove('open');}
-function createPatientConfirm(){
-  const nom=document.getElementById('np-nom').value.trim();
-  const prenom=document.getElementById('np-prenom').value.trim();
-  const ddn=document.getElementById('np-ddn').value;
-  if(!nom){document.getElementById('np-err').textContent='Le nom est obligatoire.';document.getElementById('np-err').style.display='block';return;}
-  patients.push({id:Date.now().toString(),nom,prenom,ddn});
-  localStorage.setItem('d3-patients',JSON.stringify(patients));renderPatients();
-  closeNewPatientModal();
-  showToast('✓ Patient créé');
-}
-function openPatientHistory(id){
-  const ph=historyData.filter(h=>h.patientId===id);
-  if(!ph.length){alert('Aucune consultation pour ce patient.');return;}openHistModal(ph[0].id);
-}
+// v3.24 : onglet Patients (liste, historique par patient, création manuelle) retiré du menu
+// à la demande de l'utilisateur. Les patients continuent d'être enregistrés automatiquement
+// en arrière-plan (tableau `patients`, localStorage 'd3-patients') à chaque consultation —
+// aucune donnée perdue, seule cette vue spécifique a été supprimée. Consultable via Historique.
 
 // ══ HISTORY ══
 function renderHistory(){
@@ -1775,7 +1810,7 @@ function openHistModal(id){
   // SmartNote si présente
   const sn=h.smartNote||'';
   const logosBox=document.getElementById('c-logos-box');
-  if(sn){logosBox.style.display='block';document.getElementById('c-logos-note').innerHTML=highlightUnknownImplantSizes(sn);}
+  if(sn){logosBox.style.display='block';document.getElementById('c-logos-note').innerHTML=escHtml(sn).replace(/\n/g,'<br>');}
   else{logosBox.style.display='none';}
 
   // BUG-FIX v3.22 : l'encart "ajouter un document" était volontairement masqué ici — on
@@ -1844,7 +1879,7 @@ function saveHistPatientEdit(){
   // Répercuter le nom sur la fiche patient liée, si elle existe
   if(h.patientId){
     const p=patients.find(x=>x.id===h.patientId);
-    if(p){p.nom=nom;p.prenom=prenom;localStorage.setItem('d3-patients',JSON.stringify(patients));renderPatients();}
+    if(p){p.nom=nom;p.prenom=prenom;localStorage.setItem('d3-patients',JSON.stringify(patients));}
   }
   safeSet('d3-history',JSON.stringify(historyData));
   renderHistory();
@@ -1863,7 +1898,7 @@ async function regenerateDocsWithAI(){
     const header=getPracHeader(),patient=h.patient||'Patient non renseigné';
     const today=new Date(h.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
     const aiGeneral=localStorage.getItem('d3-ai-general')||'';
-    const sys='Tu es un assistant expert en chirurgie dentaire. Tu génères des documents médicaux professionnels, précis et conformes aux pratiques françaises.';
+    const sys='Tu es un assistant expert en chirurgie dentaire. Tu génères des documents médicaux professionnels, précis et conformes aux pratiques françaises. Règle de style transversale (v3.24) : les mots \'Monsieur\', \'Madame\' et \'Docteur\' peuvent être abrégés (respectivement \'Mr\', \'Mme\', \'Dr\') partout où ils apparaissent ; tous les autres mots doivent toujours être écrits en entier, sans abréviation. Le nom de famille du patient s\'écrit toujours entièrement en MAJUSCULES partout où son identité apparaît dans un document (ex. \'Mr ROGERER Bernard\'), jamais le prénom.';
     const docKeys=Object.keys(h.docs||{});
     if(docKeys.length>0){
       const sep='|||DOCSEP|||';
@@ -1939,6 +1974,7 @@ let smartDicteeGoing=false,smartDicteeMr=null,smartDicteeChunks=[],smartDicteeSt
 let currentSmartCompareId=null;
 async function toggleSmartDictee(){
   if(smartDicteeGoing){stopSmartDictee();return;}
+  if(!guardStartMic())return;
   const key=getKey();if(!key){showToast('⚠️ Clé API OpenAI manquante','error');return;}
   const btn=document.getElementById('c-logos-dictee-btn');
   try{
@@ -1962,11 +1998,13 @@ async function toggleSmartDictee(){
     };
     smartDicteeMr.start();smartDicteeGoing=true;smartDicteeStart=Date.now();
     if(btn)btn.textContent='⏹ Arrêter la dictée';
+    const ind=document.getElementById('c-logos-dictee-indicator');if(ind)ind.style.display='inline-flex';
     setTimeout(()=>{if(smartDicteeGoing)stopSmartDictee();},120000);
   }catch(e){showToast('Microphone inaccessible : '+e.message,'error');}
 }
 function stopSmartDictee(){
   smartDicteeGoing=false;if(smartDicteeMr)try{smartDicteeMr.stop();}catch(e){}
+  const ind=document.getElementById('c-logos-dictee-indicator');if(ind)ind.style.display='none';
 }
 
 async function generateSmartDictee(dicteeTranscript,key,dureeSec){
@@ -2069,15 +2107,16 @@ function toggleSmartCompareDetail(idx){
   d.style.display=d.style.display==='block'?'none':'block';
 }
 function deleteSmartNoteCompare(idx){
-  if(!confirm('Supprimer ce comparatif ?'))return;
+  showConfirmModal('Supprimer ce comparatif ?',()=>{
   smartNoteCompares.splice(idx,1);safeSet('d3-smartnote-compare',JSON.stringify(smartNoteCompares));renderSmartNoteCompare();showToast('✓ Comparatif supprimé');
+  });
 }
 function exportSmartNoteCompare(){
   if(!smartNoteCompares.length){showToast('Aucun comparatif à exporter','error');return;}
   const blob=new Blob([JSON.stringify({smartNoteCompares,exportDate:new Date().toISOString()},null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='dentai-smartnote-comparatif-'+new Date().toISOString().slice(0,10)+'.json';a.click();
 }
-function clearSmartNoteCompare(){if(!smartNoteCompares.length)return;if(!confirm('Vider tous les comparatifs SmartNote ?'))return;smartNoteCompares=[];safeSet('d3-smartnote-compare','[]');renderSmartNoteCompare();showToast('✓ Comparatifs vidés');}
+function clearSmartNoteCompare(){if(!smartNoteCompares.length)return;showConfirmModal('Vider tous les comparatifs SmartNote ?',()=>{smartNoteCompares=[];safeSet('d3-smartnote-compare','[]');renderSmartNoteCompare();showToast('✓ Comparatifs vidés');});}
 
 function switchTab(i,tabsId,docsId){
   document.querySelectorAll('#'+tabsId+' .rtab').forEach((t,j)=>t.classList.toggle('active',j===i));
@@ -2091,6 +2130,26 @@ function getBestMimeType(){
 }
 function mimeToExt(mime){if(mime.includes('ogg'))return 'ogg';if(mime.includes('mp4'))return 'mp4';return 'webm';}
 
+// v3.24 : blocage du double micro — un seul enregistrement audio (consultation, Dicter la
+// SmartNote, micro de correction IA) ne peut être actif à la fois dans toute l'application.
+function isAnyMicBusy(){return cGoing||smartDicteeGoing||aiEditMicGoing;}
+function guardStartMic(){
+  if(isAnyMicBusy()){showToast('⚠️ Un autre enregistrement est déjà en cours, terminez-le d\'abord','error');return false;}
+  return true;
+}
+// v3.24 : remplace window.confirm()/alert() par une fenêtre personnalisée DentIA.
+// showConfirmModal(message, onConfirm) : le bouton "Confirmer" exécute onConfirm() puis ferme ;
+// "Annuler" ou le clic en dehors ferme sans rien faire (aucune action tant que l'utilisateur n'a pas choisi).
+function showConfirmModal(message,onConfirm,title){
+  document.getElementById('confirm-modal-title').textContent=title||'⚠️ Attention';
+  document.getElementById('confirm-modal-message').textContent=message;
+  const btn=document.getElementById('confirm-modal-confirm-btn');
+  const newBtn=btn.cloneNode(true);btn.parentNode.replaceChild(newBtn,btn); // retire les anciens listeners
+  newBtn.onclick=()=>{closeConfirmModal();onConfirm();};
+  document.getElementById('modal-confirm').classList.add('open');
+}
+function closeConfirmModal(){document.getElementById('modal-confirm').classList.remove('open');}
+
 function cToggle(){
   if(_cToggleLock)return;_cToggleLock=true;setTimeout(()=>_cToggleLock=false,500);
   if(cGoing)cStop();else cStart();
@@ -2098,6 +2157,7 @@ function cToggle(){
 
 async function cStart(mode='consultation'){
   if(document.getElementById('c-recbtn').disabled)return;
+  if(!guardStartMic())return;
   try{
     cRecMode=mode;
     cChunks=[];cTranscript='';cBgTranscriptDone=false;
@@ -2260,7 +2320,7 @@ function openTestMode(){document.getElementById('modal-test').classList.add('ope
 function closeTestMode(){document.getElementById('modal-test').classList.remove('open');}
 function applyTestTranscript(){
   const txt=document.getElementById('test-transcript-input').value.trim();
-  if(!txt){alert('Collez une transcription.');return;}
+  if(!txt){showToast('Collez une transcription.','error');return;}
   cTranscript=applyDict(txt);cBgTranscriptDone=true;cChunks=[new Blob(['x'])];
   document.getElementById('c-transcribed-ok').style.display='flex';
   document.getElementById('c-transcript-box').textContent=cTranscript;
@@ -2297,7 +2357,7 @@ async function cGenerate(){
     const header=getPracHeader(),patient=buildPatientName();
     const today=new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
     const aiGeneral=localStorage.getItem('d3-ai-general')||'';
-    const sys='Tu es un assistant expert en chirurgie dentaire. Tu génères des documents médicaux professionnels, précis et conformes aux pratiques françaises.';
+    const sys='Tu es un assistant expert en chirurgie dentaire. Tu génères des documents médicaux professionnels, précis et conformes aux pratiques françaises. Règle de style transversale (v3.24) : les mots \'Monsieur\', \'Madame\' et \'Docteur\' peuvent être abrégés (respectivement \'Mr\', \'Mme\', \'Dr\') partout où ils apparaissent ; tous les autres mots doivent toujours être écrits en entier, sans abréviation. Le nom de famille du patient s\'écrit toujours entièrement en MAJUSCULES partout où son identité apparaît dans un document (ex. \'Mr ROGERER Bernard\'), jamais le prénom.';
     cGenDocs={};
 
     // Appels parallèles : documents + SmartNote simultanément
@@ -2306,7 +2366,7 @@ async function cGenerate(){
       if(!docSel.length)return;
       const sep='|||DOCSEP|||';
       const docInstr=docSel.map((d,i)=>{const customRules=aiDocRules[d]?'\nRègles spécifiques : '+aiDocRules[d]:'';const extra=d==='courrier'?courrierExtraInstructions():'';return`DOCUMENT ${i+1} — ${DOC_LABELS[d].toUpperCase()} :\n${DOC_PROMPTS[d]}${customRules}${extra}`;}).join('\n\n');
-      const prompt=`Praticien :\n${header}\nDate : ${today}\nPatient : ${patient}${aiGeneral?'\n\nHabitudes de rédaction :\n'+aiGeneral:''}\n\nÀ partir de la transcription ci-dessous, génère ${docSel.length} document(s) séparés UNIQUEMENT par "${sep}".\n\n${docInstr}\n\nCommence directement par le contenu du premier document, SANS répéter le libellé "DOCUMENT X — NOM :" dans le contenu.\n\nTRANSCRIPTION :\n${transcript}`;
+      const prompt=`Praticien :\n${header}\nTitre et nom du praticien : ${getPraticienTitledName()}\nGenre du praticien : ${buildPraticienGenreLine()}\nDate : ${today}\nPatient : ${patient}\nPatient (civilité/nom majuscule/DDN) : ${buildPatientContextLine()}${aiGeneral?'\n\nHabitudes de rédaction :\n'+aiGeneral:''}\n\nÀ partir de la transcription ci-dessous, génère ${docSel.length} document(s) séparés UNIQUEMENT par "${sep}".\n\n${docInstr}\n\nCommence directement par le contenu du premier document, SANS répéter le libellé "DOCUMENT X — NOM :" dans le contenu.\n\nTRANSCRIPTION :\n${transcript}`;
       const result=await callGPT(openAIKey,sys,prompt);
       const parts=result.split(sep);
       docSel.forEach((d,i)=>{let text=(parts[i]||'').trim();text=text.replace(/^DOCUMENT\s+\d+\s*[—-]\s*.+\n?/i,'').trim();cGenDocs[d]=text;});
@@ -2317,7 +2377,7 @@ async function cGenerate(){
 
     buildResultUI(docSel);
     if(smartNote&&smartNote!=='Impossible de générer la SmartNote.'){
-      document.getElementById('c-logos-note').innerHTML=highlightUnknownImplantSizes(smartNote);document.getElementById('c-logos-box').style.display='block';cLastSmartNote=smartNote;
+      document.getElementById('c-logos-note').innerHTML=escHtml(smartNote).replace(/\n/g,'<br>');document.getElementById('c-logos-box').style.display='block';cLastSmartNote=smartNote;
     }else document.getElementById('c-logos-box').style.display='none';
     document.getElementById('c-logos-dictee-btn').style.display='inline-block';
     document.getElementById('c-transcript-box').textContent=transcript;
@@ -2358,7 +2418,7 @@ async function cGenerateDictee(){
 
     buildResultUI([]); // aucun document classique — onglets vides, seule la SmartNote/transcription s'affichent
     if(smartNote&&smartNote!=='Impossible de générer la SmartNote.'){
-      document.getElementById('c-logos-note').innerHTML=highlightUnknownImplantSizes(smartNote);document.getElementById('c-logos-box').style.display='block';cLastSmartNote=smartNote;
+      document.getElementById('c-logos-note').innerHTML=escHtml(smartNote).replace(/\n/g,'<br>');document.getElementById('c-logos-box').style.display='block';cLastSmartNote=smartNote;
     }else document.getElementById('c-logos-box').style.display='none';
     // v3.21 : la SmartNote a déjà été dictée fidèlement — "Dicter la SmartNote" en complément n'a pas de sens ici
     document.getElementById('c-logos-dictee-btn').style.display='none';
@@ -2379,6 +2439,26 @@ async function cGenerateDictee(){
 }
 
 function buildPatientName(){const n=document.getElementById('c-nom').value.trim(),p=document.getElementById('c-prenom').value.trim();return[n,p].filter(Boolean).join(' ')||'Patient non renseigné';}
+
+// v3.24 : ligne de contexte patient enrichie (civilité + NOM en majuscules + prénom + date de
+// naissance) transmise à l'IA pour le Certificat et la Lettre patient, afin qu'elle puisse
+// composer correctement leur première phrase ("Bonjour Mr X," / "Je soussigné(e)... Mr X né le...").
+function buildPatientContextLine(){
+  const civ=(document.getElementById('c-civilite')||{}).value||'';
+  const civLabel=civ==='M'?'Mr':(civ==='Mme'?'Mme':'');
+  const nom=(document.getElementById('c-nom')||{}).value.trim().toUpperCase();
+  const prenom=(document.getElementById('c-prenom')||{}).value.trim();
+  const ddnRaw=(document.getElementById('c-ddn')||{}).value||'';
+  let ddnFmt='';
+  if(ddnRaw&&ddnRaw.includes('-')){const p=ddnRaw.split('-');if(p.length===3)ddnFmt=`${p[2]}/${p[1]}/${p[0]}`;}
+  if(!nom&&!prenom)return'Patient non renseigné';
+  return[civLabel,nom,prenom].filter(Boolean).join(' ')+(ddnFmt?`, né(e) le ${ddnFmt}`:'');
+}
+// v3.24 : genre du praticien (Homme/Femme), utilisé uniquement pour accorder "soussigné(e)" dans le Certificat
+function buildPraticienGenreLine(){
+  const s=getSettings();
+  return s.genre==='f'?'Femme':'Homme';
+}
 
 function buildResultUI(sel){
   let tH='',dH='';
@@ -2432,7 +2512,7 @@ async function addDoc(d,btn){
     const today=new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
     const aiGeneral=localStorage.getItem('d3-ai-general')||'',customRules=aiDocRules[d]?'\nRègles : '+aiDocRules[d]:'';
     const extra=d==='courrier'?courrierExtraInstructions():'';
-    const result=await callGPT(key,'Tu es un assistant expert en chirurgie dentaire.',`Praticien :\n${header}\nDate : ${today}\nPatient : ${patient}${aiGeneral?'\n\nHabitudes :\n'+aiGeneral:''}\n\n${DOC_PROMPTS[d]}${customRules}${extra}\n\nTRANSCRIPTION :\n${cTranscript}`);
+    const result=await callGPT(key,'Tu es un assistant expert en chirurgie dentaire. Tu génères des documents médicaux professionnels, précis et conformes aux pratiques françaises. Règle de style transversale (v3.24) : les mots \'Monsieur\', \'Madame\' et \'Docteur\' peuvent être abrégés (respectivement \'Mr\', \'Mme\', \'Dr\') partout où ils apparaissent ; tous les autres mots doivent toujours être écrits en entier, sans abréviation. Le nom de famille du patient s\'écrit toujours entièrement en MAJUSCULES partout où son identité apparaît dans un document (ex. \'Mr ROGERER Bernard\'), jamais le prénom.',`Praticien :\n${header}\nTitre et nom du praticien : ${getPraticienTitledName()}\nGenre du praticien : ${buildPraticienGenreLine()}\nDate : ${today}\nPatient : ${patient}\nPatient (civilité/nom majuscule/DDN) : ${buildPatientContextLine()}${aiGeneral?'\n\nHabitudes :\n'+aiGeneral:''}\n\n${DOC_PROMPTS[d]}${customRules}${extra}\n\nTRANSCRIPTION :\n${cTranscript}`);
     saveStatEntry(0,'gpt-4o',cTranscript||'',result,1,0,0,'action','Ajout document supplémentaire');
     cGenDocs[d]=result.trim();
     const idx=document.getElementById('c-tabs').querySelectorAll('.rtab').length;
@@ -2480,6 +2560,7 @@ function cReset(){
   document.getElementById('c-transcribed-ok').style.display='none';
   document.getElementById('c-stxt').textContent='Prêt à enregistrer';document.getElementById('c-timer').style.display='none';
   document.getElementById('c-nom').value='';document.getElementById('c-prenom').value='';document.getElementById('c-ddn').value='';
+  const cCivEl=document.getElementById('c-civilite');if(cCivEl)cCivEl.value='';
   document.getElementById('c-transcript-box').style.display='none';document.getElementById('c-transcript-box').textContent='';
   showResultsTranscript('');
   // v3.21 : reset de la boîte "Dicter la SmartNote" — elle restait affichée avec le contenu
@@ -2618,12 +2699,12 @@ async function applySuggestions(btn){
   const header=getPracHeader(),patient=buildPatientName();
   const today=new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
   const aiGeneral=localStorage.getItem('d3-ai-general')||'';
-  const sys='Tu es un assistant expert en chirurgie dentaire. Tu génères des documents médicaux professionnels, précis et conformes aux pratiques françaises.';
+  const sys='Tu es un assistant expert en chirurgie dentaire. Tu génères des documents médicaux professionnels, précis et conformes aux pratiques françaises. Règle de style transversale (v3.24) : les mots \'Monsieur\', \'Madame\' et \'Docteur\' peuvent être abrégés (respectivement \'Mr\', \'Mme\', \'Dr\') partout où ils apparaissent ; tous les autres mots doivent toujours être écrits en entier, sans abréviation. Le nom de famille du patient s\'écrit toujours entièrement en MAJUSCULES partout où son identité apparaît dans un document (ex. \'Mr ROGERER Bernard\'), jamais le prénom.';
   const sep='|||DOCSEP|||';
   const docInstr=docsToUpdate.map((d,i)=>{const customRules=aiDocRules[d]?'\nRègles spécifiques : '+aiDocRules[d]:'';return`DOCUMENT ${i+1} — ${DOC_LABELS[d].toUpperCase()} (document actuel à mettre à jour) :\n${cGenDocs[d]}\n\nPrompt de base : ${DOC_PROMPTS[d]}${customRules}`;}).join('\n\n');
   const instrInclure=checked.length?`ÉLÉMENTS À INCLURE (ajouter s'ils sont absents) : ${checked.join(', ')}`:'';
   const instrExclure=unchecked.length?`ÉLÉMENTS À EXCLURE (retirer s'ils sont présents) : ${unchecked.join(', ')}`:'';
-  const prompt=`Praticien :\n${header}\nDate : ${today}\nPatient : ${patient}${aiGeneral?'\n\nHabitudes de rédaction :\n'+aiGeneral:''}\n\nMets à jour les documents ci-dessous selon ces instructions :\n${instrInclure}${instrInclure&&instrExclure?'\n':''}${instrExclure}\n\n${docInstr}\n\nRetourne les ${docsToUpdate.length} documents mis à jour séparés UNIQUEMENT par "${sep}". Commence directement par le contenu du premier document.`;
+  const prompt=`Praticien :\n${header}\nTitre et nom du praticien : ${getPraticienTitledName()}\nGenre du praticien : ${buildPraticienGenreLine()}\nDate : ${today}\nPatient : ${patient}\nPatient (civilité/nom majuscule/DDN) : ${buildPatientContextLine()}${aiGeneral?'\n\nHabitudes de rédaction :\n'+aiGeneral:''}\n\nMets à jour les documents ci-dessous selon ces instructions :\n${instrInclure}${instrInclure&&instrExclure?'\n':''}${instrExclure}\n\n${docInstr}\n\nRetourne les ${docsToUpdate.length} documents mis à jour séparés UNIQUEMENT par "${sep}". Commence directement par le contenu du premier document.`;
   try{
     const result=await callGPT(key,sys,prompt);
     saveStatEntry(0,'gpt-4o',prompt,result,docsToUpdate.length,0,0,'action','Éléments détectés — mise à jour');
@@ -2661,8 +2742,9 @@ function renderRetours(){
   }).join('');
 }
 function deleteRetour(idx){
-  if(!confirm('Supprimer ce retour ?'))return;
+  showConfirmModal('Supprimer ce retour ?',()=>{
   retours.splice(idx,1);safeSet('d3-retours',JSON.stringify(retours));renderRetours();showToast('✓ Retour supprimé');
+  });
 }
 function openRetourModal(idx){
   const r=retours[idx];if(!r)return;
@@ -2706,10 +2788,10 @@ function exportRetours(){
   const blob=new Blob([JSON.stringify({retours,exportDate:new Date().toISOString()},null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='dentai-retours-'+new Date().toISOString().slice(0,10)+'.json';a.click();
 }
-function clearRetours(){if(!retours.length)return;if(!confirm('Vider tous les retours ?'))return;retours=[];safeSet('d3-retours','[]');renderRetours();showToast('✓ Retours vidés');}
+function clearRetours(){if(!retours.length)return;showConfirmModal('Vider tous les retours ?',()=>{retours=[];safeSet('d3-retours','[]');renderRetours();showToast('✓ Retours vidés');});}
 
 // ══ SUPABASE ══
-function offerSupaMigration(url,key){if(!historyData.length&&!patients.length)return;if(confirm(`☁️ Supabase configuré !\n\nVous avez ${historyData.length} consultation(s) et ${patients.length} patient(s) en local.\nVoulez-vous les migrer vers Supabase maintenant ?`))migrateToSupabase(url,key);}
+function offerSupaMigration(url,key){if(!historyData.length&&!patients.length)return;showConfirmModal(`Vous avez ${historyData.length} consultation(s) et ${patients.length} patient(s) en local. Voulez-vous les migrer vers Supabase maintenant ?`,()=>migrateToSupabase(url,key),'☁️ Supabase configuré !');}
 async function migrateToSupabase(url,apiKey){
   try{
     for(const p of patients)await fetch(`${url}/rest/v1/patients`,{method:'POST',headers:{'apikey':apiKey,'Authorization':'Bearer '+apiKey,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},body:JSON.stringify(p)});
@@ -2910,9 +2992,10 @@ function saveNewCorrespondant(){
 }
 
 function deleteCorrespondant(id){
-  if(!confirm('Supprimer ce correspondant ?'))return;
+  showConfirmModal('Supprimer ce correspondant ?',()=>{
   cCorrespondants=cCorrespondants.filter(x=>x.id!==id);
   saveCorrespondants();renderCorrespondantsSettingsList();
+  });
 }
 
 function renderCorrespondantsSettingsList(){
@@ -2930,13 +3013,12 @@ function buildCorrespondantBlock(){
   const cc=cCourrierCorrespondant;
   if(!cc)return null;
   if(cc.mode==='specialite'){
-    return{attention:`À l'attention de l'/du ${cc.specialite}`,formule:`Cher/Chère ${cc.specialite},`};
+    return{attention:`À l'attention de l'/du ${cc.specialite}`};
   }
-  const titre=cc.docteur?'Dr ':(cc.civilite==='M'?'Monsieur ':(cc.civilite==='Mme'?'Madame ':''));
-  const nomComplet=`${cc.nom} ${cc.prenom}`.trim();
+  // v3.24 : fusion nom + spécialité sur une seule ligne (au lieu de deux lignes séparées)
+  const titre=cc.docteur?'Dr ':(cc.civilite==='M'?'Mr ':(cc.civilite==='Mme'?'Mme ':''));
   return{
-    attention:`${titre}${cc.nom} ${cc.prenom}${cc.specialite?'\n'+cc.specialite:''}`,
-    formule:cc.docteur?`Dr ${cc.nom},`:(cc.civilite==='M'?`Monsieur ${cc.nom},`:(cc.civilite==='Mme'?`Madame ${cc.nom},`:`${nomComplet},`)),
+    attention:`${titre}${cc.nom} ${cc.prenom}${cc.specialite?', '+cc.specialite:''}`,
     habitudes:cc.habitudes||''
   };
 }
@@ -2946,9 +3028,8 @@ function buildCorrespondantBlock(){
 // correspondant choisi (formule d'appel personnalisée + habitudes connues)
 function courrierExtraInstructions(){
   const cb=buildCorrespondantBlock();
-  if(!cb)return'';
-  let s=`\nDestinataire — utilise EXACTEMENT cette formule d'appel en début de courrier : "${cb.formule}"`;
-  if(cb.habitudes)s+=`\nHabitudes connues avec ce correspondant : ${cb.habitudes}`;
+  let s=`\nLe corps du courrier doit TOUJOURS commencer par "Bonjour," seul sur sa ligne (jamais le nom du destinataire, jamais "Cher/Chère...") — la ligne "À l'attention de" dans l'en-tête suffit déjà à identifier le destinataire, inutile de le répéter dans le corps du texte.`;
+  if(cb&&cb.habitudes)s+=`\nHabitudes connues avec ce correspondant : ${cb.habitudes}`;
   return s;
 }
 
@@ -2982,8 +3063,10 @@ function copyRdc(i,btn){navigator.clipboard.writeText(document.getElementById('r
 function printRdc(i,title){
   // v3.22 : le courrier confrère utilise une mise en page d'impression dédiée (À l'attention de + Patient)
   const docType=document.getElementById('rdc-'+i)?document.getElementById('rdc-'+i).dataset.doc:null;
-  const content=document.getElementById('rdcc-'+i).innerHTML;
+  let content=document.getElementById('rdcc-'+i).innerHTML;
   if(docType==='courrier'){printCourrierContent(content,title);return;}
+  // v3.24 : signature automatique en bas à droite pour Certificat et Lettre patient
+  if(docType==='certif'||docType==='patient')content+=printSignatureBlockHtml();
   printContent(content,title);
 }
 function copyLogos(){navigator.clipboard.writeText(document.getElementById('c-logos-note').textContent).then(()=>showToast('✓ SmartNote copiée')).catch(()=>showToast('Erreur lors de la copie','error'));}
@@ -3008,8 +3091,8 @@ function printCourrierContent(content,title){
   const patientNom=(nom||prenom)?`${nom} ${prenom}`.trim():buildPatientName();
   const ddnFmt=ddn&&ddn.includes('-')?(()=>{const p=ddn.split('-');return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:ddn;})():ddn;
   const patientHtml=`<div style="font-weight:700;font-size:11px;margin-bottom:3px">Patient</div><div>${escHtml(patientNom)}${ddnFmt?'<br>Date de naissance : '+escHtml(ddnFmt):''}</div>`;
-  if(!localStorage.getItem('d3-print-tip')){localStorage.setItem('d3-print-tip','1');showToast('💡 Pour une impression propre : décochez "En-têtes et pieds de page" dans Chrome');setTimeout(()=>doPrintCourrier(content,title,header,today,logoHtml,fs,fontMain,attentionHtml,patientHtml),2800);return;}
-  doPrintCourrier(content,title,header,today,logoHtml,fs,fontMain,attentionHtml,patientHtml);
+  if(!localStorage.getItem('d3-print-tip')){localStorage.setItem('d3-print-tip','1');showToast('💡 Pour une impression propre : décochez "En-têtes et pieds de page" dans Chrome');setTimeout(()=>doPrintCourrier(content+printSignatureBlockHtml(),title,header,today,logoHtml,fs,fontMain,attentionHtml,patientHtml),2800);return;}
+  doPrintCourrier(content+printSignatureBlockHtml(),title,header,today,logoHtml,fs,fontMain,attentionHtml,patientHtml);
 }
 function doPrintCourrier(content,title,header,today,logoHtml,fs,fontMain,attentionHtml,patientHtml){
   const old=document.getElementById('_print_iframe');if(old)old.remove();
@@ -3280,6 +3363,7 @@ function toggleAiEditBand(prefix,idx,btn){
 async function toggleAiEditMic(prefix,idx){
   const micBtn=document.getElementById('aiedit-mic-'+prefix+'-'+idx);
   if(aiEditMicGoing){stopAiEditMic();return;}
+  if(!guardStartMic())return;
   const key=getKey();if(!key){showToast('⚠️ Clé API manquante','error');return;}
   try{
     aiEditMicChunks=[];const stream=await navigator.mediaDevices.getUserMedia({audio:true});
@@ -3506,26 +3590,36 @@ function switchDocsTab(tab, btn){
   closeDocsResult();
 }
 
+// v3.24 : synchronisation à SENS UNIQUE — tout ce qui est tapé dans "Nouvel enregistrement"
+// (Patient optionnel) écrase automatiquement les champs patient de "Mes Documents". L'inverse
+// n'est jamais vrai : modifier le patient depuis "Mes Documents" n'affecte jamais "Nouvel
+// enregistrement", et "Nouvel enregistrement" repart toujours à zéro via cReset().
+function syncPatientToDocs(){
+  const civEl=document.getElementById('doc-civilite'),nomEl=document.getElementById('doc-nom'),prenomEl=document.getElementById('doc-prenom'),ddnEl=document.getElementById('doc-ddn');
+  const cCiv=(document.getElementById('c-civilite')||{}).value||'';
+  const cNom=(document.getElementById('c-nom')||{}).value||'';
+  const cPrenom=(document.getElementById('c-prenom')||{}).value||'';
+  const cDdnRaw=(document.getElementById('c-ddn')||{}).value||''; // format YYYY-MM-DD
+  if(civEl)civEl.value=cCiv;
+  if(nomEl)nomEl.value=cNom;
+  if(prenomEl)prenomEl.value=cPrenom;
+  if(ddnEl){if(cDdnRaw&&cDdnRaw.includes('-')){const[y,m,d]=cDdnRaw.split('-');ddnEl.value=`${d}/${m}/${y}`;}else{ddnEl.value=cDdnRaw;}}
+  if(currentFicheType && currentFicheType!=='fiche_endo')refreshDoc();
+}
 function getDocPatient(){
+  const civilite=(document.getElementById('doc-civilite')||{}).value||'';
+  const civiliteLabel=civilite==='M'?'Mr':(civilite==='Mme'?'Mme':'');
   const nom = (document.getElementById('doc-nom')||{}).value||'';
+  const nomMaj = nom.toUpperCase();
   const prenom = (document.getElementById('doc-prenom')||{}).value||'';
   const ddn = (document.getElementById('doc-ddn')||{}).value||'';
-  return {nom, prenom, ddn, full: [prenom,nom].filter(Boolean).join(' ')||'[Patient]'};
+  return {civilite,civiliteLabel,nom:nomMaj,prenom,ddn,
+    full: [prenom,nomMaj].filter(Boolean).join(' ')||'[Patient]',
+    fullWithCivilite: [civiliteLabel,nomMaj,prenom].filter(Boolean).join(' ')||'[Patient]'};
 }
 
 function openDocsFromConsult(){
-  const nom = (document.getElementById('c-nom')||{}).value||'';
-  const prenom = (document.getElementById('c-prenom')||{}).value||'';
-  const ddnRaw = (document.getElementById('c-ddn')||{}).value||''; // format YYYY-MM-DD
-  document.getElementById('doc-nom').value = nom;
-  document.getElementById('doc-prenom').value = prenom;
-  // Reformater YYYY-MM-DD → JJ/MM/AAAA pour doc-ddn
-  if(ddnRaw && ddnRaw.includes('-')){
-    const [y,m,d] = ddnRaw.split('-');
-    document.getElementById('doc-ddn').value = `${d}/${m}/${y}`;
-  } else {
-    document.getElementById('doc-ddn').value = ddnRaw;
-  }
+  syncPatientToDocs();
   attachDocsTranscript(cTranscript || null);
   const btn = document.getElementById('nav-docs');
   goNav('docs', btn);
@@ -3636,6 +3730,21 @@ function getSig(){
   const sig = localStorage.getItem('d3-signature');
   if(sig) return `<img src="${sig}" style="max-height:50px;max-width:180px;object-fit:contain;display:block;margin-top:6px">`;
   return '<div style="height:50px"></div>';
+}
+
+// v3.24 : bloc signature ajouté automatiquement en bas à droite du Courrier confrère, du
+// Certificat et de la Lettre patient — nom du praticien (toujours préfixé "Dr" si absent),
+// suivi de l'image de signature si elle est enregistrée, sinon le nom seul (aucun espace vide).
+function getPraticienTitledName(){
+  const s=getSettings();
+  const name=(s.name||'Dr Julien ZARATE').trim();
+  return /^(dr|docteur)\b/i.test(name)?name:'Dr '+name;
+}
+function printSignatureBlockHtml(){
+  const nom=getPraticienTitledName();
+  const sig=localStorage.getItem('d3-signature');
+  const sigImg=sig?`<img src="${sig}" style="max-height:50px;max-width:180px;object-fit:contain;display:block;margin-top:4px">`:'';
+  return `<div style="margin-top:36px;text-align:right;font-size:inherit">${escHtml(nom)}${sigImg}</div>`;
 }
 
 function genFiche(type, enriched){
