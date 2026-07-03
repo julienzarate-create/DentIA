@@ -1,5 +1,5 @@
 <!--
-  DentIA v3.27
+  DentIA v3.28
   © 2025 — Tous droits réservés
   Ce logiciel est protégé par le droit d'auteur.
   Toute reproduction ou redistribution à des fins commerciales
@@ -11,7 +11,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DentIA v3.27</title>
+<title>DentIA v3.28</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Palanquin&family=Roboto:wght@400;700&family=Poppins:wght@400;700&family=Merriweather:wght@400;700&family=Oswald:wght@400;700&family=Arvo:wght@400;700&family=Bitter:wght@400;700&family=Outfit:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -232,17 +232,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
 <div class="sidebar">
   <div class="sb-logo" onclick="goHome()" style="cursor:pointer" title="Retour à l'accueil">
     <div class="mark">🦷</div>
-    <div><h1>DentIA</h1><small>v3.27</small></div>
+    <div><h1>DentIA</h1><small>v3.28</small></div>
   </div>
   <nav class="sb-nav">
     <div class="sb-section">Consultation</div>
     <button class="sb-item active" id="nav-consult" onclick="newEnregistrement()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
       Nouvel enregistrement
-    </button>
-    <button class="sb-item" id="nav-rec-en-cours" onclick="goNavRecEnCours()" style="display:none;color:#ff6b6b">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4" fill="currentColor" class="pulse-dot"/></svg>
-      Enregistrement en cours
     </button>
     <div class="sb-section">Cabinet</div>
     <button class="sb-item" id="nav-historique" onclick="goNav('historique',this)">
@@ -256,7 +252,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
     <div class="sb-section">Paramètres</div>
     <button class="sb-item" onclick="openPanel('myai')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-      My DentAI
+      My DentIA
     </button>
     <button class="sb-item" onclick="openPanel('dict')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
@@ -610,16 +606,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
       <button class="panel-close" onclick="closePanel('settings')">×</button>
     </div>
     <nav class="panel-nav">
-      <button class="pnav-item active" onclick="switchPanelTab('settings',0,this)">Profil</button>
-      <button class="pnav-item" onclick="switchPanelTab('settings',1,this)">Cabinet</button>
-      <button class="pnav-item" onclick="switchPanelTab('settings',2,this)">Personnalisation</button>
-      <button class="pnav-item" onclick="switchPanelTab('settings',3,this)">Clé API & Stockage</button>
-      <button class="pnav-item" onclick="switchPanelTab('settings',4,this)">Statistiques</button>
-      <button class="pnav-item" onclick="switchPanelTab('settings',5,this)">Correspondants</button>
-      <button class="pnav-item" onclick="switchPanelTab('settings',6,this)">Implants</button>
+      <button class="pnav-item active" onclick="switchPanelTab('settings',0,this)">Profil & Cabinet</button>
+      <button class="pnav-item" onclick="switchPanelTab('settings',1,this)">Personnalisation</button>
+      <button class="pnav-item" onclick="switchPanelTab('settings',2,this)">Clé API & Stockage</button>
+      <button class="pnav-item" onclick="switchPanelTab('settings',3,this)">Statistiques</button>
+      <button class="pnav-item" onclick="switchPanelTab('settings',4,this)">Correspondants</button>
     </nav>
     <div class="panel-body">
       <div class="panel-tab active" id="stab-0">
+        <!-- v3.28 : fusion des anciens onglets "Profil" et "Cabinet" (jugés redondants par l'utilisateur) en un seul -->
         <div class="sg">
           <div>
             <div class="fg"><label>Prénom et nom</label><input type="text" id="s-name" placeholder="Ex : Dr Marie Dupont"></div>
@@ -633,8 +628,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
               <div style="font-size:10px;color:var(--ink3);margin-top:4px">Sources publiques gratuites (Annuaire Entreprises, OpenStreetMap) — aucune clé ni compte requis. Le n° RPPS et la spécialité restent à saisir manuellement.</div>
               <div id="profil-search-results" style="display:none;margin-top:8px"></div>
             </div>
-            <!-- v3.24 : utilisé uniquement pour l'accord grammatical de "soussigné(e)" dans le Certificat — le titre reste toujours "Docteur" automatiquement -->
-            <div class="fg"><label>Genre (pour l'accord de "soussigné(e)" dans le Certificat)</label><select id="s-genre"><option value="h">Homme</option><option value="f">Femme</option></select></div>
+            <!-- v3.28 : renommé "Genre" → "Sexe" et texte entre parenthèses retiré (à la demande de l'utilisateur) ;
+                 sert désormais à l'accord grammatical du praticien dans TOUS les documents générés par l'IA, pas
+                 seulement le Certificat (voir prompts plus bas) — l'id et les valeurs h/f restent inchangés. -->
+            <div class="fg"><label>Sexe</label><select id="s-genre"><option value="h">Homme</option><option value="f">Femme</option></select></div>
             <div class="fg"><label>Spécialité</label><input type="text" id="s-spec" placeholder="Ex : Chirurgien-dentiste"></div>
             <div class="fg"><label>N° RPPS</label><input type="text" id="s-rpps" placeholder="11 chiffres"></div>
             <div class="fg"><label>N° AM / Adeli</label><input type="text" id="s-adeli" placeholder="9 chiffres"></div>
@@ -643,19 +640,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
             <div class="fg"><label>Email professionnel</label><input type="text" id="s-email" placeholder="dr.dupont@cabinet.fr"></div>
             <div class="fg"><label>Téléphone</label><input type="text" id="s-tel" placeholder="06 XX XX XX XX"></div>
             <div class="fg"><label>SIRET</label><input type="text" id="s-siret" placeholder="14 chiffres"></div>
+            <div class="fg"><label>Nom du cabinet</label><input type="text" id="s-cabinet" placeholder="Cabinet dentaire du Centre"></div>
+            <div class="fg"><label>Adresse (rue)</label><input type="text" id="s-adresse" autocomplete="street-address" placeholder="57 rue Charles de Gaulle"></div>
+            <div style="display:flex;gap:10px"><div class="fg" style="width:140px"><label>Code postal</label><input type="text" id="s-cp" autocomplete="postal-code" placeholder="57290"></div><div class="fg" style="flex:1"><label>Ville</label><input type="text" id="s-ville" autocomplete="address-level2" placeholder="Metz"></div></div>
+            <!-- v3.28 : champ "Système de nomenclature" retiré à la demande de l'utilisateur — FDI est
+                 désormais utilisé systématiquement (c'était déjà la seule valeur jamais changée en pratique,
+                 et ce réglage n'était référencé nulle part ailleurs dans le code). -->
+            <div class="fg"><label>Site internet</label><input type="text" id="s-site" placeholder="www.cabinet-dupont.fr"></div>
           </div>
         </div>
       </div>
       <div class="panel-tab" id="stab-1" style="display:none">
-        <div class="fg"><label>Nom du cabinet</label><input type="text" id="s-cabinet" placeholder="Cabinet dentaire du Centre"></div>
-        <div class="fg"><label>Adresse (rue)</label><input type="text" id="s-adresse" autocomplete="street-address" placeholder="57 rue Charles de Gaulle"></div>
-        <div style="display:flex;gap:10px"><div class="fg" style="width:140px"><label>Code postal</label><input type="text" id="s-cp" autocomplete="postal-code" placeholder="57290"></div><div class="fg" style="flex:1"><label>Ville</label><input type="text" id="s-ville" autocomplete="address-level2" placeholder="Metz"></div></div>
-        <div class="fg"><label>Système de nomenclature</label>
-          <select id="s-nomenclature"><option value="FDI">FDI</option><option value="Universal">Universal</option><option value="Palmer">Palmer</option></select>
-        </div>
-        <div class="fg"><label>Site internet</label><input type="text" id="s-site" placeholder="www.cabinet-dupont.fr"></div>
-      </div>
-      <div class="panel-tab" id="stab-2" style="display:none">
         <div class="fg">
           <label>Logo du cabinet</label>
           <div class="logo-zone" id="logo-zone" onclick="document.getElementById('logo-input').click()">
@@ -694,7 +689,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
           </div>
         </div>
       </div>
-      <div class="panel-tab" id="stab-3" style="display:none">
+      <div class="panel-tab" id="stab-2" style="display:none">
         <div class="fg">
           <label style="display:flex;align-items:center;gap:6px">Clé API OpenAI (obligatoire — Whisper + GPT)
             <button class="api-help-btn" onclick="document.getElementById('tooltip-openai').classList.add('open')" title="Comment obtenir cette clé ?">?</button>
@@ -723,7 +718,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
         </div>
         <button class="btn-sec" onclick="exportData()">📤 Exporter toutes les données (JSON)</button>
       </div>
-      <div class="panel-tab" id="stab-4" style="display:none">
+      <div class="panel-tab" id="stab-3" style="display:none">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
           <strong style="font-size:14px" id="stats-month-label">—</strong>
           <div style="display:flex;gap:8px">
@@ -734,44 +729,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
         <div id="stats-body"></div>
         <p style="font-size:11px;color:var(--ink3);margin-top:14px;line-height:1.6">⚠️ Estimations uniquement — coûts réels sur <strong>platform.openai.com</strong></p>
       </div>
-      <div class="panel-tab" id="stab-5" style="display:none">
+      <div class="panel-tab" id="stab-4" style="display:none">
         <!-- v3.22 : carnet d'adresses confrères, utilisé pour le courrier confrère -->
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
           <p style="font-size:12px;color:var(--ink2);margin:0">Vos correspondants enregistrés, réutilisables pour les courriers confrère.</p>
           <button class="btn-green" onclick="openNewCorrespondantModal('',false)" style="white-space:nowrap">+ Ajouter</button>
         </div>
         <div id="settings-correspondants-list"></div>
-      </div>
-      <div class="panel-tab" id="stab-6" style="display:none">
-        <!-- v3.24 : refonte en 3 listes indépendantes (marques / diamètres / longueurs) — remplace
-             l'ancienne liste unique de tailles complètes. Ces listes servent uniquement de référence
-             pour que la SmartNote conserve fidèlement marque/taille d'implant (aucune vérification ni
-             surbrillance automatique, retirée en v3.24 à la demande de l'utilisateur). -->
-        <p style="font-size:12px;color:var(--ink2);margin-bottom:14px">Renseignez séparément vos marques, diamètres et longueurs d'implants habituels. Ces informations aident l'IA à toujours retranscrire fidèlement la marque et la taille d'un implant mentionné en consultation, sans jamais les résumer ni les oublier.</p>
-        <div style="margin-bottom:20px">
-          <div style="font-size:13px;font-weight:700;margin-bottom:8px">Marques</div>
-          <div style="display:flex;gap:8px;margin-bottom:10px">
-            <input type="text" id="implant-brand-input" placeholder="ex : Nobel Replace" onkeydown="if(event.key==='Enter')addImplantItem('brand')" style="flex:1;border:1px solid var(--border2);border-radius:8px;padding:7px 10px;font-family:'DM Sans',sans-serif;font-size:12px;outline:none;color:var(--ink);background:var(--surface)">
-            <button class="btn-green" onclick="addImplantItem('brand')">+ Ajouter</button>
-          </div>
-          <div id="implant-brands-list"></div>
-        </div>
-        <div style="margin-bottom:20px">
-          <div style="font-size:13px;font-weight:700;margin-bottom:8px">Diamètres (mm)</div>
-          <div style="display:flex;gap:8px;margin-bottom:10px">
-            <input type="text" id="implant-diameter-input" placeholder="ex : 4.3" onkeydown="if(event.key==='Enter')addImplantItem('diameter')" style="flex:1;border:1px solid var(--border2);border-radius:8px;padding:7px 10px;font-family:'DM Sans',sans-serif;font-size:12px;outline:none;color:var(--ink);background:var(--surface)">
-            <button class="btn-green" onclick="addImplantItem('diameter')">+ Ajouter</button>
-          </div>
-          <div id="implant-diameters-list"></div>
-        </div>
-        <div>
-          <div style="font-size:13px;font-weight:700;margin-bottom:8px">Longueurs (mm)</div>
-          <div style="display:flex;gap:8px;margin-bottom:10px">
-            <input type="text" id="implant-length-input" placeholder="ex : 10" onkeydown="if(event.key==='Enter')addImplantItem('length')" style="flex:1;border:1px solid var(--border2);border-radius:8px;padding:7px 10px;font-family:'DM Sans',sans-serif;font-size:12px;outline:none;color:var(--ink);background:var(--surface)">
-            <button class="btn-green" onclick="addImplantItem('length')">+ Ajouter</button>
-          </div>
-          <div id="implant-lengths-list"></div>
-        </div>
       </div>
     </div>
     <div class="panel-footer">
@@ -786,13 +750,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
   <div class="panel-backdrop" onclick="closePanel('myai')"></div>
   <div class="panel">
     <div class="panel-header">
-      <div><div class="panel-title">My DentAI</div><div class="panel-sub">Personnalisez la manière dont DentAI rédige pour vous</div></div>
+      <div><div class="panel-title">My DentIA</div><div class="panel-sub">Personnalisez la manière dont DentIA rédige pour vous</div></div>
       <button class="panel-close" onclick="closePanel('myai')">×</button>
     </div>
     <nav class="panel-nav">
       <button class="pnav-item active" onclick="switchPanelTab('myai',0,this)">Habitudes générales</button>
       <button class="pnav-item" onclick="switchPanelTab('myai',1,this)">Documents</button>
       <button class="pnav-item" onclick="switchPanelTab('myai',2,this)">SmartNote</button>
+      <button class="pnav-item" onclick="switchPanelTab('myai',3,this)">Implants</button>
     </nav>
     <div class="panel-body">
       <div class="panel-tab active" id="aitab-0">
@@ -821,6 +786,35 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
         <p style="font-size:13px;color:var(--ink2);margin:20px 0 6px"><strong>Prompt — Dictée directe</strong></p>
         <p style="font-size:12px;color:var(--ink3);margin-bottom:14px">Utilisé pour "Dicter la SmartNote" (au démarrage ou en complément d'une SmartNote existante) — fidélité maximale à ce qui est dicté, sans interprétation.</p>
         <div class="fg"><textarea id="ai-logos-prompt-dictee" rows="16"></textarea><div style="font-size:11px;color:var(--ink3);text-align:right;margin-top:4px" id="logos-prompt-dictee-count">0 caractères</div></div>
+      </div>
+      <div class="panel-tab" id="aitab-3" style="display:none">
+        <!-- v3.28 : onglet déplacé depuis Paramètres vers My DentIA (à la demande de l'utilisateur —
+             réglage personnalisé, plus pertinent ici). Contenu et logique inchangés depuis v3.24. -->
+        <p style="font-size:12px;color:var(--ink2);margin-bottom:14px">Renseignez séparément vos marques, diamètres et longueurs d'implants habituels. Ces informations aident l'IA à toujours retranscrire fidèlement la marque et la taille d'un implant mentionné en consultation, sans jamais les résumer ni les oublier.</p>
+        <div style="margin-bottom:20px">
+          <div style="font-size:13px;font-weight:700;margin-bottom:8px">Marques</div>
+          <div style="display:flex;gap:8px;margin-bottom:10px">
+            <input type="text" id="implant-brand-input" placeholder="ex : Nobel Replace" onkeydown="if(event.key==='Enter')addImplantItem('brand')" style="flex:1;border:1px solid var(--border2);border-radius:8px;padding:7px 10px;font-family:'DM Sans',sans-serif;font-size:12px;outline:none;color:var(--ink);background:var(--surface)">
+            <button class="btn-green" onclick="addImplantItem('brand')">+ Ajouter</button>
+          </div>
+          <div id="implant-brands-list"></div>
+        </div>
+        <div style="margin-bottom:20px">
+          <div style="font-size:13px;font-weight:700;margin-bottom:8px">Diamètres (mm)</div>
+          <div style="display:flex;gap:8px;margin-bottom:10px">
+            <input type="text" id="implant-diameter-input" placeholder="ex : 4.3" onkeydown="if(event.key==='Enter')addImplantItem('diameter')" style="flex:1;border:1px solid var(--border2);border-radius:8px;padding:7px 10px;font-family:'DM Sans',sans-serif;font-size:12px;outline:none;color:var(--ink);background:var(--surface)">
+            <button class="btn-green" onclick="addImplantItem('diameter')">+ Ajouter</button>
+          </div>
+          <div id="implant-diameters-list"></div>
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:700;margin-bottom:8px">Longueurs (mm)</div>
+          <div style="display:flex;gap:8px;margin-bottom:10px">
+            <input type="text" id="implant-length-input" placeholder="ex : 10" onkeydown="if(event.key==='Enter')addImplantItem('length')" style="flex:1;border:1px solid var(--border2);border-radius:8px;padding:7px 10px;font-family:'DM Sans',sans-serif;font-size:12px;outline:none;color:var(--ink);background:var(--surface)">
+            <button class="btn-green" onclick="addImplantItem('length')">+ Ajouter</button>
+          </div>
+          <div id="implant-lengths-list"></div>
+        </div>
       </div>
     </div>
     <div class="panel-footer">
@@ -898,6 +892,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
              changelog — plus de fusion/remixage de plusieurs versions en un seul résumé groupé (la
              section "Version 3.19 – 3.22" ci-dessous est un reliquat d'avant cette règle, conservé
              tel quel pour ne rien perdre de l'historique déjà écrit). -->
+        <div style="margin-bottom:18px"><div style="font-size:13px;font-weight:700;margin-bottom:8px">Version 3.28</div><ul style="margin:0;padding-left:18px;font-size:12px;color:var(--ink2);line-height:1.9">
+          <li>Paramètres → Profil et Cabinet : fusion des anciens onglets "Profil" et "Cabinet" en un seul onglet "Profil & Cabinet".</li>
+          <li>Retrait du champ "Système de nomenclature" (FDI est désormais utilisé systématiquement).</li>
+          <li>Correctif bug : le bouton "🔍 Rechercher mes informations" remplissait le champ Ville avec un code (ex : "57647") au lieu du nom de la ville (ex : "Seremange-Erzange") — corrigé.</li>
+          <li>Renommage du champ "Genre" en "Sexe" dans le profil praticien, texte explicatif entre parenthèses retiré.</li>
+          <li>L'accord grammatical selon le sexe du praticien (ex : "soussigné"/"soussignée") s'applique désormais à TOUS les documents générés par l'IA, et non plus seulement au Certificat.</li>
+          <li>L'onglet "Implants" a été déplacé de Paramètres vers My DentIA (réglage personnalisé, plus cohérent à cet emplacement).</li>
+          <li>Renommage de "My DentAI" en "My DentIA" dans toute l'interface.</li>
+          <li>Refonte de la sauvegarde en Historique : une consultation est désormais enregistrée automatiquement dès la fin de la transcription, même si aucun document n'a encore été généré (badge "⏳ Documents non générés"). Elle peut être reprise à tout moment depuis l'Historique pour générer ses documents ; la génération met à jour cette même entrée au lieu d'en créer une nouvelle en doublon.</li>
+          <li>Conséquence : le bouton rouge "Enregistrement en cours" de la colonne de gauche est supprimé — un seul bouton "Nouvel enregistrement" reste affiché en permanence, puisqu'une consultation arrêtée ne peut désormais plus jamais être perdue.</li>
+        </ul></div>
         <div style="margin-bottom:18px"><div style="font-size:13px;font-weight:700;margin-bottom:8px">Version 3.27</div><ul style="margin:0;padding-left:18px;font-size:12px;color:var(--ink2);line-height:1.9">
           <li>Apprentissage automatique des habitudes de rédaction : après chaque correction manuelle de SmartNote (consultation ou dictée), l'IA analyse si la correction révèle une préférence de style généralisable (et non une simple erreur de mot ou un cas particulier). Si oui, une proposition discrète apparaît juste sous la SmartNote corrigée.</li>
           <li>Chaque proposition doit être validée d'un clic ("✓ Ajouter à mes habitudes") avant d'être active — rien n'est ajouté automatiquement sans confirmation.</li>
@@ -1395,7 +1400,7 @@ function loadAll(){
   smartNoteCompares=JSON.parse(localStorage.getItem('d3-smartnote-compare')||'[]');
   migrateRetourTranscripts();
   const s=getSettings();
-  ['name','genre','spec','rpps','adeli','email','tel','siret','cabinet','adresse','cp','ville','site','apikey','nomenclature','fontsize'].forEach(k=>{const el=document.getElementById('s-'+k);if(el&&s[k])el.value=s[k];});
+  ['name','genre','spec','rpps','adeli','email','tel','siret','cabinet','adresse','cp','ville','site','apikey','fontsize'].forEach(k=>{const el=document.getElementById('s-'+k);if(el&&s[k])el.value=s[k];});
   const retEl=document.getElementById('s-retention');if(retEl)retEl.value=s.retention||'30';
   const supaUrlEl=document.getElementById('s-supa-url');if(supaUrlEl)supaUrlEl.value=localStorage.getItem('d3-supa-url')||'';
   const supaKeyEl=document.getElementById('s-supa-key');if(supaKeyEl)supaKeyEl.value=localStorage.getItem('d3-supa-key')||'';
@@ -1411,7 +1416,7 @@ function getKey(){return localStorage.getItem('d3-apikey')||'';}
 
 function saveSettings(){
   const s={};
-  ['name','genre','spec','rpps','adeli','email','tel','siret','cabinet','adresse','cp','ville','site','nomenclature','fontsize'].forEach(k=>{const el=document.getElementById('s-'+k);if(el)s[k]=el.value;});
+  ['name','genre','spec','rpps','adeli','email','tel','siret','cabinet','adresse','cp','ville','site','fontsize'].forEach(k=>{const el=document.getElementById('s-'+k);if(el)s[k]=el.value;});
   const ret=document.getElementById('s-retention');if(ret)s.retention=ret.value;
   localStorage.setItem('d3-settings',JSON.stringify(s));
   const ak=document.getElementById('s-apikey').value.trim();if(ak)localStorage.setItem('d3-apikey',ak);
@@ -1475,12 +1480,12 @@ async function applyProfilSearchResult(idx){
   if(s.siret)document.getElementById('s-siret').value=s.siret;
   if(s.adresse)document.getElementById('s-adresse').value=s.adresse;
   if(s.code_postal)document.getElementById('s-cp').value=s.code_postal;
-  if(s.commune)document.getElementById('s-ville').value=s.commune;
+  if(s.libelle_commune)document.getElementById('s-ville').value=s.libelle_commune; // v3.28 BUG-FIX : "commune" est le code INSEE, "libelle_commune" est le nom de la ville
   const raison=r.nom_raison_sociale||r.nom_complet;
   if(raison&&!document.getElementById('s-cabinet').value.trim())document.getElementById('s-cabinet').value=raison;
   showToast('✓ SIRET et adresse importés');
   document.getElementById('profil-search-results').style.display='none';
-  await searchProfilOsmDetails(s.commune,raison);
+  await searchProfilOsmDetails(s.libelle_commune,raison);
 }
 // v3.26 : complément best-effort (téléphone/site web) via OpenStreetMap — source communautaire,
 // remplissage inégal selon les fiches existantes. Échec silencieux : ne bloque jamais l'utilisateur.
@@ -1801,8 +1806,8 @@ function updateCharCount(){
 // v3.24 : si un enregistrement de consultation est actif, la navigation est bloquée tant que
 // l'utilisateur n'a pas confirmé vouloir l'arrêter (et le perdre) via la fenêtre dédiée.
 function goNav(page,btn){
-  if(cGoing){
-    showConfirmModal('Un enregistrement est en cours. Si vous continuez, il sera arrêté et perdu.',()=>{cReset();_goNavExecute(page,btn);});
+  if(cGoing||(cChunks.length>0&&!cTranscript)){
+    showConfirmModal('Un enregistrement ou une transcription est en cours. Si vous continuez, il sera arrêté et perdu.',()=>{cReset();_goNavExecute(page,btn);});
     return;
   }
   _goNavExecute(page,btn);
@@ -1815,23 +1820,21 @@ function _goNavExecute(page,btn){
   if(page==='historique')renderHistory();
 }
 
-function goNavRecEnCours(){
-  // Retourner à l'écran de consultation en cours sans réinitialiser
-  document.querySelectorAll('.cpage').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.sb-item').forEach(n=>n.classList.remove('active'));
-  document.getElementById('page-consult').classList.add('active');
-  document.getElementById('nav-rec-en-cours').classList.add('active');
-}
+// v3.28 : goNavRecEnCours supprimée (le bouton "Enregistrement en cours" n'existe plus — voir
+// setRecEnCours ci-dessous). "Nouvel enregistrement" est désormais le seul bouton, toujours
+// affiché ; une consultation arrêtée est de toute façon sauvegardée automatiquement (voir
+// saveHistoryDraft), plus rien ne peut donc être perdu en navigant ailleurs.
 
-function setRecEnCours(active){
-  document.getElementById('nav-rec-en-cours').style.display=active?'flex':'none';
-  document.getElementById('nav-consult').style.display=active?'none':'flex';
-}
+// v3.28 : no-op conservée volontairement (au lieu de supprimer tous ses appels dans le code) pour
+// ne prendre aucun risque de régression — le bouton qu'elle pilotait n'existe plus.
+function setRecEnCours(active){}
 
 function newEnregistrement(){
-  // Vérifier si un enregistrement non généré est en cours
-  if((cGoing||cChunks.length>0||cTranscript)&&!Object.keys(cGenDocs).length&&!cLastSmartNote){
-    showConfirmModal('Vous avez une transcription en cours qui n\'a pas encore généré de documents. Si vous continuez, cet enregistrement sera définitivement perdu.',()=>_newEnregistrementExecute(),'⚠️ Enregistrement non sauvegardé');
+  // v3.28 : on n'avertit plus que si RIEN n'a encore été sauvegardé (enregistrement en cours, ou
+  // transcription pas encore terminée) — dès que la transcription est finie, saveHistoryDraft()
+  // l'a déjà mise en sécurité dans l'Historique, donc plus rien ne peut être perdu à ce stade.
+  if(cGoing||(cChunks.length>0&&!cTranscript)){
+    showConfirmModal('Un enregistrement ou une transcription est en cours. Si vous continuez, il sera arrêté et perdu.',()=>_newEnregistrementExecute(),'⚠️ Enregistrement non sauvegardé');
     return;
   }
   _newEnregistrementExecute();
@@ -1856,7 +1859,8 @@ function openPanel(name){
   document.querySelectorAll(`[id^="${prefix}-"]`).forEach((t,i)=>t.style.display=i===0?'block':'none');
   const nav=overlay.querySelector('.panel-nav');if(nav)nav.querySelectorAll('.pnav-item').forEach((b,i)=>b.classList.toggle('active',i===0));
   if(name==='settings')updateStorageInfo();if(name==='dict')renderDict();if(name==='retours'){renderRetours();renderSmartNoteCompare();}
-  if(name==='settings'){statsOffset=0;setTimeout(()=>renderStats(),100);renderCorrespondantsSettingsList();renderAllImplantLists();}
+  if(name==='settings'){statsOffset=0;setTimeout(()=>renderStats(),100);renderCorrespondantsSettingsList();}
+  if(name==='myai')renderAllImplantLists();
 }
 
 function closePanel(name){
@@ -1882,9 +1886,11 @@ function renderHistory(){
   const el=document.getElementById('h-list');
   if(!historyData.length){el.innerHTML='<div class="empty">Aucune consultation enregistrée.</div>';return;}
   el.innerHTML=historyData.map(h=>{
+    const isDraft=!Object.keys(h.docs||{}).length&&!h.smartNote; // v3.28 : consultation transcrite, documents pas encore générés
     const badges=Object.keys(h.docs||{}).map(d=>docEmoji(d)+' '+docLabel(d));
     if(h.smartNote)badges.push('📋 SmartNote');
-    return `<div class="h-item" onclick="openHistModal('${h.id}')">
+    if(isDraft)badges.push('<span style="color:#d97706;font-weight:600">⏳ Documents non générés</span>');
+    return `<div class="h-item" onclick="${isDraft?`resumeHistDraft('${h.id}')`:`openHistModal('${h.id}')`}">
       <div class="h-date">${new Date(h.date).toLocaleDateString('fr-FR',{weekday:'long',day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'})}</div>
       <div class="h-patient">${h.patient||'Patient non renseigné'}</div>
       ${h.resume?`<div class="h-resume">${escHtml(h.resume)}</div>`:''}
@@ -2070,12 +2076,12 @@ async function regenerateDocsWithAI(){
     const header=getPracHeader(),patient=h.patient||'Patient non renseigné';
     const today=new Date(h.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
     const aiGeneral=localStorage.getItem('d3-ai-general')||'';
-    const sys='Tu es un assistant expert en chirurgie dentaire. Tu génères des documents médicaux professionnels, précis et conformes aux pratiques françaises. Règle de style transversale (v3.24) : les mots \'Monsieur\', \'Madame\' et \'Docteur\' peuvent être abrégés (respectivement \'Mr\', \'Mme\', \'Dr\') partout où ils apparaissent ; tous les autres mots doivent toujours être écrits en entier, sans abréviation. Le nom de famille du patient s\'écrit toujours entièrement en MAJUSCULES partout où son identité apparaît dans un document (ex. \'Mr ROGERER Bernard\'), jamais le prénom.';
+    const sys='Tu es un assistant expert en chirurgie dentaire. Tu génères des documents médicaux professionnels, précis et conformes aux pratiques françaises. Règle de style transversale (v3.24) : les mots \'Monsieur\', \'Madame\' et \'Docteur\' peuvent être abrégés (respectivement \'Mr\', \'Mme\', \'Dr\') partout où ils apparaissent ; tous les autres mots doivent toujours être écrits en entier, sans abréviation. Le nom de famille du patient s\'écrit toujours entièrement en MAJUSCULES partout où son identité apparaît dans un document (ex. \'Mr ROGERER Bernard\'), jamais le prénom. Règle d\'accord (v3.28) : le contexte fourni au-dessus contient \'Genre du praticien\' (Homme ou Femme) — accorder systématiquement en genre tout mot, participe ou adjectif se rapportant au praticien lui-même dans le document (ex. \'soussigné\'/\'soussignée\', \'certain\'/\'certaine\'), quel que soit le type de document, sans jamais laisser de forme non tranchée entre parenthèses comme \'(e)\'.';
     const docKeys=Object.keys(h.docs||{});
     if(docKeys.length>0){
       const sep='|||DOCSEP|||';
       const docInstr=docKeys.map((d,i)=>{const customRules=aiDocRules[d]?'\nRègles spécifiques : '+aiDocRules[d]:'';return`DOCUMENT ${i+1} — ${DOC_LABELS[d].toUpperCase()} :\n${DOC_PROMPTS[d]}${customRules}`;}).join('\n\n');
-      const prompt=`Praticien :\n${header}\nDate : ${today}\nPatient : ${patient}${aiGeneral?'\n\nHabitudes de rédaction :\n'+aiGeneral:''}\n\nÀ partir de la transcription ci-dessous, génère ${docKeys.length} document(s) séparés UNIQUEMENT par "${sep}".\n\n${docInstr}\n\nCommence directement par le contenu du premier document, SANS répéter le libellé "DOCUMENT X — NOM :" dans le contenu.\n\nTRANSCRIPTION :\n${h.transcript}`;
+      const prompt=`Praticien :\n${header}\nTitre et nom du praticien : ${getPraticienTitledName()}\nGenre du praticien : ${buildPraticienGenreLine()}\nDate : ${today}\nPatient : ${patient}${aiGeneral?'\n\nHabitudes de rédaction :\n'+aiGeneral:''}\n\nÀ partir de la transcription ci-dessous, génère ${docKeys.length} document(s) séparés UNIQUEMENT par "${sep}".\n\n${docInstr}\n\nCommence directement par le contenu du premier document, SANS répéter le libellé "DOCUMENT X — NOM :" dans le contenu.\n\nTRANSCRIPTION :\n${h.transcript}`;
       const result=await callGPT(key,sys,prompt);
       saveStatEntry(0,'gpt-4o',h.transcript||'',result,docKeys.length,0,0,'action','Régénération après correction patient');
       const parts=result.split(sep);
@@ -2356,7 +2362,7 @@ async function cStart(mode='consultation'){
   if(!guardStartMic())return;
   try{
     cRecMode=mode;
-    cChunks=[];cTranscript='';cBgTranscriptDone=false;
+    cChunks=[];cTranscript='';cBgTranscriptDone=false;cCurrentHistId=null;cGenDocs={};cLastSmartNote='';
     cSegments=[];clearTimeout(cRotateTimer1);clearTimeout(cRotateTimer2);cPendingNextMr=null;cPendingNextChunks=null;
     const stream=await navigator.mediaDevices.getUserMedia({audio:true});
     cStream=stream;
@@ -2490,6 +2496,7 @@ async function startBackgroundTranscription(){
     const segs=cSegments.length?cSegments:[new Blob(cChunks,{type:cMimeType||'audio/webm'})];
     let transcript=await transcribeAllSegments(key,segs);
     transcript=applyDict(transcript);cTranscript=transcript;cBgTranscriptDone=true;
+    saveHistoryDraft(transcript); // v3.28 : rien n'est jamais perdu, même sans documents générés
     cTempsTranscription=Math.round((Date.now()-startTime)/1000);
     clearInterval(progInt);bar.style.width='100%';
     setTimeout(()=>{
@@ -2553,7 +2560,7 @@ async function cGenerate(){
     const header=getPracHeader(),patient=buildPatientName();
     const today=new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
     const aiGeneral=localStorage.getItem('d3-ai-general')||'';
-    const sys='Tu es un assistant expert en chirurgie dentaire. Tu génères des documents médicaux professionnels, précis et conformes aux pratiques françaises. Règle de style transversale (v3.24) : les mots \'Monsieur\', \'Madame\' et \'Docteur\' peuvent être abrégés (respectivement \'Mr\', \'Mme\', \'Dr\') partout où ils apparaissent ; tous les autres mots doivent toujours être écrits en entier, sans abréviation. Le nom de famille du patient s\'écrit toujours entièrement en MAJUSCULES partout où son identité apparaît dans un document (ex. \'Mr ROGERER Bernard\'), jamais le prénom.';
+    const sys='Tu es un assistant expert en chirurgie dentaire. Tu génères des documents médicaux professionnels, précis et conformes aux pratiques françaises. Règle de style transversale (v3.24) : les mots \'Monsieur\', \'Madame\' et \'Docteur\' peuvent être abrégés (respectivement \'Mr\', \'Mme\', \'Dr\') partout où ils apparaissent ; tous les autres mots doivent toujours être écrits en entier, sans abréviation. Le nom de famille du patient s\'écrit toujours entièrement en MAJUSCULES partout où son identité apparaît dans un document (ex. \'Mr ROGERER Bernard\'), jamais le prénom. Règle d\'accord (v3.28) : le contexte fourni au-dessus contient \'Genre du praticien\' (Homme ou Femme) — accorder systématiquement en genre tout mot, participe ou adjectif se rapportant au praticien lui-même dans le document (ex. \'soussigné\'/\'soussignée\', \'certain\'/\'certaine\'), quel que soit le type de document, sans jamais laisser de forme non tranchée entre parenthèses comme \'(e)\'.';
     cGenDocs={};
 
     // Appels parallèles : documents + SmartNote simultanément
@@ -2715,7 +2722,7 @@ async function addDoc(d,btn){
     const today=new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
     const aiGeneral=localStorage.getItem('d3-ai-general')||'',customRules=aiDocRules[d]?'\nRègles : '+aiDocRules[d]:'';
     const extra=d==='courrier'?courrierExtraInstructions():'';
-    const result=await callGPT(key,'Tu es un assistant expert en chirurgie dentaire. Tu génères des documents médicaux professionnels, précis et conformes aux pratiques françaises. Règle de style transversale (v3.24) : les mots \'Monsieur\', \'Madame\' et \'Docteur\' peuvent être abrégés (respectivement \'Mr\', \'Mme\', \'Dr\') partout où ils apparaissent ; tous les autres mots doivent toujours être écrits en entier, sans abréviation. Le nom de famille du patient s\'écrit toujours entièrement en MAJUSCULES partout où son identité apparaît dans un document (ex. \'Mr ROGERER Bernard\'), jamais le prénom.',`Praticien :\n${header}\nTitre et nom du praticien : ${getPraticienTitledName()}\nGenre du praticien : ${buildPraticienGenreLine()}\nDate : ${today}\nPatient : ${patient}\nPatient (civilité/nom majuscule/DDN) : ${buildPatientContextLine()}${aiGeneral?'\n\nHabitudes :\n'+aiGeneral:''}\n\n${DOC_PROMPTS[d]}${customRules}${extra}\n\nTRANSCRIPTION :\n${cTranscript}`);
+    const result=await callGPT(key,'Tu es un assistant expert en chirurgie dentaire. Tu génères des documents médicaux professionnels, précis et conformes aux pratiques françaises. Règle de style transversale (v3.24) : les mots \'Monsieur\', \'Madame\' et \'Docteur\' peuvent être abrégés (respectivement \'Mr\', \'Mme\', \'Dr\') partout où ils apparaissent ; tous les autres mots doivent toujours être écrits en entier, sans abréviation. Le nom de famille du patient s\'écrit toujours entièrement en MAJUSCULES partout où son identité apparaît dans un document (ex. \'Mr ROGERER Bernard\'), jamais le prénom. Règle d\'accord (v3.28) : le contexte fourni au-dessus contient \'Genre du praticien\' (Homme ou Femme) — accorder systématiquement en genre tout mot, participe ou adjectif se rapportant au praticien lui-même dans le document (ex. \'soussigné\'/\'soussignée\', \'certain\'/\'certaine\'), quel que soit le type de document, sans jamais laisser de forme non tranchée entre parenthèses comme \'(e)\'.',`Praticien :\n${header}\nTitre et nom du praticien : ${getPraticienTitledName()}\nGenre du praticien : ${buildPraticienGenreLine()}\nDate : ${today}\nPatient : ${patient}\nPatient (civilité/nom majuscule/DDN) : ${buildPatientContextLine()}${aiGeneral?'\n\nHabitudes :\n'+aiGeneral:''}\n\n${DOC_PROMPTS[d]}${customRules}${extra}\n\nTRANSCRIPTION :\n${cTranscript}`);
     saveStatEntry(0,'gpt-4o',cTranscript||'',result,1,0,0,'action','Ajout document supplémentaire');
     cGenDocs[d]=result.trim();
     const idx=document.getElementById('c-tabs').querySelectorAll('.rtab').length;
@@ -2740,8 +2747,67 @@ function saveHistory(patient,docs,smartNote,transcript,resume=''){
   // Sauvegarder les versions de chaque document
   const versions={};
   Object.keys(docs).forEach((d,i)=>{const vKey='rdc_'+i;if(docVersions[vKey])versions[d]=docVersions[vKey].versions;});
-  historyData.unshift({id:Date.now().toString(),date:new Date().toISOString(),patient,patientId,docs,smartNote,smartNoteOriginal:smartNote,smartNoteRetourId:null,transcript,suggestions:cSuggestions,versions,resume,recMode:cRecMode,correspondant:cCourrierCorrespondant});
+  // v3.28 : depuis la sauvegarde automatique dès la fin de transcription (voir saveHistoryDraft),
+  // une entrée "brouillon" existe déjà la plupart du temps pour cette consultation (cCurrentHistId).
+  // On la MET À JOUR plutôt que d'en créer une nouvelle en doublon.
+  const existing=cCurrentHistId?historyData.find(h=>h.id===cCurrentHistId):null;
+  if(existing){
+    existing.patient=patient;if(patientId)existing.patientId=patientId;existing.docs=docs;
+    existing.smartNote=smartNote;existing.smartNoteOriginal=smartNote;existing.transcript=transcript;
+    existing.suggestions=cSuggestions;existing.versions=versions;if(resume)existing.resume=resume;
+    existing.recMode=cRecMode;existing.correspondant=cCourrierCorrespondant;
+  }else{
+    const id=Date.now().toString();
+    historyData.unshift({id,date:new Date().toISOString(),patient,patientId,docs,smartNote,smartNoteOriginal:smartNote,smartNoteRetourId:null,transcript,suggestions:cSuggestions,versions,resume,recMode:cRecMode,correspondant:cCourrierCorrespondant});
+    cCurrentHistId=id;
+  }
   if(historyData.length>200)historyData.pop();safeSet('d3-history',JSON.stringify(historyData));
+}
+
+// v3.28 : sauvegarde automatique dès la fin de la transcription (avant toute génération de
+// document), pour qu'une consultation arrêtée ne puisse jamais être perdue, même sans documents
+// générés. L'entrée apparaît dans l'Historique avec le badge "Documents non générés" et peut être
+// reprise plus tard (voir resumeHistDraft). Si des documents sont ensuite générés, saveHistory()
+// mettra à jour cette même entrée au lieu d'en créer une nouvelle (voir ci-dessus).
+function saveHistoryDraft(transcript){
+  if(!transcript)return;
+  const patient=buildPatientName();
+  saveHistory(patient,{},'',transcript,'');
+}
+
+// v3.28 : reprend une consultation "brouillon" (transcription enregistrée mais aucun document
+// généré) depuis l'Historique — reproduit exactement l'écran affiché juste après la fin d'une
+// transcription, pour que l'utilisateur choisisse ses documents et les génère normalement.
+function resumeHistDraft(id){
+  const h=historyData.find(x=>x.id===id);if(!h)return;
+  cCurrentHistId=id;
+  cTranscript=h.transcript||'';cBgTranscriptDone=true;cGenDocs={};cLastSmartNote='';
+  cRecMode=h.recMode||'consultation';
+
+  document.querySelectorAll('.cpage').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-consult').classList.add('active');
+
+  const parts=(h.patient||'').split(' ');
+  document.getElementById('c-nom').value=parts[0]||'';
+  document.getElementById('c-prenom').value=parts.slice(1).join(' ')||'';
+  document.getElementById('c-ddn').value='';
+  setHistPatientProtection(false); // v3.28 : documents pas encore générés, patient encore librement modifiable
+
+  document.getElementById('c-rec-card').style.display='block';
+  document.getElementById('c-rec-mode-choice').style.display='none';
+  document.getElementById('c-rec-active').style.display='none';
+  document.getElementById('c-transcribing').style.display='none';
+  document.getElementById('c-transcribed-ok').style.display='flex';
+  document.getElementById('c-transcript-box').style.display='block';
+  document.getElementById('c-transcript-box').textContent=cTranscript;
+  document.getElementById('c-loader').style.display='none';
+  document.getElementById('c-err').style.display='none';
+  document.getElementById('c-hist-regen-btn').style.display='none';
+  document.getElementById('c-update-btn').style.display='none';
+  document.querySelectorAll('#c-chips .chip').forEach(c=>{c.classList.remove('sel');if(c.dataset.doc==='smartnote')c.classList.add('sel');});
+  showDocSelection();
+  showToast('Consultation reprise — choisissez les documents à générer');
 }
 
 function cReset(){
@@ -2908,7 +2974,7 @@ async function applySuggestions(btn){
   const header=getPracHeader(),patient=buildPatientName();
   const today=new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
   const aiGeneral=localStorage.getItem('d3-ai-general')||'';
-  const sys='Tu es un assistant expert en chirurgie dentaire. Tu génères des documents médicaux professionnels, précis et conformes aux pratiques françaises. Règle de style transversale (v3.24) : les mots \'Monsieur\', \'Madame\' et \'Docteur\' peuvent être abrégés (respectivement \'Mr\', \'Mme\', \'Dr\') partout où ils apparaissent ; tous les autres mots doivent toujours être écrits en entier, sans abréviation. Le nom de famille du patient s\'écrit toujours entièrement en MAJUSCULES partout où son identité apparaît dans un document (ex. \'Mr ROGERER Bernard\'), jamais le prénom.';
+  const sys='Tu es un assistant expert en chirurgie dentaire. Tu génères des documents médicaux professionnels, précis et conformes aux pratiques françaises. Règle de style transversale (v3.24) : les mots \'Monsieur\', \'Madame\' et \'Docteur\' peuvent être abrégés (respectivement \'Mr\', \'Mme\', \'Dr\') partout où ils apparaissent ; tous les autres mots doivent toujours être écrits en entier, sans abréviation. Le nom de famille du patient s\'écrit toujours entièrement en MAJUSCULES partout où son identité apparaît dans un document (ex. \'Mr ROGERER Bernard\'), jamais le prénom. Règle d\'accord (v3.28) : le contexte fourni au-dessus contient \'Genre du praticien\' (Homme ou Femme) — accorder systématiquement en genre tout mot, participe ou adjectif se rapportant au praticien lui-même dans le document (ex. \'soussigné\'/\'soussignée\', \'certain\'/\'certaine\'), quel que soit le type de document, sans jamais laisser de forme non tranchée entre parenthèses comme \'(e)\'.';
   const sep='|||DOCSEP|||';
   const docInstr=docsToUpdate.map((d,i)=>{const customRules=aiDocRules[d]?'\nRègles spécifiques : '+aiDocRules[d]:'';return`DOCUMENT ${i+1} — ${DOC_LABELS[d].toUpperCase()} (document actuel à mettre à jour) :\n${cGenDocs[d]}\n\nPrompt de base : ${DOC_PROMPTS[d]}${customRules}`;}).join('\n\n');
   const instrInclure=checked.length?`ÉLÉMENTS À INCLURE (ajouter s'ils sont absents) : ${checked.join(', ')}`:'';
