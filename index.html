@@ -1,5 +1,5 @@
 <!--
-  DentIA v3.25
+  DentIA v3.27
   © 2025 — Tous droits réservés
   Ce logiciel est protégé par le droit d'auteur.
   Toute reproduction ou redistribution à des fins commerciales
@@ -11,7 +11,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DentIA v3.25</title>
+<title>DentIA v3.27</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Palanquin&family=Roboto:wght@400;700&family=Poppins:wght@400;700&family=Merriweather:wght@400;700&family=Oswald:wght@400;700&family=Arvo:wght@400;700&family=Bitter:wght@400;700&family=Outfit:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -232,7 +232,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
 <div class="sidebar">
   <div class="sb-logo" onclick="goHome()" style="cursor:pointer" title="Retour à l'accueil">
     <div class="mark">🦷</div>
-    <div><h1>DentIA</h1><small>v3.25</small></div>
+    <div><h1>DentIA</h1><small>v3.27</small></div>
   </div>
   <nav class="sb-nav">
     <div class="sb-section">Consultation</div>
@@ -419,6 +419,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
             <!-- v3.24 : indicateur visuel de dictée en cours, réutilise le pattern pastille rouge pulsante déjà utilisé pour l'enregistrement principal -->
             <span id="c-logos-dictee-indicator" style="display:none;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--red);font-weight:500"><span class="rdot on"></span>Dictée en cours…</span>
           </div>
+          <!-- v3.26 — Point 10 : proposition discrète d'habitude de rédaction détectée après correction -->
+          <div id="c-logos-habit-proposal" style="display:none;margin-top:8px"></div>
           <div class="logos-box" id="c-logos-dictee-box" style="display:none;margin-top:10px;background:#fefce8;border:1px solid #fde047">
             <h4>🎙️ SmartNote (dictée)</h4>
             <div class="logos-note" id="c-logos-dictee-note" contenteditable="false"></div>
@@ -427,6 +429,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
               <button id="c-logos-dictee-edit-btn" onclick="toggleLogosDicteeEdit()" style="padding:6px 13px;background:var(--s2);border:1px solid var(--border);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;color:var(--ink2)">✏️ Modifier</button>
               <button id="c-logos-dictee-save-btn" onclick="saveLogosDicteeEdit()" style="display:none;padding:6px 13px;background:var(--green);color:#fff;border:none;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer">✓ Enregistrer</button>
             </div>
+            <!-- v3.26 — Point 10 : proposition discrète d'habitude de rédaction (variante dictée) -->
+            <div id="c-logos-dictee-habit-proposal" style="display:none;margin-top:8px"></div>
           </div>
         </div>
       </div>
@@ -619,6 +623,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
         <div class="sg">
           <div>
             <div class="fg"><label>Prénom et nom</label><input type="text" id="s-name" placeholder="Ex : Dr Marie Dupont"></div>
+            <!-- v3.26 — Point 2 (simplifié, sans clé API) : recherche automatique de SIRET/adresse
+                 via l'Annuaire Entreprises (INSEE, gratuit sans clé), puis complément best-effort
+                 téléphone/site web via OpenStreetMap (gratuit sans clé). RPPS et spécialité restent
+                 à saisir manuellement — ces données ne sont disponibles que via l'API Annuaire Santé,
+                 qui nécessite une clé API (non souhaitée par l'utilisateur). -->
+            <div class="fg" style="margin-top:-6px;margin-bottom:14px">
+              <button type="button" id="profil-search-btn" class="btn-sec" onclick="searchProfilInfo()" style="font-size:12px;padding:7px 12px">🔍 Rechercher mes informations (SIRET, adresse…)</button>
+              <div style="font-size:10px;color:var(--ink3);margin-top:4px">Sources publiques gratuites (Annuaire Entreprises, OpenStreetMap) — aucune clé ni compte requis. Le n° RPPS et la spécialité restent à saisir manuellement.</div>
+              <div id="profil-search-results" style="display:none;margin-top:8px"></div>
+            </div>
             <!-- v3.24 : utilisé uniquement pour l'accord grammatical de "soussigné(e)" dans le Certificat — le titre reste toujours "Docteur" automatiquement -->
             <div class="fg"><label>Genre (pour l'accord de "soussigné(e)" dans le Certificat)</label><select id="s-genre"><option value="h">Homme</option><option value="f">Femme</option></select></div>
             <div class="fg"><label>Spécialité</label><input type="text" id="s-spec" placeholder="Ex : Chirurgien-dentiste"></div>
@@ -884,6 +898,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
              changelog — plus de fusion/remixage de plusieurs versions en un seul résumé groupé (la
              section "Version 3.19 – 3.22" ci-dessous est un reliquat d'avant cette règle, conservé
              tel quel pour ne rien perdre de l'historique déjà écrit). -->
+        <div style="margin-bottom:18px"><div style="font-size:13px;font-weight:700;margin-bottom:8px">Version 3.27</div><ul style="margin:0;padding-left:18px;font-size:12px;color:var(--ink2);line-height:1.9">
+          <li>Apprentissage automatique des habitudes de rédaction : après chaque correction manuelle de SmartNote (consultation ou dictée), l'IA analyse si la correction révèle une préférence de style généralisable (et non une simple erreur de mot ou un cas particulier). Si oui, une proposition discrète apparaît juste sous la SmartNote corrigée.</li>
+          <li>Chaque proposition doit être validée d'un clic ("✓ Ajouter à mes habitudes") avant d'être active — rien n'est ajouté automatiquement sans confirmation.</li>
+          <li>Les habitudes validées s'ajoutent comme nouvelle ligne dans Paramètres → My DentAI → Habitudes générales, déjà utilisé dans tous les prompts de génération de documents.</li>
+        </ul></div>
+        <div style="margin-bottom:18px"><div style="font-size:13px;font-weight:700;margin-bottom:8px">Version 3.26</div><ul style="margin:0;padding-left:18px;font-size:12px;color:var(--ink2);line-height:1.9">
+          <li>Paramètres → Profil : nouveau bouton "🔍 Rechercher mes informations" — à partir du nom et prénom, recherche automatique du SIRET et de l'adresse du cabinet via l'Annuaire Entreprises (INSEE, gratuit, sans clé ni compte), avec complément best-effort du téléphone et du site web via OpenStreetMap.</li>
+          <li>Gestion des homonymes : si plusieurs résultats correspondent, tous sont proposés avec leur adresse pour que vous sélectionniez le vôtre.</li>
+          <li>Le numéro RPPS et la spécialité restent à saisir manuellement (non disponibles sans clé API sur les sources gratuites utilisées).</li>
+        </ul></div>
         <div style="margin-bottom:18px"><div style="font-size:13px;font-weight:700;margin-bottom:8px">Version 3.25</div><ul style="margin:0;padding-left:18px;font-size:12px;color:var(--ink2);line-height:1.9">
           <li>"Dicter la SmartNote" : la SmartNote générée est désormais copiée automatiquement dans le presse-papiers, sans avoir besoin de cliquer sur le bouton "Copier".</li>
           <li>Suppression du champ "Numéro de TVA" dans Paramètres (jugé peu utile).</li>
@@ -1397,6 +1421,88 @@ function saveSettings(){
   updateSidebar();updateStorageInfo();applyFonts();_settingsDirty=false;closePanel('settings');
 }
 
+// v3.26 — Point 2 (version sans clé API) : recherche automatique de SIRET/adresse via l'Annuaire
+// Entreprises (recherche-entreprises.api.gouv.fr — API publique INSEE, gratuite, sans clé, CORS
+// ouvert), puis complément best-effort du téléphone/site web via OpenStreetMap Nominatim (gratuit,
+// sans clé). Le RPPS et la spécialité ne sont PAS recherchés automatiquement : ces données ne sont
+// disponibles que via l'API Annuaire Santé, qui nécessite une clé API — refusée par l'utilisateur.
+// Gestion des homonymes : tous les résultats trouvés sont proposés, l'utilisateur choisit le sien.
+// Aucun résultat : message informatif non bloquant, l'utilisateur continue en saisie manuelle.
+async function searchProfilInfo(){
+  const nameRaw=document.getElementById('s-name').value.trim();
+  const resultsEl=document.getElementById('profil-search-results');
+  if(!nameRaw){showToast('Renseignez d\'abord votre prénom et nom','error');return;}
+  const btn=document.getElementById('profil-search-btn');
+  const originalLabel=btn?btn.textContent:'';
+  if(btn){btn.disabled=true;btn.textContent='🔍 Recherche en cours…';}
+  resultsEl.style.display='none';resultsEl.innerHTML='';
+  try{
+    // Retire "Dr"/"Docteur" du nom avant la recherche — ce n'est pas un terme d'entreprise/dirigeant
+    const cleanName=nameRaw.replace(/^(dr\.?|docteur)\s+/i,'').trim();
+    const url='https://recherche-entreprises.api.gouv.fr/search?q='+encodeURIComponent(cleanName)+'&per_page=5';
+    const res=await fetch(url);
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    const results=(data.results||[]).filter(r=>r.siege&&(r.siege.adresse||r.siege.siret));
+    window._profilSearchResults=results;
+    if(!results.length){
+      resultsEl.innerHTML='<div style="font-size:12px;color:var(--ink3);padding:8px 10px;background:var(--s2);border-radius:8px">Aucun résultat trouvé automatiquement pour ce nom dans l\'Annuaire Entreprises. Vous pouvez continuer à remplir les champs manuellement.</div>';
+      resultsEl.style.display='block';
+      return;
+    }
+    resultsEl.innerHTML='<div style="font-size:11px;color:var(--ink2);margin-bottom:8px">Est-ce vous ? (source : Annuaire Entreprises — INSEE)</div>'
+      +results.map((r,i)=>{
+        const s=r.siege||{};
+        const adresseComplete=[s.adresse].filter(Boolean).join(', ');
+        return `<div style="border:1px solid var(--border2);border-radius:8px;padding:10px 12px;margin-bottom:6px;cursor:pointer" onclick="applyProfilSearchResult(${i})" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)'">
+          <div style="font-weight:600;font-size:13px">${escHtml(r.nom_complet||r.nom_raison_sociale||cleanName)}</div>
+          <div style="font-size:11px;color:var(--ink2);margin-top:2px">${escHtml(adresseComplete)||'Adresse non disponible'}</div>
+          <div style="font-size:10px;color:var(--ink3);margin-top:2px">SIRET : ${s.siret||'—'}</div>
+        </div>`;
+      }).join('')
+      +'<div style="font-size:10px;color:var(--ink3);margin-top:4px">Aucun de ces résultats ne vous correspond ? Continuez à remplir les champs manuellement.</div>';
+    resultsEl.style.display='block';
+  }catch(e){
+    resultsEl.innerHTML='<div style="font-size:12px;color:var(--red);padding:8px 10px;background:var(--rl);border-radius:8px">Recherche automatique indisponible pour le moment. Vous pouvez continuer à remplir les champs manuellement.</div>';
+    resultsEl.style.display='block';
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent=originalLabel;}
+  }
+}
+async function applyProfilSearchResult(idx){
+  const r=(window._profilSearchResults||[])[idx];if(!r)return;
+  const s=r.siege||{};
+  if(s.siret)document.getElementById('s-siret').value=s.siret;
+  if(s.adresse)document.getElementById('s-adresse').value=s.adresse;
+  if(s.code_postal)document.getElementById('s-cp').value=s.code_postal;
+  if(s.commune)document.getElementById('s-ville').value=s.commune;
+  const raison=r.nom_raison_sociale||r.nom_complet;
+  if(raison&&!document.getElementById('s-cabinet').value.trim())document.getElementById('s-cabinet').value=raison;
+  showToast('✓ SIRET et adresse importés');
+  document.getElementById('profil-search-results').style.display='none';
+  await searchProfilOsmDetails(s.commune,raison);
+}
+// v3.26 : complément best-effort (téléphone/site web) via OpenStreetMap — source communautaire,
+// remplissage inégal selon les fiches existantes. Échec silencieux : ne bloque jamais l'utilisateur.
+async function searchProfilOsmDetails(commune,nom){
+  try{
+    const q=[nom,commune].filter(Boolean).join(' ');
+    if(!q)return;
+    const url='https://nominatim.openstreetmap.org/search?format=json&addressdetails=0&extratags=1&limit=3&q='+encodeURIComponent(q);
+    const res=await fetch(url,{headers:{'Accept-Language':'fr'}});
+    if(!res.ok)return;
+    const data=await res.json();
+    const match=(data||[]).find(d=>d.extratags&&(d.extratags.phone||d.extratags['contact:phone']||d.extratags.website||d.extratags['contact:website']));
+    if(!match)return;
+    const tel=match.extratags.phone||match.extratags['contact:phone'];
+    const site=match.extratags.website||match.extratags['contact:website'];
+    let added=[];
+    if(tel&&!document.getElementById('s-tel').value.trim()){document.getElementById('s-tel').value=tel;added.push('téléphone');}
+    if(site&&!document.getElementById('s-site').value.trim()){document.getElementById('s-site').value=site;added.push('site web');}
+    if(added.length)showToast('✓ '+added.join(' et ')+' complété(s) automatiquement (OpenStreetMap)');
+  }catch(e){/* best-effort silencieux */}
+}
+
 function saveAI(){
   localStorage.setItem('d3-ai-general',document.getElementById('ai-general').value);
   const promptVal=document.getElementById('ai-logos-prompt').value;
@@ -1568,6 +1674,56 @@ function learnDictFromCorrection(before,after,patientNom,patientPrenom){
   }
   if(added)safeSet('d3-dict',JSON.stringify(dictEntries));
 }
+
+// v3.26 — Point 10 : détection automatique d'"habitudes de rédaction" à partir des corrections
+// manuelles. Complémentaire du Dictionnaire (qui gère les mots mal transcrits) : ici on cherche
+// des PRÉFÉRENCES DE STYLE/FORMULATION généralisables (ex. "4.3 par 10" → "4.3x10mm"), pas des
+// erreurs de reconnaissance vocale ponctuelles. Option A (validée) : analyse dès la 1ère correction
+// de ce type — chaque correction manuelle déclenche un appel IA dédié. La proposition n'est jamais
+// ajoutée automatiquement : elle est affichée à l'endroit même de la correction et attend une
+// validation explicite de l'utilisateur avant d'être ajoutée à "Mes habitudes de rédaction".
+async function detectAndProposeHabit(before,after,proposalElId){
+  if(!before||!after||before===after)return;
+  const key=getKey();if(!key)return; // pas de clé OpenAI = pas d'analyse, échec silencieux
+  const currentHabits=localStorage.getItem('d3-ai-general')||'';
+  const sys='Tu analyses la correction manuelle d\'un texte médical par un chirurgien-dentiste, pour détecter si elle révèle une PRÉFÉRENCE DE STYLE OU DE FORMULATION généralisable (ex : une façon d\'écrire les tailles, les abréviations, l\'ordre des informations), à distinguer d\'une simple erreur ponctuelle de reconnaissance vocale (un mot mal transcrit) ou d\'un ajustement propre à ce patient précis (non généralisable). Réponds UNIQUEMENT en JSON, sans texte autour, sans balises markdown, sous la forme exacte : {"isHabit":true,"habit":"description courte et actionnable de la préférence, à la 3e personne, ex : \'Écrire les diamètres/longueurs d\'implants sous la forme XxYmm plutôt que X par Y\'"} ou {"isHabit":false,"habit":""}. Réponds isHabit:false si la correction est une simple erreur de mot isolé, si elle est spécifique à ce patient/cas précis et non généralisable, ou si une habitude très similaire est déjà présente dans la liste existante fournie.';
+  const user=`Habitudes déjà connues (ne pas proposer de doublon) :\n${currentHabits||'(aucune)'}\n\nTexte AVANT correction :\n${before}\n\nTexte APRÈS correction :\n${after}`;
+  let parsed;
+  try{
+    const raw=await callGPT(key,sys,user);
+    const clean=raw.replace(/```json|```/g,'').trim();
+    parsed=JSON.parse(clean);
+  }catch(e){return;} // best-effort silencieux — on ne bloque jamais l'utilisateur si l'analyse échoue
+  if(!parsed||!parsed.isHabit||!parsed.habit)return;
+  showHabitProposal(parsed.habit,proposalElId);
+}
+function showHabitProposal(habitText,proposalElId){
+  const el=document.getElementById(proposalElId);if(!el)return;
+  el.innerHTML=`<div style="border:1px solid #fde047;background:#fefce8;border-radius:8px;padding:9px 12px;font-size:12px;color:var(--ink2)">
+    <div style="margin-bottom:6px">💡 Nouvelle habitude détectée : <strong>${escHtml(habitText)}</strong></div>
+    <div style="display:flex;gap:6px">
+      <button onclick="confirmHabitProposal('${proposalElId}',this)" style="padding:5px 11px;background:var(--green);color:#fff;border:none;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;cursor:pointer">✓ Ajouter à mes habitudes</button>
+      <button onclick="dismissHabitProposal('${proposalElId}')" style="padding:5px 11px;background:none;border:1px solid var(--border);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:11px;cursor:pointer;color:var(--ink3)">✕ Ignorer</button>
+    </div>
+  </div>`;
+  el.dataset.habitText=habitText;
+  el.style.display='block';
+}
+function confirmHabitProposal(proposalElId,btn){
+  const el=document.getElementById(proposalElId);if(!el)return;
+  const habitText=el.dataset.habitText;if(!habitText)return;
+  const current=localStorage.getItem('d3-ai-general')||'';
+  const updated=(current?current.replace(/\s+$/,'')+'\n':'')+'- '+habitText;
+  localStorage.setItem('d3-ai-general',updated);
+  const ta=document.getElementById('ai-general');if(ta)ta.value=updated; // reflète le champ si le panneau est déjà ouvert
+  el.style.display='none';el.innerHTML='';
+  showToast('✓ Habitude ajoutée à "Mes habitudes de rédaction"');
+}
+function dismissHabitProposal(proposalElId){
+  const el=document.getElementById(proposalElId);if(!el)return;
+  el.style.display='none';el.innerHTML='';
+}
+
 function exportDict(){
   const blob=new Blob([JSON.stringify({dict:dictEntries,exportDate:new Date().toISOString()},null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='dentai-dictionnaire-'+new Date().toISOString().slice(0,10)+'.json';a.click();
@@ -1826,6 +1982,8 @@ function openHistModal(id){
   const logosBox=document.getElementById('c-logos-box');
   if(sn){logosBox.style.display='block';document.getElementById('c-logos-note').innerHTML=escHtml(sn).replace(/\n/g,'<br>');}
   else{logosBox.style.display='none';}
+  // v3.26 : efface toute proposition d'habitude affichée pour la consultation précédente
+  ['c-logos-habit-proposal','c-logos-dictee-habit-proposal'].forEach(pid=>{const p=document.getElementById(pid);if(p){p.style.display='none';p.innerHTML='';}});
 
   // BUG-FIX v3.22 : l'encart "ajouter un document" était volontairement masqué ici — on
   // l'affiche désormais avec les types de documents non encore générés pour cette consultation.
@@ -1972,6 +2130,8 @@ function saveCLogos(){
     if(h){h.smartNoteRetourId=rid;safeSet('d3-history',JSON.stringify(historyData));}
     const pat=h?.patientId?patients.find(p=>p.id===h.patientId):null;
     learnDictFromCorrection(original,corrected,pat?.nom,pat?.prenom);
+    // v3.26 — Point 10 : détection d'habitude en parallèle, best-effort, ne bloque jamais la sauvegarde
+    detectAndProposeHabit(original,corrected,'c-logos-habit-proposal');
   }
   showToast('✓ SmartNote enregistrée');
 }
@@ -2086,6 +2246,8 @@ function saveLogosDicteeEdit(){
       compare.retourId=upsertRetour(compare.retourId,'smartnote',compare.transcriptionDictee||'',original,'Correction manuelle',corrected,dicteePrompt);
       compare.smartDictee=corrected;
       safeSet('d3-smartnote-compare',JSON.stringify(smartNoteCompares));
+      // v3.26 — Point 10 : même détection d'habitude que pour la SmartNote consultation
+      detectAndProposeHabit(original,corrected,'c-logos-dictee-habit-proposal');
     }
   }
   showToast('✓ SmartNote enregistrée');
@@ -2611,6 +2773,9 @@ function cReset(){
   // de l'ancien patient si aucune nouvelle dictée n'était refaite pour le nouveau patient.
   document.getElementById('c-logos-dictee-box').style.display='none';
   document.getElementById('c-logos-dictee-note').textContent='';
+  // v3.26 : on efface aussi toute proposition d'habitude affichée, pour ne pas la laisser
+  // visible avec un contenu qui ne correspond plus à la nouvelle consultation.
+  ['c-logos-habit-proposal','c-logos-dictee-habit-proposal'].forEach(id=>{const p=document.getElementById(id);if(p){p.style.display='none';p.innerHTML='';}});
   // v3.21 : reverrouillage des champs patient (protection Historique) — une nouvelle
   // consultation reste toujours librement modifiable.
   setHistPatientProtection(false);
