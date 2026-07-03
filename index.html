@@ -1,5 +1,5 @@
 <!--
-  DentIA v3.24
+  DentIA v3.25
   © 2025 — Tous droits réservés
   Ce logiciel est protégé par le droit d'auteur.
   Toute reproduction ou redistribution à des fins commerciales
@@ -11,7 +11,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DentIA v3.24</title>
+<title>DentIA v3.25</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Palanquin&family=Roboto:wght@400;700&family=Poppins:wght@400;700&family=Merriweather:wght@400;700&family=Oswald:wght@400;700&family=Arvo:wght@400;700&family=Bitter:wght@400;700&family=Outfit:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -232,7 +232,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
 <div class="sidebar">
   <div class="sb-logo" onclick="goHome()" style="cursor:pointer" title="Retour à l'accueil">
     <div class="mark">🦷</div>
-    <div><h1>DentIA</h1><small>v3.24</small></div>
+    <div><h1>DentIA</h1><small>v3.25</small></div>
   </div>
   <nav class="sb-nav">
     <div class="sb-section">Consultation</div>
@@ -628,7 +628,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
           <div>
             <div class="fg"><label>Email professionnel</label><input type="text" id="s-email" placeholder="dr.dupont@cabinet.fr"></div>
             <div class="fg"><label>Téléphone</label><input type="text" id="s-tel" placeholder="06 XX XX XX XX"></div>
-            <div class="fg"><label>Numéro de TVA</label><input type="text" id="s-tva" placeholder="FR12345678901"></div>
             <div class="fg"><label>SIRET</label><input type="text" id="s-siret" placeholder="14 chiffres"></div>
           </div>
         </div>
@@ -828,8 +827,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
     <div class="panel-body">
       <div style="display:flex;gap:8px;margin-bottom:12px">
         <button class="btn-green" onclick="openDictModal()">+ Ajouter une correction</button>
-        <button class="btn-sec" onclick="exportDict()">📤 Exporter (JSON)</button>
       </div>
+      <!-- v3.25 — Point 8 : le bouton d'export du Dictionnaire est supprimé, ses données sont
+           désormais incluses dans l'export unique du panneau Feedback (voir exportFeedback()). -->
       <div style="font-size:11px;color:var(--ink3);margin-bottom:10px">🔵 IA = ajout automatique à partir de vos corrections · les entrées en <span style="color:#dc2626;font-weight:600">rouge</span> sont en conflit (deux corrections différentes pour le même mot) et ne sont plus appliquées tant que vous n'en supprimez pas une</div>
       <input type="text" id="dict-search" placeholder="🔍 Rechercher…" oninput="renderDict()" style="width:100%;border:1px solid var(--border2);border-radius:8px;padding:7px 10px;font-family:'DM Sans',sans-serif;font-size:12px;outline:none;color:var(--ink);background:var(--surface);margin-bottom:10px;box-sizing:border-box">
       <div id="dict-list"></div>
@@ -845,27 +845,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
       <div><div class="panel-title">Feedback</div><div class="panel-sub">Historique des modifications IA et comparatifs SmartNote — pour affiner vos prompts</div></div>
       <button class="panel-close" onclick="closePanel('retours')">×</button>
     </div>
-    <nav class="panel-nav">
-      <button class="pnav-item active" onclick="switchPanelTab('retours',0,this)">Historique des modifications IA</button>
-      <button class="pnav-item" onclick="switchPanelTab('retours',1,this)">Comparatif SmartNote</button>
-    </nav>
     <div class="panel-body">
-      <div id="fbtab-0">
-        <p style="font-size:13px;color:var(--ink2);margin-bottom:16px">Chaque modification IA enregistre automatiquement la transcription, le document avant/après et la demande. Plusieurs modifications successives sur un même document ne créent qu'une seule entrée (première version → dernière version validée).</p>
-        <div style="display:flex;gap:8px;margin-bottom:16px">
-          <button class="btn-green" onclick="exportRetours()">📤 Exporter (JSON)</button>
-          <button class="btn-sec" onclick="clearRetours()">🗑️ Vider</button>
-        </div>
-        <div id="retours-list"></div>
+      <!-- v3.25 : fusion des anciens sous-onglets "Historique des modifications IA" et
+           "Comparatif SmartNote" en une seule liste chronologique mélangée, avec un seul
+           export et un seul vidage. Les deux mécanismes de stockage (retours / smartNoteCompares)
+           restent distincts en interne, seul l'affichage/export est unifié. -->
+      <p style="font-size:13px;color:var(--ink2);margin-bottom:16px">Chaque modification IA (documents et SmartNote) et chaque comparatif SmartNote (consultation complète vs dictée) sont enregistrés automatiquement ici, mélangés par ordre chronologique, pour affiner vos prompts.</p>
+      <div style="display:flex;gap:8px;margin-bottom:16px">
+        <button class="btn-green" onclick="exportFeedback()">📤 Exporter (JSON)</button>
+        <button class="btn-sec" onclick="clearFeedback()">🗑️ Vider</button>
       </div>
-      <div id="fbtab-1" style="display:none">
-        <p style="font-size:13px;color:var(--ink2);margin-bottom:16px">Quand une SmartNote générée automatiquement à partir d'une consultation complète est complétée par une dictée courte, les deux versions sont enregistrées ici côte à côte (avec les transcriptions correspondantes) pour analyser lesquelles sont les plus fiables et affiner le prompt SmartNote.</p>
-        <div style="display:flex;gap:8px;margin-bottom:16px">
-          <button class="btn-green" onclick="exportSmartNoteCompare()">📤 Exporter (JSON)</button>
-          <button class="btn-sec" onclick="clearSmartNoteCompare()">🗑️ Vider</button>
-        </div>
-        <div id="smartnote-compare-list"></div>
-      </div>
+      <div id="feedback-list"></div>
     </div>
   </div>
 </div>
@@ -894,6 +884,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
              changelog — plus de fusion/remixage de plusieurs versions en un seul résumé groupé (la
              section "Version 3.19 – 3.22" ci-dessous est un reliquat d'avant cette règle, conservé
              tel quel pour ne rien perdre de l'historique déjà écrit). -->
+        <div style="margin-bottom:18px"><div style="font-size:13px;font-weight:700;margin-bottom:8px">Version 3.25</div><ul style="margin:0;padding-left:18px;font-size:12px;color:var(--ink2);line-height:1.9">
+          <li>"Dicter la SmartNote" : la SmartNote générée est désormais copiée automatiquement dans le presse-papiers, sans avoir besoin de cliquer sur le bouton "Copier".</li>
+          <li>Suppression du champ "Numéro de TVA" dans Paramètres (jugé peu utile).</li>
+          <li>Panneau Feedback : les anciens sous-onglets "Historique des modifications IA" et "Comparatif SmartNote" sont fusionnés en une seule liste chronologique mélangée, avec un seul bouton "Exporter" et un seul bouton "Vider" pour l'ensemble.</li>
+          <li>Le bouton d'export du Dictionnaire est supprimé : les corrections du dictionnaire sont désormais incluses automatiquement dans l'export du panneau Feedback.</li>
+          <li>Correction : la transcription est désormais visible immédiatement dans l'écran "Documents générés" juste après un enregistrement (consultation complète ou dictée SmartNote), sans avoir besoin de repasser par l'Historique.</li>
+          <li>Correctif bug : le bouton "Enregistrement en cours" de la colonne de gauche ne reste plus affiché par erreur après l'abandon d'un enregistrement (changement d'onglet + confirmation).</li>
+          <li>Correctif Dictionnaire : deux corrections identiques pour un même mot (simple doublon) ne sont plus signalées à tort comme un "conflit" — un conflit n'est désormais détecté que si deux corrections réellement différentes existent pour le même mot.</li>
+          <li>SmartNote : nouvelle règle contextuelle pour corriger automatiquement "plan" en "implant" quand ce mot est immédiatement associé à une marque d'implant et/ou un format de taille (diamètre x longueur) — sans jamais toucher à "plan" employé dans son sens normal (ex. "plan de traitement").</li>
+        </ul></div>
         <div style="margin-bottom:18px"><div style="font-size:13px;font-weight:700;margin-bottom:8px">Version 3.24</div><ul style="margin:0;padding-left:18px;font-size:12px;color:var(--ink2);line-height:1.9">
           <li>Signature automatique (nom + image si enregistrée) ajoutée en bas de page sur le Courrier confrère, le Certificat et la Lettre patient.</li>
           <li>Certificat : la civilité, le nom et la date de naissance du patient sont désormais mentionnés dans la première phrase, et "soussigné/soussignée" s'accorde correctement selon votre genre (renseignable dans Paramètres).</li>
@@ -1101,6 +1101,10 @@ Informations à toujours exclure (v3.22) :
 Implants (v3.24) :
 - Dès qu'un implant est mentionné, conserver TOUJOURS fidèlement sa marque et sa taille exacte (diamètre x longueur) telles qu'entendues, jamais les résumer, les arrondir ou les omettre, même si le reste de la phrase est condensé
 
+Correction contextuelle "plan" → "implant" (v3.25) :
+- Si le mot "plan" apparaît immédiatement associé à une marque d'implant (ex : Nobel Replace, Nobel Active, Straumann, Astra...) et/ou à un format de taille diamètre x longueur (ex : "4.3 par 10", "4.3x10mm"), il s'agit presque toujours d'une erreur de reconnaissance vocale pour "implant" — corrige-le systématiquement en "implant" dans ce contexte précis
+- Ne jamais appliquer cette correction quand "plan" est utilisé dans son sens normal, sans marque ni taille d'implant à proximité immédiate (ex : "plan de traitement", "plan de soins")
+
 [COLLER ICI LE TEXTE]`;
 
 // v3.21 : prompt dédié à la dictée directe (mode démarrage "Dicter la SmartNote" +
@@ -1151,6 +1155,10 @@ Notation des soins (toujours en notation FDI) :
 - Lésion cervicale (collet) → soins collet 26 — uniquement si "collet" dicté
 - Lésion vestibulaire → soins 1F vest sur 26 — uniquement si "vestibulaire" dicté
 - Ne jamais inventer le nombre de faces, la localisation ou le type de lésion s'ils ne sont pas dictés explicitement
+
+Correction contextuelle "plan" → "implant" (v3.25) :
+- Si le mot "plan" apparaît immédiatement associé à une marque d'implant (ex : Nobel Replace, Nobel Active, Straumann, Astra...) et/ou à un format de taille diamètre x longueur (ex : "4.3 par 10", "4.3x10mm"), il s'agit presque toujours d'une erreur de reconnaissance vocale pour "implant" — corrige-le systématiquement en "implant" dans ce contexte précis
+- Ne jamais appliquer cette correction quand "plan" est utilisé dans son sens normal, sans marque ni taille d'implant à proximité immédiate (ex : "plan de traitement", "plan de soins")
 
 [COLLER ICI LE TEXTE]`;
 
@@ -1363,7 +1371,7 @@ function loadAll(){
   smartNoteCompares=JSON.parse(localStorage.getItem('d3-smartnote-compare')||'[]');
   migrateRetourTranscripts();
   const s=getSettings();
-  ['name','genre','spec','rpps','adeli','email','tel','tva','siret','cabinet','adresse','cp','ville','site','apikey','nomenclature','fontsize'].forEach(k=>{const el=document.getElementById('s-'+k);if(el&&s[k])el.value=s[k];});
+  ['name','genre','spec','rpps','adeli','email','tel','siret','cabinet','adresse','cp','ville','site','apikey','nomenclature','fontsize'].forEach(k=>{const el=document.getElementById('s-'+k);if(el&&s[k])el.value=s[k];});
   const retEl=document.getElementById('s-retention');if(retEl)retEl.value=s.retention||'30';
   const supaUrlEl=document.getElementById('s-supa-url');if(supaUrlEl)supaUrlEl.value=localStorage.getItem('d3-supa-url')||'';
   const supaKeyEl=document.getElementById('s-supa-key');if(supaKeyEl)supaKeyEl.value=localStorage.getItem('d3-supa-key')||'';
@@ -1379,7 +1387,7 @@ function getKey(){return localStorage.getItem('d3-apikey')||'';}
 
 function saveSettings(){
   const s={};
-  ['name','genre','spec','rpps','adeli','email','tel','tva','siret','cabinet','adresse','cp','ville','site','nomenclature','fontsize'].forEach(k=>{const el=document.getElementById('s-'+k);if(el)s[k]=el.value;});
+  ['name','genre','spec','rpps','adeli','email','tel','siret','cabinet','adresse','cp','ville','site','nomenclature','fontsize'].forEach(k=>{const el=document.getElementById('s-'+k);if(el)s[k]=el.value;});
   const ret=document.getElementById('s-retention');if(ret)s.retention=ret.value;
   localStorage.setItem('d3-settings',JSON.stringify(s));
   const ak=document.getElementById('s-apikey').value.trim();if(ak)localStorage.setItem('d3-apikey',ak);
@@ -1513,11 +1521,15 @@ function deleteDict(i){
   });
 }
 // v3.23 : un mot n'est plus en conflit s'il ne reste plus qu'une seule correction pour ce mot
+// v3.25 : un conflit n'existe que si au moins deux corrections DIFFERENTES existent pour le même
+// mot de départ. Deux entrées identiques (même mot, même correction) sont de simples doublons
+// inoffensifs — elles ne sont plus marquées en conflit et restent invisibles/sans badge.
 function resolveDictConflicts(){
   dictEntries.forEach(d=>{
     const norm=stripAccents(d.from).toLowerCase();
     const sameWord=dictEntries.filter(o=>stripAccents(o.from).toLowerCase()===norm);
-    d.conflict=sameWord.length>1;
+    const distinctCorrections=new Set(sameWord.map(o=>stripAccents(o.to).toLowerCase()));
+    d.conflict=distinctCorrections.size>1;
   });
 }
 // v3.23 : apprentissage automatique — appelée quand l'utilisateur corrige manuellement une
@@ -1540,7 +1552,9 @@ function learnDictFromCorrection(before,after,patientNom,patientPrenom){
     if(/^\d+([.,]\d+)?$/.test(w1)&&/^\d+([.,]\d+)?$/.test(w2))continue; // pas de simples nombres (dents, mesures) — trop de faux positifs
     const normW1=stripAccents(w1).toLowerCase();
     const existing=dictEntries.filter(d=>stripAccents(d.from).toLowerCase()===normW1);
-    if(existing.some(d=>d.to.toLowerCase()===w2.toLowerCase()))continue; // déjà connu
+    // v3.25 : comparaison accent-insensible (comme resolveDictConflicts) pour éviter un faux
+    // conflit/toast quand la correction existante ne diffère que par les accents.
+    if(existing.some(d=>stripAccents(d.to).toLowerCase()===stripAccents(w2).toLowerCase()))continue; // déjà connu
     if(existing.length){
       // conflit : un autre "to" existe déjà pour ce mot
       dictEntries.push({from:w1,to:w2,source:'auto',conflict:true});
@@ -2030,7 +2044,10 @@ async function generateSmartDictee(dicteeTranscript,key,dureeSec){
   saveStatEntry(dureeSec,'gpt-4o',dicteeTranscript,dicteeSmart,1,0,0,'action','SmartNote — Dicter la SmartNote');
 
   currentSmartCompareId=saveSmartNoteCompare(patient,mainTranscript,dicteeTranscript,originalSmart,dicteeSmart);
-  showToast('✓ SmartNote (dictée) générée');
+  // v3.25 : copie automatique dans le presse-papiers dès que la SmartNote dictée est prête,
+  // sans que l'utilisateur ait besoin de cliquer sur le bouton "Copier". Uniquement pour cette
+  // fonctionnalité (Dicter la SmartNote) — les autres documents gardent le copier manuel.
+  navigator.clipboard.writeText(dicteeSmart).then(()=>showToast('✓ SmartNote (dictée) générée et copiée')).catch(()=>showToast('✓ SmartNote (dictée) générée'));
 }
 
 function saveSmartNoteCompare(patient,transcriptionConsult,transcriptionDictee,smartConsult,smartDictee){
@@ -2074,14 +2091,11 @@ function saveLogosDicteeEdit(){
   showToast('✓ SmartNote enregistrée');
 }
 
-function renderSmartNoteCompare(){
-  const el=document.getElementById('smartnote-compare-list');
-  if(!el)return;
-  if(!smartNoteCompares.length){el.innerHTML='<div class="empty">Aucun comparatif enregistré pour l\'instant. Utilisez le bouton 🎙️ Dicter la SmartNote à côté d\'une SmartNote pour en créer un.</div>';return;}
-  el.innerHTML=smartNoteCompares.slice().reverse().map((c,i)=>{
-    const idx=smartNoteCompares.length-1-i;
-    const patient=c.patient?`<span style="font-size:11px;color:var(--ink2);margin-left:6px">👤 ${escHtml(c.patient)}</span>`:'';
-    return`<div class="retour-item" style="display:block;padding:10px 0">
+// v3.25 : voir renderRetours ci-dessus — délègue également à renderFeedback().
+function renderSmartNoteCompare(){renderFeedback();}
+function smartCompareRowHtml(c,idx){
+  const patient=c.patient?`<span style="font-size:11px;color:var(--ink2);margin-left:6px">👤 ${escHtml(c.patient)}</span>`:'';
+  return`<div class="retour-item" style="display:block;padding:10px 0">
       <div style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="toggleSmartCompareDetail(${idx})">
         <div style="flex:1">
           <div class="retour-date">${new Date(c.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'})}</div>
@@ -2100,7 +2114,32 @@ function renderSmartNoteCompare(){
         <div style="font-size:11px;color:var(--ink2);line-height:1.7;white-space:pre-wrap;max-height:100px;overflow-y:auto">${escHtml(c.transcriptionDictee)||'—'}</div>
       </div>
     </div>`;
-  }).join('');
+}
+// v3.25 — Point 4 : liste unique fusionnant retours (modifications IA) et smartNoteCompares
+// (comparatifs SmartNote), triée par date décroissante. Les deux tableaux sources restent
+// séparés en interne ; seul l'affichage est mélangé. Les index utilisés dans les onclick
+// (openRetourModal, deleteRetour, toggleSmartCompareDetail, deleteSmartNoteCompare) pointent
+// toujours vers l'index réel dans le tableau d'origine, pas vers un index de la liste fusionnée.
+function renderFeedback(){
+  const el=document.getElementById('feedback-list');
+  if(!el)return;
+  const items=[
+    ...retours.map((r,i)=>({date:r.date,html:retourRowHtml(r,i)})),
+    ...smartNoteCompares.map((c,i)=>({date:c.date,html:smartCompareRowHtml(c,i)}))
+  ].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  if(!items.length){el.innerHTML='<div class="empty">Aucun retour enregistré. Les retours se créent automatiquement à chaque modification IA, correction de SmartNote, ou comparatif SmartNote.</div>';return;}
+  el.innerHTML=items.map(it=>it.html).join('');
+}
+function exportFeedback(){
+  if(!retours.length&&!smartNoteCompares.length){showToast('Aucun retour à exporter','error');return;}
+  const blob=new Blob([JSON.stringify({retours,smartNoteCompares,dictionnaire:dictEntries,exportDate:new Date().toISOString()},null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='dentai-feedback-'+new Date().toISOString().slice(0,10)+'.json';a.click();
+}
+function clearFeedback(){
+  if(!retours.length&&!smartNoteCompares.length)return;
+  showConfirmModal('Vider tout le feedback (modifications IA + comparatifs SmartNote) ?',()=>{
+    retours=[];smartNoteCompares=[];safeSet('d3-retours','[]');safeSet('d3-smartnote-compare','[]');renderFeedback();showToast('✓ Feedback vidé');
+  });
 }
 function toggleSmartCompareDetail(idx){
   const d=document.getElementById('smartcompare-detail-'+idx);if(!d)return;
@@ -2111,12 +2150,7 @@ function deleteSmartNoteCompare(idx){
   smartNoteCompares.splice(idx,1);safeSet('d3-smartnote-compare',JSON.stringify(smartNoteCompares));renderSmartNoteCompare();showToast('✓ Comparatif supprimé');
   });
 }
-function exportSmartNoteCompare(){
-  if(!smartNoteCompares.length){showToast('Aucun comparatif à exporter','error');return;}
-  const blob=new Blob([JSON.stringify({smartNoteCompares,exportDate:new Date().toISOString()},null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='dentai-smartnote-comparatif-'+new Date().toISOString().slice(0,10)+'.json';a.click();
-}
-function clearSmartNoteCompare(){if(!smartNoteCompares.length)return;showConfirmModal('Vider tous les comparatifs SmartNote ?',()=>{smartNoteCompares=[];safeSet('d3-smartnote-compare','[]');renderSmartNoteCompare();showToast('✓ Comparatifs vidés');});}
+// v3.25 : exportSmartNoteCompare/clearSmartNoteCompare remplacées par exportFeedback/clearFeedback (Point 4).
 
 function switchTab(i,tabsId,docsId){
   document.querySelectorAll('#'+tabsId+' .rtab').forEach((t,j)=>t.classList.toggle('active',j===i));
@@ -2381,6 +2415,10 @@ async function cGenerate(){
     }else document.getElementById('c-logos-box').style.display='none';
     document.getElementById('c-logos-dictee-btn').style.display='inline-block';
     document.getElementById('c-transcript-box').textContent=transcript;
+    // v3.25 : alimente aussi la zone "📄 Voir la transcription" de l'écran résultats — jusqu'ici
+    // elle n'était remplie qu'en rouvrant la consultation depuis l'Historique, jamais juste après
+    // une génération en direct, ce qui donnait deux écrans différents pour le même document.
+    showResultsTranscript(transcript);
     buildAddStrip(docSel);
     buildSuggestionsPanel(suggestions);
     saveHistory(patient,cGenDocs,smartNote||'',transcript,resume||'');
@@ -2423,6 +2461,9 @@ async function cGenerateDictee(){
     // v3.21 : la SmartNote a déjà été dictée fidèlement — "Dicter la SmartNote" en complément n'a pas de sens ici
     document.getElementById('c-logos-dictee-btn').style.display='none';
     document.getElementById('c-transcript-box').textContent=transcript;
+    // v3.25 : même correctif que pour la consultation complète (voir cGenerate) — la zone
+    // "📄 Voir la transcription" de l'écran résultats doit être visible dès la fin de la dictée.
+    showResultsTranscript(transcript);
     buildAddStrip([]);
     cSuggestions=[];
     buildSuggestionsPanel({included:[],excluded:[]});
@@ -2542,6 +2583,9 @@ function saveHistory(patient,docs,smartNote,transcript,resume=''){
 }
 
 function cReset(){
+  // v3.25 : setRecEnCours(false) manquait ici — le bouton "Enregistrement en cours" restait
+  // affiché dans la colonne de gauche même après un abandon/reset complet de l'enregistrement.
+  setRecEnCours(false);
   cChunks=[];cTranscript='';cSecs=0;cGenDocs={};cLastSmartNote='';cBgTranscriptDone=false;cMimeType='';cSegments=[];cCourrierCorrespondant=null;
   // v3.21 : cCurrentHistId n'était jamais remis à zéro ici — une consultation ouverte
   // depuis l'Historique laissait son id "actif" même après un nouvel enregistrement.
@@ -2730,16 +2774,14 @@ async function applySuggestions(btn){
 }
 
 // ══ RETOURS ══
-function renderRetours(){
-  const el=document.getElementById('retours-list');
-  if(!retours.length){el.innerHTML='<div class="empty">Aucun retour enregistré. Les retours se créent automatiquement à chaque modification IA ou correction de SmartNote.</div>';return;}
-  el.innerHTML=retours.slice().reverse().map((r,i)=>{
-    const idx=retours.length-1-i;
-    const label=r.docType==='smartnote'?'📋 SmartNote':(DOC_EMOJI[r.docType]||'📄')+' '+(DOC_LABELS[r.docType]||r.docType);
-    const sub=r.docType==='smartnote'?'Correction manuelle':`"${(r.demande||'').substring(0,80)}${(r.demande||'').length>80?'…':''}"`;
-    const patient=r.patient?`<span style="font-size:11px;color:var(--ink2);margin-left:6px">👤 ${r.patient}</span>`:(r.patientRenseigné===false?`<span style="font-size:11px;color:var(--ink3);margin-left:6px">Patient non renseigné</span>`:'');
-    return`<div class="retour-item" style="display:flex;align-items:center;gap:8px"><div style="flex:1;cursor:pointer" onclick="openRetourModal(${idx})"><div class="retour-date">${new Date(r.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'})}</div><div class="retour-type">${label}${patient}</div><div class="retour-demande">${sub}</div></div><button onclick="deleteRetour(${idx})" style="flex-shrink:0;background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;color:var(--ink3);font-size:13px;transition:all .15s" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--ink3)'" title="Supprimer ce retour">🗑️</button></div>`;
-  }).join('');
+// v3.25 : renderRetours et renderSmartNoteCompare délèguent désormais à renderFeedback(),
+// qui affiche les deux sources fusionnées dans une seule liste chronologique (voir plus bas).
+function renderRetours(){renderFeedback();}
+function retourRowHtml(r,idx){
+  const label=r.docType==='smartnote'?'📋 SmartNote':(DOC_EMOJI[r.docType]||'📄')+' '+(DOC_LABELS[r.docType]||r.docType);
+  const sub=r.docType==='smartnote'?'Correction manuelle':`"${(r.demande||'').substring(0,80)}${(r.demande||'').length>80?'…':''}"`;
+  const patient=r.patient?`<span style="font-size:11px;color:var(--ink2);margin-left:6px">👤 ${r.patient}</span>`:(r.patientRenseigné===false?`<span style="font-size:11px;color:var(--ink3);margin-left:6px">Patient non renseigné</span>`:'');
+  return`<div class="retour-item" style="display:flex;align-items:center;gap:8px"><div style="flex:1;cursor:pointer" onclick="openRetourModal(${idx})"><div class="retour-date">${new Date(r.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'})}</div><div class="retour-type">${label}${patient}</div><div class="retour-demande">${sub}</div></div><button onclick="deleteRetour(${idx})" style="flex-shrink:0;background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;color:var(--ink3);font-size:13px;transition:all .15s" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--ink3)'" title="Supprimer ce retour">🗑️</button></div>`;
 }
 function deleteRetour(idx){
   showConfirmModal('Supprimer ce retour ?',()=>{
@@ -2783,12 +2825,7 @@ function upsertRetour(existingId,docType,transcription,avant,demande,apres,promp
   safeSet('d3-retours',JSON.stringify(retours));
   return id;
 }
-function exportRetours(){
-  if(!retours.length){showToast('Aucun retour à exporter','error');return;}
-  const blob=new Blob([JSON.stringify({retours,exportDate:new Date().toISOString()},null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='dentai-retours-'+new Date().toISOString().slice(0,10)+'.json';a.click();
-}
-function clearRetours(){if(!retours.length)return;showConfirmModal('Vider tous les retours ?',()=>{retours=[];safeSet('d3-retours','[]');renderRetours();showToast('✓ Retours vidés');});}
+// v3.25 : exportRetours/clearRetours remplacées par exportFeedback/clearFeedback (Point 4).
 
 // ══ SUPABASE ══
 function offerSupaMigration(url,key){if(!historyData.length&&!patients.length)return;showConfirmModal(`Vous avez ${historyData.length} consultation(s) et ${patients.length} patient(s) en local. Voulez-vous les migrer vers Supabase maintenant ?`,()=>migrateToSupabase(url,key),'☁️ Supabase configuré !');}
