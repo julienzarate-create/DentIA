@@ -1,5 +1,5 @@
 <!--
-  DentIA v3.28
+  DentIA v3.30
   © 2025 — Tous droits réservés
   Ce logiciel est protégé par le droit d'auteur.
   Toute reproduction ou redistribution à des fins commerciales
@@ -11,7 +11,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DentIA v3.28</title>
+<title>DentIA v3.30</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Palanquin&family=Roboto:wght@400;700&family=Poppins:wght@400;700&family=Merriweather:wght@400;700&family=Oswald:wght@400;700&family=Arvo:wght@400;700&family=Bitter:wght@400;700&family=Outfit:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -232,7 +232,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
 <div class="sidebar">
   <div class="sb-logo" onclick="goHome()" style="cursor:pointer" title="Retour à l'accueil">
     <div class="mark">🦷</div>
-    <div><h1>DentIA</h1><small>v3.28</small></div>
+    <div><h1>DentIA</h1><small>v3.30</small></div>
   </div>
   <nav class="sb-nav">
     <div class="sb-section">Consultation</div>
@@ -892,6 +892,19 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
              changelog — plus de fusion/remixage de plusieurs versions en un seul résumé groupé (la
              section "Version 3.19 – 3.22" ci-dessous est un reliquat d'avant cette règle, conservé
              tel quel pour ne rien perdre de l'historique déjà écrit). -->
+        <div style="margin-bottom:18px"><div style="font-size:13px;font-weight:700;margin-bottom:8px">Version 3.30</div><ul style="margin:0;padding-left:18px;font-size:12px;color:var(--ink2);line-height:1.9">
+          <li>"✨ Enrichir" — durée estimée doublée pendant "Intégration en cours…" (l'ancienne estimation était trop optimiste par rapport à la durée réelle).</li>
+          <li>"✨ Enrichir" — ajout d'un timer et d'une barre de progression pendant l'étape "Analyse de la consultation en cours…" (juste après le clic sur Enrichir), qui n'affichait auparavant qu'un texte fixe sans indication de temps.</li>
+          <li>"✨ Enrichir" — garantie d'intégration totale : toute information cochée apparaît désormais systématiquement sur le document généré. Si l'IA ne trouve pas où l'insérer précisément dans le texte, elle est ajoutée dans une nouvelle section neutre et imprimable "Info personnalisée" en fin de document (l'ancien encart d'avertissement jaune est supprimé).</li>
+          <li>"✨ Enrichir" — nouvelle règle de cohérence : avant d'ajouter une information, l'IA vérifie si le document contient déjà une information équivalente ou contradictoire sur le même sujet (ex. un délai déjà mentionné ailleurs) ; dans ce cas, elle corrige l'information existante à son emplacement d'origine au lieu d'en ajouter une seconde en doublon.</li>
+          <li>"✨ Enrichir" — ajout d'une seconde petite passe IA de relecture, limitée aux seules zones de texte touchées par un ajout (pas tout le document), pour fluidifier la cohérence autour de chaque insertion.</li>
+          <li>"✨ Enrichir" — les cases à cocher "Informations extraites" sont désormais plus précises : elles indiquent systématiquement la valeur concrète détectée (chiffre, quantité, détail), et non plus une catégorie vague (ex. "Fumeur, environ 10 cigarettes/jour" au lieu de "Tabagisme").</li>
+        </ul></div>
+        <div style="margin-bottom:18px"><div style="font-size:13px;font-weight:700;margin-bottom:8px">Version 3.29</div><ul style="margin:0;padding-left:18px;font-size:12px;color:var(--ink2);line-height:1.9">
+          <li>Correctif majeur de la fonction "✨ Enrichir" (Mes Documents) : elle était beaucoup trop lente (jusqu'à plus de 2 minutes) et pouvait produire un document cassé à la fin sur les documents longs. En cause : l'IA était chargée de réécrire le document entier à chaque enrichissement.</li>
+          <li>Nouveau fonctionnement : l'IA ne fournit plus que les petits ajouts à intégrer (et non plus le document entier), qui sont ensuite insérés directement au bon endroit par l'application. Résultat attendu : quelques secondes au lieu de plusieurs dizaines, et plus de risque de document coupé/cassé.</li>
+          <li>Sécurité ajoutée : si un ajout ne peut pas être placé automatiquement avec certitude (pour éviter tout risque d'insertion au mauvais endroit), il n'est jamais perdu silencieusement — il apparaît dans un encart "⚠️ Informations non intégrées automatiquement" à la fin du document, à ajouter manuellement si besoin.</li>
+        </ul></div>
         <div style="margin-bottom:18px"><div style="font-size:13px;font-weight:700;margin-bottom:8px">Version 3.28</div><ul style="margin:0;padding-left:18px;font-size:12px;color:var(--ink2);line-height:1.9">
           <li>Paramètres → Profil et Cabinet : fusion des anciens onglets "Profil" et "Cabinet" en un seul onglet "Profil & Cabinet".</li>
           <li>Retrait du champ "Système de nomenclature" (FDI est désormais utilisé systématiquement).</li>
@@ -4081,9 +4094,18 @@ async function genFicheEnrichie(type){
   sugPanel = document.createElement('div');
   sugPanel.id = 'enrich-sug-panel';
   sugPanel.style.cssText = 'margin-top:16px;background:#fffbeb;border:1.5px solid #fcd34d;border-radius:10px;padding:14px 16px';
-  sugPanel.innerHTML = '<div style="font-size:12px;font-weight:600;color:#92400e">✨ Analyse de la consultation en cours…</div>';
+  // v3.30 : timer + barre de progression pendant l'analyse (même principe que l'intégration),
+  // pour ne plus laisser un texte fixe sans indication de temps pendant l'attente.
+  const etaSecExtract = Math.max(5, Math.min(15, Math.round((docsTranscript||'').length/500)));
+  sugPanel.innerHTML = `<div style="font-size:12px;font-weight:600;color:#92400e;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center"><span>✨ Analyse de la consultation en cours…</span><span id="enrich-extract-eta" style="font-weight:400;color:#a16207">environ ${etaSecExtract} seconde${etaSecExtract>1?'s':''}</span></div><div style="background:#fde68a;border-radius:20px;height:6px;overflow:hidden"><div id="enrich-extract-progress-bar" style="height:100%;background:#c2410c;border-radius:20px;width:0%;transition:width .3s ease"></div></div>`;
   resultEl.appendChild(sugPanel);
   setTimeout(()=>sugPanel.scrollIntoView({behavior:'smooth',block:'nearest'}),100);
+  const extractBarEl = document.getElementById('enrich-extract-progress-bar');
+  const extractStart = Date.now();
+  const extractProgInt = setInterval(()=>{
+    const e=(Date.now()-extractStart)/1000;
+    if(extractBarEl) extractBarEl.style.width=Math.min(92,Math.round(e/etaSecExtract*92))+'%';
+  },200);
 
   try{
     const hint = ENRICH_HINTS[type] || "Cherche toute information personnelle pertinente sur le patient (allergies, pathologies, traitements, habitudes, remarques cliniques).";
@@ -4098,7 +4120,7 @@ Instructions de recherche : ${hint}
 Patient : ${p.full||'non renseigné'}
 
 Retourne un JSON avec la clé "suggestions" : tableau d'objets avec :
-- "label" : description courte de l'information (ex: "Fumeur 15 cigarettes/jour")
+- "label" : description de l'information, qui doit TOUJOURS contenir la valeur concrète extraite (chiffre, quantité, détail précis) et jamais une simple catégorie vague. Par exemple, écrire "Dent 38 extraite (dent de sagesse inférieure gauche)" et non "Dent extraite" ; écrire "Fumeur, environ 10 cigarettes/jour" et non "Tabagisme". Si aucun détail chiffré ou précis n'est disponible dans la transcription pour une information, ne la propose pas.
 - "instruction" : instruction précise pour l'intégrer dans le document (ex: "Dans la section risques, personnaliser la mise en garde tabac : le patient fume 15 cigarettes/jour, insister sur l'importance d'arrêter avant et après l'intervention")
 
 Maximum 6 suggestions. Si aucune information pertinente, retourne {"suggestions":[]}.
@@ -4106,6 +4128,9 @@ Maximum 6 suggestions. Si aucune information pertinente, retourne {"suggestions"
 Transcription :
 ${docsTranscript}`
     );
+
+    clearInterval(extractProgInt);
+    if(extractBarEl) extractBarEl.style.width='100%';
 
     let parsed;
     try{ parsed = JSON.parse(extractResult.replace(/```json?/g,'').replace(/```/g,'').trim()); }
@@ -4136,6 +4161,7 @@ ${docsTranscript}`
       </div>`;
 
   }catch(e){
+    clearInterval(extractProgInt);
     sugPanel.innerHTML = `<div style="font-size:12px;color:#c0392b">Erreur : ${escHtml(e.message)}</div>`;
   }
 }
@@ -4161,10 +4187,15 @@ async function validateEnrich(){
   const baseHtml = contentEl ? contentEl.innerHTML : '';
   const instructionsList = checked.map((s,i)=>`${i+1}. ${s.instruction}`).join('\n');
 
-  // v3.22 : barre de progression animée (même principe que "Transcription en cours…") à la
-  // place de l'ancien affichage du texte HTML en temps réel. Durée estimée selon la taille du
-  // document de base + le nombre d'éléments à intégrer (pas besoin de précision parfaite).
-  const etaSec = Math.max(3, Math.round(baseHtml.length/1500 + checked.length*2));
+  // v3.30 — Option A conservée (édition ciblée, pas de régénération complète), avec 3 ajustements :
+  // 1) estimation de durée doublée par rapport à la v3.29 (jugée trop optimiste par rapport au réel) ;
+  // 2) chaque modification cochée est désormais numérotée et suivie individuellement (id), pour
+  //    garantir qu'AUCUNE ne soit jamais silencieusement perdue : si l'IA ne trouve pas où l'insérer
+  //    précisément dans le texte, elle est ajoutée telle quelle dans une section neutre et imprimable
+  //    "Info personnalisée" en fin de document (plus d'encart d'avertissement) ;
+  // 3) ajout d'une 2e petite passe IA de relecture, limitée aux seules zones de texte touchées par un
+  //    ajout (pas tout le document), pour fluidifier la cohérence autour de chaque insertion.
+  const etaSec = Math.max(8, Math.min(20, checked.length*4+4));
   panel.innerHTML = `<div style="font-size:12px;font-weight:600;color:#92400e;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center"><span>⏳ Intégration en cours…</span><span id="enrich-eta" style="font-weight:400;color:#a16207">environ ${etaSec} seconde${etaSec>1?'s':''}</span></div><div style="background:#fde68a;border-radius:20px;height:6px;overflow:hidden"><div id="enrich-progress-bar" style="height:100%;background:#c2410c;border-radius:20px;width:0%;transition:width .3s ease"></div></div>`;
   const barEl = document.getElementById('enrich-progress-bar');
   const enrichStart = Date.now();
@@ -4174,40 +4205,119 @@ async function validateEnrich(){
   },200);
 
   try{
-    // v3.21 — Option B : on ne demande plus de reformuler le texte existant autour des ajouts,
-    // ce qui réduit fortement la quantité de texte à régénérer (donc la vitesse) ; seules les
-    // informations réellement nouvelles sont surlignées, pas les reformulations.
-    const result = await callGPTStream(key,
-      'Tu es un expert en chirurgie dentaire. Tu modifies des documents médicaux en HTML. Réponds UNIQUEMENT avec le HTML du document modifié, sans commentaire, sans markdown, sans balise DOCTYPE, html, head ou body.',
-      `Voici un document médical de type "${type}" en HTML. Intègre les modifications ci-dessous directement dans le document, sans créer de doublons ni de répétitions.
+    // Passe 1 : insertion ciblée + règle anti-doublon/anti-contradiction
+    const editResult = await callGPTStream(key,
+      'Tu es un expert en chirurgie dentaire. Tu proposes des petites modifications ciblées à insérer dans un document médical HTML existant. Réponds UNIQUEMENT en JSON valide, sans markdown, sans commentaire.',
+      `Voici un document médical de type "${type}" en HTML, et une liste de modifications numérotées à y intégrer.
 
 Modifications à intégrer :
 ${instructionsList}
 
-Document HTML à modifier :
+Document HTML actuel :
 ${baseHtml}
 
-IMPORTANT — Pour aller vite : insère les informations demandées en les ajoutant au bon endroit (nouvelle phrase, précision ajoutée, ou remplacement d'un texte générique par l'info précise), SANS reformuler ni retoucher le reste du texte existant qui n'a pas besoin de changer. Recopie à l'identique tout ce qui ne concerne pas une modification demandée.
+Pour CHAQUE modification numérotée ci-dessus (dans l'ordre, sans en sauter aucune), retourne un objet JSON avec :
+- "id" : le numéro de la modification (1, 2, 3...).
+- "search" : un extrait EXACT et VERBATIM du texte actuellement visible dans le document (8 à 15 mots consécutifs, copiés à l'identique, sans balise HTML coupée au milieu), pris à l'endroit où l'information doit être ajoutée ou corrigée. Cet extrait doit être assez long pour n'apparaître qu'UNE SEULE fois dans tout le document. Laisse ce champ VIDE ("") si tu ne trouves vraiment aucun endroit pertinent où l'insérer précisément.
+- "replace" : si "search" n'est pas vide, le même extrait avec l'information intégrée au bon endroit, sans reformuler le reste de l'extrait — entoure UNIQUEMENT le texte réellement nouveau (absent de "search") avec <span class="ia-highlight">...</span>. Si "search" est vide, indique ici uniquement la phrase à afficher telle quelle contenant l'information (texte brut, sans balise HTML).
 
-IMPORTANT — Surlignage : entoure UNIQUEMENT le texte que tu ajoutes réellement (nouveau, absent du document d'origine) avec une balise <span class="ia-highlight">...</span>. N'entoure pas le texte existant, même légèrement adapté. N'entoure jamais une balise HTML entière (div, table...), seulement le texte concerné.
+Règle de cohérence — IMPORTANT : avant d'ajouter une information, vérifie si le document contient déjà une information équivalente ou contradictoire sur le même sujet (ex. un délai, une durée ou une quantité déjà mentionnés ailleurs dans le document, même formulés différemment). Si c'est le cas, ton "search" doit cibler CETTE information déjà présente pour la CORRIGER/REMPLACER directement à son emplacement d'origine, plutôt que d'ajouter une seconde information contradictoire ailleurs dans le document. Ne fais jamais coexister deux informations différentes sur le même sujet.
 
-Retourne uniquement le HTML modifié complet.`,
+Retourne un JSON avec la clé "edits" : tableau de ${checked.length} objets, un par modification numérotée, dans le même ordre. Rien d'autre autour du JSON, sans balises markdown.`,
       'gpt-4o-mini',
       ()=>{}
     );
 
+    let edits = [];
+    try{
+      const clean = editResult.replace(/```json?/gi,'').replace(/```/g,'').trim();
+      edits = JSON.parse(clean).edits || [];
+    }catch(e){ edits = []; }
+
+    // Application de la passe 1 : remplacement ciblé uniquement si l'extrait est unique dans le
+    // document (sécurité contre un remplacement au mauvais endroit). Garantie totale : toute
+    // modification cochée qui n'a pas pu être appliquée précisément dans le texte est quand même
+    // conservée, dans la liste "missed" — rien n'est jamais perdu silencieusement.
+    let working = baseHtml;
+    let appliedCount = 0;
+    const appliedTexts = [];
+    const missed = [];
+    checked.forEach((s,idx)=>{
+      const num = idx+1;
+      const ed = edits.find(e=>e && Number(e.id)===num);
+      if(ed && ed.search && ed.search.trim()){
+        const occurrences = working.split(ed.search).length - 1;
+        if(occurrences === 1){
+          const rep = ed.replace || ed.search;
+          working = working.replace(ed.search, rep);
+          appliedTexts.push(rep);
+          appliedCount++;
+          return;
+        }
+      }
+      const fallbackText = (ed && ed.replace && ed.replace.replace(/<[^>]+>/g,'').trim()) || s.label;
+      missed.push(fallbackText);
+    });
+
+    // Passe 2 : relecture de fluidité, limitée aux seules zones de texte touchées par la passe 1
+    // (pas tout le document) — cohérence locale sans repayer le coût d'une régénération complète.
+    if(appliedTexts.length > 0){
+      const CTX = 180;
+      const zones = [];
+      appliedTexts.forEach((rep,i)=>{
+        const idx = working.indexOf(rep);
+        if(idx === -1) return;
+        const start = Math.max(0, idx - CTX);
+        const end = Math.min(working.length, idx + rep.length + CTX);
+        zones.push({id:i, text: working.slice(start,end)});
+      });
+      if(zones.length > 0){
+        try{
+          const fluencyResult = await callGPTStream(key,
+            'Tu es un expert en chirurgie dentaire, relecteur de documents médicaux en HTML. Réponds UNIQUEMENT en JSON valide, sans markdown.',
+            `Voici des extraits d'un document médical HTML. Chaque extrait contient une information récemment ajoutée ou corrigée, entourée de <span class="ia-highlight">...</span>. Relis chaque extrait et rends-le plus fluide si besoin (transition naturelle avec le reste de la phrase), SANS changer le sens, SANS retirer d'information, en conservant impérativement la balise <span class="ia-highlight">...</span> autour de l'information ajoutée/corrigée. Si un extrait est déjà fluide, renvoie-le à l'identique.
+
+Extraits :
+${zones.map(z=>`ID ${z.id} :\n${z.text}`).join('\n\n')}
+
+Retourne un JSON avec la clé "zones" : tableau de ${zones.length} objets {"id":...,"text":"..."}, un par extrait fourni, dans le même ordre. Rien d'autre autour du JSON.`,
+            'gpt-4o-mini',
+            ()=>{}
+          );
+          const cleanF = fluencyResult.replace(/```json?/gi,'').replace(/```/g,'').trim();
+          const parsedZones = JSON.parse(cleanF).zones || [];
+          parsedZones.forEach(z=>{
+            const orig = zones.find(zo=>zo.id===Number(z.id));
+            if(orig && z.text && working.includes(orig.text)){
+              working = working.replace(orig.text, z.text);
+            }
+          });
+          saveStatEntry(0,'gpt-4o-mini',zones.map(z=>z.text).join('\n'),fluencyResult,1,0,0,'action','Enrichir — fluidité');
+        }catch(e){ /* passe 2 best-effort : en cas d'échec, le résultat de la passe 1 est conservé tel quel */ }
+      }
+    }
+
+    // Garantie d'intégration totale : les modifications non placées précisément dans le texte sont
+    // ajoutées dans une section neutre et imprimable en fin de document — pas un encart d'alerte.
+    if(missed.length > 0){
+      const missedHtml = missed.map(m=>`<li>${escHtml(m)}</li>`).join('');
+      working += `<div style="margin-top:24px;padding-top:14px;border-top:1px solid #d1d5db"><div style="font-size:13px;font-weight:700;margin-bottom:6px">Info personnalisée</div><ul style="margin:0;padding-left:18px;font-size:13px;line-height:1.7">${missedHtml}</ul></div>`;
+    }
+
     clearInterval(enrichProgInt);
     if(barEl) barEl.style.width='100%';
 
-    // Filet de sécurité : au cas où l'IA laisserait malgré tout des balises markdown parasites
-    const cleanResult = result.replace(/^```html?\s*/i,'').replace(/```\s*$/,'').trim();
-
-    if(contentEl) contentEl.innerHTML = cleanResult;
+    if(contentEl) contentEl.innerHTML = working;
     panel.remove();
     // v3.20 : tracker le coût de cette action IA (jusqu'ici absente des statistiques)
-    saveStatEntry(0,'gpt-4o-mini',baseHtml+instructionsList,cleanResult,1,0,0,'action','Enrichir — intégration');
-    saveMesDocumentsHistory(type,cleanResult); // v3.20 : conserver cette génération dans l'Historique si patient identifié
-    showToast('✓ Document enrichi et personnalisé');
+    saveStatEntry(0,'gpt-4o-mini',baseHtml+instructionsList,editResult,1,0,0,'action','Enrichir — intégration');
+    saveMesDocumentsHistory(type,working); // v3.20 : conserver cette génération dans l'Historique si patient identifié
+
+    if(missed.length > 0){
+      showToast(`✓ Document enrichi (${appliedCount}/${checked.length} intégré(s) dans le texte, ${missed.length} en "Info personnalisée")`);
+    } else {
+      showToast('✓ Document enrichi et personnalisé');
+    }
 
   }catch(e){
     clearInterval(enrichProgInt);
