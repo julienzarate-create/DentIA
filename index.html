@@ -1,5 +1,5 @@
 <!--
-  DentIA v3.30
+  DentIA v3.31
   © 2025 — Tous droits réservés
   Ce logiciel est protégé par le droit d'auteur.
   Toute reproduction ou redistribution à des fins commerciales
@@ -11,7 +11,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DentIA v3.30</title>
+<title>DentIA v3.31</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Palanquin&family=Roboto:wght@400;700&family=Poppins:wght@400;700&family=Merriweather:wght@400;700&family=Oswald:wght@400;700&family=Arvo:wght@400;700&family=Bitter:wght@400;700&family=Outfit:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -232,7 +232,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
 <div class="sidebar">
   <div class="sb-logo" onclick="goHome()" style="cursor:pointer" title="Retour à l'accueil">
     <div class="mark">🦷</div>
-    <div><h1>DentIA</h1><small>v3.30</small></div>
+    <div><h1>DentIA</h1><small>v3.31</small></div>
   </div>
   <nav class="sb-nav">
     <div class="sb-section">Consultation</div>
@@ -758,6 +758,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
       <button class="pnav-item" onclick="switchPanelTab('myai',1,this)">Documents</button>
       <button class="pnav-item" onclick="switchPanelTab('myai',2,this)">SmartNote</button>
       <button class="pnav-item" onclick="switchPanelTab('myai',3,this)">Implants</button>
+      <button class="pnav-item" onclick="switchPanelTab('myai',4,this)">Feedback IA</button>
     </nav>
     <div class="panel-body">
       <div class="panel-tab active" id="aitab-0">
@@ -815,6 +816,23 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
           </div>
           <div id="implant-lengths-list"></div>
         </div>
+        <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+          <!-- v3.31 : format de rédaction souhaité pour la pose d'un implant, transmis à l'IA en
+               même temps que les listes ci-dessus, pour qu'elle rédige toujours dans cet ordre
+               et ce style plutôt que de choisir une formulation au hasard. -->
+          <div style="font-size:13px;font-weight:700;margin-bottom:8px">Habitude de rédaction</div>
+          <p style="font-size:12px;color:var(--ink2);margin-bottom:8px">Indiquez le format exact que vous souhaitez pour la retranscription d'une pose d'implant (ordre acte / taille / marque). Ce format sera systématiquement utilisé par l'IA.</p>
+          <input type="text" id="implant-habit-input" placeholder="ex : pose implant 4.3x10mm Nobel replace" style="width:100%;border:1px solid var(--border2);border-radius:8px;padding:7px 10px;font-family:'DM Sans',sans-serif;font-size:12px;outline:none;color:var(--ink);background:var(--surface)">
+        </div>
+      </div>
+      <div class="panel-tab" id="aitab-4" style="display:none">
+        <!-- v3.31 : Journal de Feedback IA — capture automatique (avant / échange / après) de
+             chaque génération ou modification faite par l'IA, pour analyse ultérieure. -->
+        <p style="font-size:12px;color:var(--ink2);margin-bottom:6px">Chaque génération ou modification faite par l'IA est enregistrée automatiquement ici (document avant, transcription/instructions, document après). Cliquez sur "Exporter" sur une entrée pour copier un rapport technique complet à transmettre à Claude — les informations d'identité du patient (nom, prénom, date de naissance) sont automatiquement anonymisées à l'export.</p>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+          <button class="act-btn" onclick="showConfirmModal('Vider tout le journal de feedback IA ? Cette action est irréversible.',()=>{safeSet('d3-ai-feedback','[]');renderAIFeedbackList();showToast('Journal vidé');})" style="color:var(--red)">🗑️ Vider le journal</button>
+        </div>
+        <div id="ai-feedback-list"></div>
       </div>
     </div>
     <div class="panel-footer">
@@ -892,6 +910,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
              changelog — plus de fusion/remixage de plusieurs versions en un seul résumé groupé (la
              section "Version 3.19 – 3.22" ci-dessous est un reliquat d'avant cette règle, conservé
              tel quel pour ne rien perdre de l'historique déjà écrit). -->
+        <div style="margin-bottom:18px"><div style="font-size:13px;font-weight:700;margin-bottom:8px">Version 3.31</div><ul style="margin:0;padding-left:18px;font-size:12px;color:var(--ink2);line-height:1.9">
+          <li>"✨ Enrichir" — correction d'un bug important : sur les documents en tableau (ex. conseils post-opératoires), l'intégration d'une information pouvait casser la mise en page (tableau désorganisé, bout de code affiché en texte visible). Un contrôle de sécurité vérifie désormais, avant chaque remplacement, qu'il ne coupe pas une case de tableau ni ne laisse de mise en forme apparaître en texte ; si ce n'est pas sûr, l'information part automatiquement dans "Info personnalisée" au lieu d'être insérée dans le texte — rien n'est jamais perdu, mais le document n'est plus jamais cassé. Ce même contrôle protège aussi la passe de relecture de fluidité.</li>
+          <li>"✨ Enrichir" — correction d'un bug de dépassement de limite IA ("This model's maximum context length is 128000 tokens…") : le logo du cabinet, intégré en base64 dans les documents, était envoyé en entier à l'IA lors de l'intégration, pouvant à lui seul saturer la limite. Le logo (et la signature) sont désormais retirés de la version envoyée à l'IA — le document réellement affiché et sauvegardé n'est absolument pas impacté.</li>
+          <li>Historique — le logo et la signature ne sont plus enregistrés en clair dans chaque document sauvegardé dans l'Historique (ils étaient dupliqués à l'identique à chaque fois, ce qui pouvait saturer le stockage du navigateur bien avant les 200 consultations prévues). Ils sont désormais réaffichés dynamiquement (logo/signature actuels) à la consultation, sans aucun impact visuel.</li>
+          <li>SmartNote (consultation ET dictée) — les listes de marques, diamètres et longueurs d'implants configurées dans My DentIA (onglet Implants) sont désormais transmises à l'IA pour qu'elle identifie fidèlement une marque/taille d'implant mentionnée, même mal transcrite phonétiquement (ex. "plan" pour "implant"). Auparavant, ces listes n'étaient utilisées que pour l'affichage et jamais réellement prises en compte par l'IA.</li>
+          <li>Onglet Implants (My DentIA) — nouveau champ "Habitude de rédaction", pré-rempli avec "pose implant 4.3x10mm Nobel replace" (modifiable), transmis à l'IA en même temps que les listes ci-dessus pour qu'elle rédige toujours une pose d'implant dans l'ordre et le style voulus par le praticien.</li>
+          <li>Nouveau : Journal de Feedback IA (onglet "Feedback IA" de My DentIA) — chaque génération ou modification faite par l'IA dans l'application (SmartNote, documents, suggestions, Enrichir, modification libre, etc.) est désormais enregistrée automatiquement (document avant / échange — transcription ou instructions / document après). Un bouton "Exporter" sur chaque entrée copie un rapport technique complet, avec anonymisation automatique du nom, prénom et date de naissance du patient, prêt à transmettre à Claude pour analyse.</li>
+        </ul></div>
         <div style="margin-bottom:18px"><div style="font-size:13px;font-weight:700;margin-bottom:8px">Version 3.30</div><ul style="margin:0;padding-left:18px;font-size:12px;color:var(--ink2);line-height:1.9">
           <li>"✨ Enrichir" — durée estimée doublée pendant "Intégration en cours…" (l'ancienne estimation était trop optimiste par rapport à la durée réelle).</li>
           <li>"✨ Enrichir" — ajout d'un timer et d'une barre de progression pendant l'étape "Analyse de la consultation en cours…" (juste après le clic sur Enrichir), qui n'affichait auparavant qu'un texte fixe sans indication de temps.</li>
@@ -1204,6 +1230,10 @@ Correction contextuelle "plan" → "implant" (v3.25) :
 
 [COLLER ICI LE TEXTE]`;
 
+// v3.31 : format de rédaction par défaut pour la pose d'implant (onglet Implants, My DentIA) —
+// pré-rempli mais librement modifiable par le praticien.
+const DEFAULT_IMPLANT_HABIT='pose implant 4.3x10mm Nobel replace';
+
 const DEFAULT_DICT=[
   {from:'côme bim',to:'cone beam'},{from:'come beam',to:'cone beam'},
   {from:'art icain',to:'articaïne'},{from:'articain',to:'articaïne'},
@@ -1421,6 +1451,9 @@ function loadAll(){
   document.getElementById('ai-logos-prompt').value=(localStorage.getItem('d3-logos-prompt')||DEFAULT_LOGOS_PROMPT).replace('\n[COLLER ICI LE TEXTE]','');
   document.getElementById('ai-logos-prompt-dictee').value=(localStorage.getItem('d3-logos-prompt-dictee')||DEFAULT_LOGOS_PROMPT_DICTEE).replace('\n[COLLER ICI LE TEXTE]','');
   const logo=localStorage.getItem('d3-logo');if(logo)showLogo(logo);
+  // v3.31 : champ "Habitude de rédaction" (onglet Implants) — pré-rempli par défaut, modifiable.
+  const implantHabitEl=document.getElementById('implant-habit-input');
+  if(implantHabitEl)implantHabitEl.value=localStorage.getItem('d3-implant-habit')!==null?localStorage.getItem('d3-implant-habit'):DEFAULT_IMPLANT_HABIT;
   updateSidebar();updateStorageInfo();applyFonts();loadSigPreview();
 }
 
@@ -1529,6 +1562,9 @@ function saveAI(){
   localStorage.setItem('d3-logos-prompt-dictee',promptDicteeVal+'\n[COLLER ICI LE TEXTE]');
   aiDocRules[currentDocType]=document.getElementById('ai-doc-rules').value;
   localStorage.setItem('d3-ai-doc-rules',JSON.stringify(aiDocRules));
+  // v3.31 : sauvegarde de l'habitude de rédaction implants
+  const implantHabitEl=document.getElementById('implant-habit-input');
+  if(implantHabitEl)safeSet('d3-implant-habit',implantHabitEl.value);
   _aiDirty=false;
   const btn=document.querySelector('#panel-myai .btn-green');
   if(btn){const o=btn.textContent;btn.textContent='✓ Sauvegardé';setTimeout(()=>btn.textContent=o,2000);}
@@ -1711,6 +1747,8 @@ async function detectAndProposeHabit(before,after,proposalElId){
     const raw=await callGPT(key,sys,user);
     const clean=raw.replace(/```json|```/g,'').trim();
     parsed=JSON.parse(clean);
+    // v3.31 : capture Journal de Feedback IA (patient non identifiable ici, pas d'anonymisation nécessaire)
+    saveAIFeedback('habit_detection','Détection d\'habitude de rédaction',before,'(analyse automatique de la correction manuelle)',after+'\n\nRésultat IA : '+raw,{model:'gpt-4o'});
   }catch(e){return;} // best-effort silencieux — on ne bloque jamais l'utilisateur si l'analyse échoue
   if(!parsed||!parsed.isHabit||!parsed.habit)return;
   showHabitProposal(parsed.habit,proposalElId);
@@ -1886,6 +1924,7 @@ function switchPanelTab(panel,idx,btn){
   document.querySelectorAll(`[id^="${prefix}-"]`).forEach(t=>t.style.display='none');document.getElementById(prefix+'-'+idx).style.display='block';
   const nav=btn.closest('nav');nav.querySelectorAll('.pnav-item').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
   if(panel==='retours'&&idx===1)renderSmartNoteCompare();
+  if(panel==='myai'&&idx===4)renderAIFeedbackList(); // v3.31 : Journal de Feedback IA
 }
 
 // ══ PATIENTS ══
@@ -2092,6 +2131,7 @@ async function regenerateDocsWithAI(){
     const sys='Tu es un assistant expert en chirurgie dentaire. Tu génères des documents médicaux professionnels, précis et conformes aux pratiques françaises. Règle de style transversale (v3.24) : les mots \'Monsieur\', \'Madame\' et \'Docteur\' peuvent être abrégés (respectivement \'Mr\', \'Mme\', \'Dr\') partout où ils apparaissent ; tous les autres mots doivent toujours être écrits en entier, sans abréviation. Le nom de famille du patient s\'écrit toujours entièrement en MAJUSCULES partout où son identité apparaît dans un document (ex. \'Mr ROGERER Bernard\'), jamais le prénom. Règle d\'accord (v3.28) : le contexte fourni au-dessus contient \'Genre du praticien\' (Homme ou Femme) — accorder systématiquement en genre tout mot, participe ou adjectif se rapportant au praticien lui-même dans le document (ex. \'soussigné\'/\'soussignée\', \'certain\'/\'certaine\'), quel que soit le type de document, sans jamais laisser de forme non tranchée entre parenthèses comme \'(e)\'.';
     const docKeys=Object.keys(h.docs||{});
     if(docKeys.length>0){
+      const beforeDocs=docKeys.map(d=>h.docs[d]).join('\n\n---\n\n');
       const sep='|||DOCSEP|||';
       const docInstr=docKeys.map((d,i)=>{const customRules=aiDocRules[d]?'\nRègles spécifiques : '+aiDocRules[d]:'';return`DOCUMENT ${i+1} — ${DOC_LABELS[d].toUpperCase()} :\n${DOC_PROMPTS[d]}${customRules}`;}).join('\n\n');
       const prompt=`Praticien :\n${header}\nTitre et nom du praticien : ${getPraticienTitledName()}\nGenre du praticien : ${buildPraticienGenreLine()}\nDate : ${today}\nPatient : ${patient}${aiGeneral?'\n\nHabitudes de rédaction :\n'+aiGeneral:''}\n\nÀ partir de la transcription ci-dessous, génère ${docKeys.length} document(s) séparés UNIQUEMENT par "${sep}".\n\n${docInstr}\n\nCommence directement par le contenu du premier document, SANS répéter le libellé "DOCUMENT X — NOM :" dans le contenu.\n\nTRANSCRIPTION :\n${h.transcript}`;
@@ -2100,6 +2140,9 @@ async function regenerateDocsWithAI(){
       const parts=result.split(sep);
       docKeys.forEach((d,i)=>{let text=(parts[i]||'').trim();text=text.replace(/^DOCUMENT\s+\d+\s*[—-]\s*.+\n?/i,'').trim();h.docs[d]=text;});
       safeSet('d3-history',JSON.stringify(historyData));
+      // v3.31 : capture Journal de Feedback IA
+      const hPatientParts=(h.patient||'').split(' ');
+      saveAIFeedback('regenerate','Régénération complète des documents',beforeDocs,h.transcript||'',docKeys.map(d=>h.docs[d]).join('\n\n---\n\n'),{model:'gpt-4o',prenom:hPatientParts.slice(1).join(' '),nom:hPatientParts[0]});
     }
     openHistModal(cCurrentHistId);
     showToast('✓ Documents régénérés');
@@ -2604,6 +2647,10 @@ async function cGenerate(){
     buildAddStrip(docSel);
     buildSuggestionsPanel(suggestions);
     saveHistory(patient,cGenDocs,smartNote||'',transcript,resume||'');
+    // v3.31 : capture Journal de Feedback IA — SmartNote et documents générés depuis cette consultation
+    const feedbackMeta=getConsultPatientMeta();
+    if(wantSmartNote && smartNote) saveAIFeedback('smartnote','Génération SmartNote (consultation)','',transcript,smartNote,Object.assign({model:'gpt-4o'},feedbackMeta));
+    if(docSel.length) saveAIFeedback('documents','Génération documents (consultation)','',transcript,Object.values(cGenDocs).join('\n\n---\n\n'),Object.assign({model:'gpt-4o'},feedbackMeta));
     // v3.20 : coût précis — on inclut le texte de la SmartNote, des suggestions détectées et du
     // résumé, qui sont générés en parallèle lors de cette même étape mais étaient ignorés du calcul avant.
     const resultTextComplet=Object.values(cGenDocs).join('')+(smartNote||'')+JSON.stringify(suggestions||{})+(resume||'');
@@ -2650,6 +2697,8 @@ async function cGenerateDictee(){
     cSuggestions=[];
     buildSuggestionsPanel({included:[],excluded:[]});
     saveHistory(patient,cGenDocs,smartNote||'',transcript,resume||'');
+    // v3.31 : capture Journal de Feedback IA — SmartNote générée en mode dictée directe
+    if(smartNote) saveAIFeedback('smartnote_dictee','Génération SmartNote (dictée directe)','',transcript,smartNote,Object.assign({model:'gpt-4o'},getConsultPatientMeta()));
     const resultTextComplet=(smartNote||'')+(resume||'');
     saveStatEntry(cSecs,'gpt-4o',transcript,resultTextComplet,0,cTempsTranscription||0,tempsGeneration,'recording','Dictée SmartNote');
     setRecEnCours(false);
@@ -2905,6 +2954,26 @@ async function callGPTStream(key,system,user,model,onChunk){
   return full;
 }
 
+// v3.31 : construit un bloc de contexte à partir des listes d'implants (marques/diamètres/
+// longueurs) configurées dans My DentIA, ainsi que de l'habitude de rédaction — pour que l'IA
+// s'y réfère et retranscrive fidèlement une marque/taille d'implant même mal transcrite
+// phonétiquement, dans le format voulu par le praticien. Vide si rien n'est configuré (aucun impact).
+function buildImplantContextBlock(){
+  const brands=implantLists.brand||[], diameters=implantLists.diameter||[], lengths=implantLists.length||[];
+  const habitRaw=localStorage.getItem('d3-implant-habit');
+  const habit=(habitRaw!==null?habitRaw:DEFAULT_IMPLANT_HABIT).trim();
+  if(!brands.length && !diameters.length && !lengths.length && !habit) return '';
+  let block='\nRéférences implants du praticien :';
+  if(brands.length) block+=`\n- Marques habituelles : ${brands.join(', ')}`;
+  if(diameters.length) block+=`\n- Diamètres habituels (mm) : ${diameters.join(', ')}`;
+  if(lengths.length) block+=`\n- Longueurs habituelles (mm) : ${lengths.join(', ')}`;
+  if(brands.length||diameters.length||lengths.length){
+    block+=`\nDès qu'un implant est mentionné, réfère-toi en priorité à ces listes pour identifier fidèlement la marque et la taille exactes, même en cas d'approximation due à la reconnaissance vocale (mot mal transcrit mais phonétiquement proche d'une marque ou d'un chiffre de cette liste).`;
+  }
+  if(habit) block+=`\nFormat de rédaction à utiliser systématiquement pour la pose d'un implant (respecte cet ordre et ce style) : "${habit}"`;
+  return block+'\n';
+}
+
 async function genSmartNote(openAIKey,transcript,patient,today,isDictee=false){
   const s=getSettings();
   // v3.21 : deux prompts distincts et indépendants selon le contexte — "Consultation enregistrée"
@@ -2912,7 +2981,12 @@ async function genSmartNote(openAIKey,transcript,patient,today,isDictee=false){
   // est dicté, sans interprétation). Le mode "Dicter la SmartNote" utilise toujours le second.
   const promptKey=isDictee?'d3-logos-prompt-dictee':'d3-logos-prompt';
   const defaultPrompt=isDictee?DEFAULT_LOGOS_PROMPT_DICTEE:DEFAULT_LOGOS_PROMPT;
-  const logosPrompt=(localStorage.getItem(promptKey)||defaultPrompt).replace('[COLLER ICI LE TEXTE]',transcript);
+  // v3.31 : injection du bloc de contexte implants juste avant la transcription, pour les deux
+  // modes (consultation ET dictée) — corrige l'absence totale de prise en compte des listes
+  // d'implants configurées dans My DentIA lors de la génération de la SmartNote.
+  const implantBlock=buildImplantContextBlock();
+  const rawPrompt=localStorage.getItem(promptKey)||defaultPrompt;
+  const logosPrompt=rawPrompt.replace('[COLLER ICI LE TEXTE]',implantBlock+'[COLLER ICI LE TEXTE]').replace('[COLLER ICI LE TEXTE]',transcript);
   // BUG-FIX v3.22 : on n'envoie plus patient/date/praticien en contexte à l'IA — ces infos
   // étaient parfois reprises telles quelles dans la SmartNote alors qu'elles sont déjà
   // connues par ailleurs (dossier patient). Voir aussi la nouvelle règle dans DEFAULT_LOGOS_PROMPT.
@@ -2994,6 +3068,7 @@ async function applySuggestions(btn){
   const instrExclure=unchecked.length?`ÉLÉMENTS À EXCLURE (retirer s'ils sont présents) : ${unchecked.join(', ')}`:'';
   const prompt=`Praticien :\n${header}\nTitre et nom du praticien : ${getPraticienTitledName()}\nGenre du praticien : ${buildPraticienGenreLine()}\nDate : ${today}\nPatient : ${patient}\nPatient (civilité/nom majuscule/DDN) : ${buildPatientContextLine()}${aiGeneral?'\n\nHabitudes de rédaction :\n'+aiGeneral:''}\n\nMets à jour les documents ci-dessous selon ces instructions :\n${instrInclure}${instrInclure&&instrExclure?'\n':''}${instrExclure}\n\n${docInstr}\n\nRetourne les ${docsToUpdate.length} documents mis à jour séparés UNIQUEMENT par "${sep}". Commence directement par le contenu du premier document.`;
   try{
+    const beforeDocs=docsToUpdate.map(d=>cGenDocs[d]).join('\n\n---\n\n');
     const result=await callGPT(key,sys,prompt);
     saveStatEntry(0,'gpt-4o',prompt,result,docsToUpdate.length,0,0,'action','Éléments détectés — mise à jour');
     const parts=result.split(sep);
@@ -3012,6 +3087,9 @@ async function applySuggestions(btn){
       updateVersionUI('rdc',elIdx);
     });
     document.querySelectorAll('.suggestions-zone').forEach(zone=>renderSuggestionsZone(zone));
+    // v3.31 : capture Journal de Feedback IA
+    const exchangeTxt=`${instrInclure}${instrInclure&&instrExclure?'\n':''}${instrExclure}`;
+    saveAIFeedback('suggestions','Application des éléments détectés',beforeDocs,exchangeTxt,docsToUpdate.map(d=>cGenDocs[d]).join('\n\n---\n\n'),Object.assign({model:'gpt-4o'},getConsultPatientMeta()));
     showToast('✓ Documents mis à jour');
   }catch(e){showToast('Erreur : '+e.message,'error');}
   finally{if(btn){btn.textContent='🔄 Mettre à jour';btn.disabled=false;}}
@@ -3085,6 +3163,7 @@ async function migrateToSupabase(url,apiKey){
 function fmtTime(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');}
 function fmtDoc(t){
   if(!t)return '';
+  t = restoreDentiaPlaceholders(t); // v3.31 : réinjecte le logo/signature actuels si nécessaire
   return t
     .replace(/^#{1,3} (.+)$/gm,'<h3>$1</h3>')
     .replace(/\*\*(.+?)\*\*/g,(m,p1)=>{
@@ -3684,6 +3763,9 @@ async function detectHabitAndOffer(idx,instructions,key){
     const res=await callGPT(key,'Tu analyses une instruction de modification donnée par un praticien pour un courrier confrère. Réponds UNIQUEMENT en JSON, sans texte autour, format exact : {"durable":true,"resume":"..."} ou {"durable":false,"resume":""}. "durable"=true seulement si l\'instruction reflète une préférence stylistique durable pour ce correspondant précis (ton, vouvoiement/tutoiement, formule d\'appel, style rédactionnel général) — PAS une simple correction ponctuelle de fait clinique ou de contenu.',`Instruction du praticien : "${instructions}"`);
     let parsed;
     try{parsed=JSON.parse(res.replace(/^```json\s*/i,'').replace(/```\s*$/,'').trim());}catch(e){return;}
+    // v3.31 : capture Journal de Feedback IA (pas de contenu patient identifiable ici, seule
+    // l'instruction de style est analysée — pas d'anonymisation nécessaire)
+    saveAIFeedback('durable_pref','Détection préférence durable (correspondant)','',instructions,res,{model:'gpt-4o'});
     if(parsed&&parsed.durable)showHabitBanner(idx,parsed.resume||instructions);
   }catch(e){/* silencieux, non bloquant */}
 }
@@ -3727,6 +3809,8 @@ async function applyAiEdit(prefix,idx){
   try{
     const result=await callGPT(key,'Tu es un assistant expert en chirurgie dentaire. Tu modifies des documents médicaux selon les instructions du praticien. Réponds UNIQUEMENT avec le document modifié complet, sans commentaire, sans explication, sans balise.',`Voici le document actuel :\n\n${currentText}\n\nInstructions de modification :\n${instructions}\n\nRetourne le document modifié complet.`);
     saveStatEntry(0,'gpt-4o',currentText+instructions,result,1,0,0,'action','Modifier un document (IA)');
+    // v3.31 : capture Journal de Feedback IA
+    saveAIFeedback('modifier','Modification libre d\'un document (IA)',docAvant,instructions,result,Object.assign({model:'gpt-4o'},getConsultPatientMeta()));
     contentEl.innerHTML=fmtDoc(result);
     // Sauvegarder la version
     const vKey=prefix+'_'+idx;
@@ -3887,6 +3971,14 @@ function syncPatientToDocs(){
   if(ddnEl){if(cDdnRaw&&cDdnRaw.includes('-')){const[y,m,d]=cDdnRaw.split('-');ddnEl.value=`${d}/${m}/${y}`;}else{ddnEl.value=cDdnRaw;}}
   if(currentFicheType && currentFicheType!=='fiche_endo')refreshDoc();
 }
+// v3.31 : infos patient du formulaire "consultation" (pour anonymisation du Journal de Feedback IA)
+function getConsultPatientMeta(){
+  return {
+    nom:(document.getElementById('c-nom')||{}).value||'',
+    prenom:(document.getElementById('c-prenom')||{}).value||'',
+    ddn:(document.getElementById('c-ddn')||{}).value||''
+  };
+}
 function getDocPatient(){
   const civilite=(document.getElementById('doc-civilite')||{}).value||'';
   const civiliteLabel=civilite==='M'?'Mr':(civilite==='Mme'?'Mme':'');
@@ -4006,6 +4098,90 @@ function printDocsResult(){
 let currentFicheType = null; // type de fiche dans Mes Documents
 
 function escHtml(str){ return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// v3.31 — Contrôle de sécurité structurel pour "✨ Enrichir" : avant d'appliquer un remplacement de
+// texte proposé par l'IA dans un document HTML existant, on vérifie que ce remplacement ne risque
+// pas de casser la structure (ex. couper une case de tableau en deux, ou laisser un bout de mise en
+// forme se retrouver affiché comme texte). Corrige le bug du tableau cassé / code visible.
+const ENRICH_VOID_TAGS = new Set(['br','img','hr','input','meta','link']);
+function enrichTagsBalanced(html){
+  // Vérifie que chaque balise ouvrante d'un fragment a bien sa balise fermante correspondante à
+  // l'intérieur même du fragment (donc qu'on ne coupe pas, par exemple, une case de tableau en deux).
+  const re = /<\/?([a-zA-Z][a-zA-Z0-9]*)\b[^>]*>/g;
+  const stack = [];
+  let m;
+  while((m = re.exec(html))){
+    const full = m[0], tag = m[1].toLowerCase();
+    if(ENRICH_VOID_TAGS.has(tag)) continue;
+    if(full.startsWith('</')){
+      if(stack.length===0 || stack[stack.length-1]!==tag) return false;
+      stack.pop();
+    } else if(!full.endsWith('/>')){
+      stack.push(tag);
+    }
+  }
+  return stack.length===0;
+}
+function enrichNoLeakedStyle(html){
+  // Détecte un bout de mise en forme (attribut style coupé) qui traînerait en texte visible,
+  // typiquement des fragments comme "px;", "border:", "font-size", en dehors de toute balise.
+  const withoutTags = html.replace(/<[^>]*>/g,' ');
+  return !/(?:\d+px\s*;|border\s*:|font-size\s*:|background\s*:|padding\s*:|margin\s*:|border-radius\s*:)/i.test(withoutTags);
+}
+function enrichAngleBracketsBalanced(html){
+  // Un nombre différent de "<" et de ">" trahit une balise coupée au milieu.
+  const opens=(html.match(/</g)||[]).length, closes=(html.match(/>/g)||[]).length;
+  return opens===closes;
+}
+function isSafeEnrichSnippet(html){
+  if(!html) return true; // rien à vérifier (ex. remplacement texte brut sans HTML)
+  return enrichAngleBracketsBalanced(html) && enrichTagsBalanced(html) && enrichNoLeakedStyle(html);
+}
+function enrichExtractTags(html){
+  return (html.match(/<[^>]+>/g)||[]).map(t=>t.toLowerCase().replace(/\s+/g,' ').trim());
+}
+function enrichSameTagStructure(a,b){
+  // Utilisé pour la passe de fluidité : vérifie que la version relue par l'IA garde exactement les
+  // mêmes balises, dans le même ordre, que l'extrait d'origine — seul le texte a pu changer.
+  const ta=enrichExtractTags(a), tb=enrichExtractTags(b);
+  if(ta.length!==tb.length) return false;
+  for(let i=0;i<ta.length;i++){ if(ta[i]!==tb[i]) return false; }
+  return true;
+}
+// v3.31 — Retire temporairement les images encodées en base64 (logo, signature) d'un document
+// avant de l'envoyer à l'IA : ces images n'apportent rien à l'IA pour repérer où insérer du texte,
+// mais peuvent à elles seules représenter des dizaines de milliers de tokens et faire dépasser la
+// limite de contexte du modèle. Le document réellement affiché/modifié n'est jamais impacté, seule
+// la version envoyée à l'IA est allégée.
+function stripBase64ImagesForAI(html){
+  return (html||'').replace(/src="data:image\/[^"]*"/gi, 'src="LOGO"');
+}
+// v3.31 — Le logo du cabinet et la signature enregistrée sont intégrés directement (en base64,
+// donc très volumineux) dans les documents "Mes Documents". Les enregistrer tels quels dans
+// l'Historique à chaque document sature très vite le stockage du navigateur (le même logo/la même
+// signature étant dupliqués à l'identique à chaque fois). On les remplace donc par un simple repère
+// avant sauvegarde, et on les restitue dynamiquement (avec le logo/signature ACTUELS, qui changent
+// rarement) au moment de l'affichage — aucun impact visuel pour le praticien.
+const DENTIA_LOGO_PLACEHOLDER='__DENTIA_LOGO_PLACEHOLDER__', DENTIA_SIG_PLACEHOLDER='__DENTIA_SIG_PLACEHOLDER__';
+function stripLogoForHistoryStorage(html){
+  if(!html) return html;
+  let out=html;
+  const logo=localStorage.getItem('d3-logo');
+  const sig=localStorage.getItem('d3-signature');
+  if(logo) out=out.split(logo).join(DENTIA_LOGO_PLACEHOLDER);
+  if(sig) out=out.split(sig).join(DENTIA_SIG_PLACEHOLDER);
+  // Sécurité : toute autre image base64 imprévue est retirée (non restaurable), pour ne jamais
+  // laisser passer un gros volume de données non maîtrisé dans le stockage.
+  out=out.replace(/src="data:image\/[^"]*"/gi,'src=""');
+  return out;
+}
+function restoreDentiaPlaceholders(html){
+  if(!html || (html.indexOf(DENTIA_LOGO_PLACEHOLDER)===-1 && html.indexOf(DENTIA_SIG_PLACEHOLDER)===-1)) return html;
+  let out=html;
+  if(out.indexOf(DENTIA_LOGO_PLACEHOLDER)!==-1) out=out.split(DENTIA_LOGO_PLACEHOLDER).join(localStorage.getItem('d3-logo')||'');
+  if(out.indexOf(DENTIA_SIG_PLACEHOLDER)!==-1) out=out.split(DENTIA_SIG_PLACEHOLDER).join(localStorage.getItem('d3-signature')||'');
+  return out;
+}
 
 function getSig(){
   const sig = localStorage.getItem('d3-signature');
@@ -4136,6 +4312,8 @@ ${docsTranscript}`
     try{ parsed = JSON.parse(extractResult.replace(/```json?/g,'').replace(/```/g,'').trim()); }
     catch(e){ parsed = {suggestions:[]}; }
     saveStatEntry(0,'gpt-4o',docsTranscript||'',extractResult,1,0,0,'action','Enrichir — extraction');
+    // v3.31 : capture Journal de Feedback IA
+    saveAIFeedback('enrich_extract','Enrichir — extraction des suggestions','',docsTranscript||'',extractResult,{model:'gpt-4o',nom:p.nom,prenom:p.prenom,ddn:p.ddn});
 
     if(!parsed.suggestions || parsed.suggestions.length === 0){
       sugPanel.innerHTML = '<div style="font-size:12px;color:#92400e;padding:4px 0">✨ Aucune information personnalisable trouvée dans la transcription pour ce type de document.</div>';
@@ -4185,6 +4363,10 @@ async function validateEnrich(){
 
   const contentEl = document.getElementById('docs-result-content');
   const baseHtml = contentEl ? contentEl.innerHTML : '';
+  // v3.31 : version allégée (logo/images base64 retirés) envoyée à l'IA — évite de dépasser la
+  // limite de tokens du modèle à cause du logo du cabinet. Le document réel (baseHtml) n'est pas
+  // touché : seule la copie envoyée à l'IA est allégée.
+  const baseHtmlForAI = stripBase64ImagesForAI(baseHtml);
   const instructionsList = checked.map((s,i)=>`${i+1}. ${s.instruction}`).join('\n');
 
   // v3.30 — Option A conservée (édition ciblée, pas de régénération complète), avec 3 ajustements :
@@ -4214,7 +4396,7 @@ Modifications à intégrer :
 ${instructionsList}
 
 Document HTML actuel :
-${baseHtml}
+${baseHtmlForAI}
 
 Pour CHAQUE modification numérotée ci-dessus (dans l'ordre, sans en sauter aucune), retourne un objet JSON avec :
 - "id" : le numéro de la modification (1, 2, 3...).
@@ -4247,8 +4429,12 @@ Retourne un JSON avec la clé "edits" : tableau de ${checked.length} objets, un 
       const ed = edits.find(e=>e && Number(e.id)===num);
       if(ed && ed.search && ed.search.trim()){
         const occurrences = working.split(ed.search).length - 1;
-        if(occurrences === 1){
-          const rep = ed.replace || ed.search;
+        const rep = ed.replace || ed.search;
+        // v3.31 : contrôle de sécurité structurel — on n'applique le remplacement que si l'extrait
+        // ne coupe pas une case de tableau en deux et ne contient aucun bout de mise en forme qui
+        // se retrouverait affiché en texte. Sinon, l'info part dans "Info personnalisée" (rien
+        // n'est perdu), mais le document n'est jamais cassé.
+        if(occurrences === 1 && isSafeEnrichSnippet(ed.search) && isSafeEnrichSnippet(rep)){
           working = working.replace(ed.search, rep);
           appliedTexts.push(rep);
           appliedCount++;
@@ -4288,11 +4474,17 @@ Retourne un JSON avec la clé "zones" : tableau de ${zones.length} objets {"id":
           const parsedZones = JSON.parse(cleanF).zones || [];
           parsedZones.forEach(z=>{
             const orig = zones.find(zo=>zo.id===Number(z.id));
-            if(orig && z.text && working.includes(orig.text)){
+            // v3.31 : on n'applique la relecture de fluidité que si le texte relu par l'IA garde
+            // exactement la même structure de balises que l'extrait d'origine (même balises, même
+            // ordre) — sinon on garde le résultat de la passe 1 tel quel pour cet ajout, sans le
+            // polissage, plutôt que de risquer de casser le document.
+            if(orig && z.text && working.includes(orig.text) && enrichSameTagStructure(orig.text,z.text)){
               working = working.replace(orig.text, z.text);
             }
           });
           saveStatEntry(0,'gpt-4o-mini',zones.map(z=>z.text).join('\n'),fluencyResult,1,0,0,'action','Enrichir — fluidité');
+          // v3.31 : capture Journal de Feedback IA (passe de fluidité)
+          saveAIFeedback('enrich_fluidity','Enrichir — relecture de fluidité',zones.map(z=>z.text).join('\n\n---\n\n'),'(relecture automatique des zones modifiées)',fluencyResult,Object.assign({model:'gpt-4o-mini'},getDocPatient()));
         }catch(e){ /* passe 2 best-effort : en cas d'échec, le résultat de la passe 1 est conservé tel quel */ }
       }
     }
@@ -4310,7 +4502,9 @@ Retourne un JSON avec la clé "zones" : tableau de ${zones.length} objets {"id":
     if(contentEl) contentEl.innerHTML = working;
     panel.remove();
     // v3.20 : tracker le coût de cette action IA (jusqu'ici absente des statistiques)
-    saveStatEntry(0,'gpt-4o-mini',baseHtml+instructionsList,editResult,1,0,0,'action','Enrichir — intégration');
+    saveStatEntry(0,'gpt-4o-mini',baseHtmlForAI+instructionsList,editResult,1,0,0,'action','Enrichir — intégration');
+    // v3.31 : capture Journal de Feedback IA (intégration)
+    saveAIFeedback('enrich_integration','Enrichir — intégration',stripLogoForHistoryStorage(baseHtml),instructionsList,stripLogoForHistoryStorage(working),Object.assign({model:'gpt-4o-mini'},getDocPatient()));
     saveMesDocumentsHistory(type,working); // v3.20 : conserver cette génération dans l'Historique si patient identifié
 
     if(missed.length > 0){
@@ -4336,9 +4530,100 @@ function saveMesDocumentsHistory(type,contentHtml){
   let pat=patients.find(x=>x.nom.toLowerCase()===nomTrim.toLowerCase());
   if(!pat){pat={id:Date.now().toString(),nom:nomTrim,prenom:p.prenom.trim(),ddn:p.ddn||''};patients.push(pat);localStorage.setItem('d3-patients',JSON.stringify(patients));}
   patientId=pat.id;
-  const docs={};docs[type]=contentHtml;
+  // v3.31 : on ne sauvegarde plus le logo/la signature en clair dans l'Historique (ils sont
+  // remplacés par un repère, restitué dynamiquement à l'affichage) — évite de saturer le stockage.
+  const docs={};docs[type]=stripLogoForHistoryStorage(contentHtml);
   historyData.unshift({id:Date.now().toString(),date:new Date().toISOString(),patient:p.full,patientId,docs,smartNote:'',smartNoteOriginal:'',smartNoteRetourId:null,transcript:docsTranscript||'',suggestions:[],versions:{},resume:docLabel(type),source:'mesdocuments'});
   if(historyData.length>200)historyData.pop();safeSet('d3-history',JSON.stringify(historyData));
+}
+
+// v3.31 — JOURNAL DE FEEDBACK IA : capture automatique (avant / échange / après) de chaque
+// génération ou modification faite par l'IA dans l'application, pour que Julien puisse exporter
+// un rapport technique complet et le transmettre à Claude pour analyse. Capture "best-effort" :
+// ne doit jamais faire échouer ou ralentir perceptiblement la génération IA elle-même.
+function saveAIFeedback(actionType,label,before,exchange,after,meta){
+  try{
+    const list=JSON.parse(localStorage.getItem('d3-ai-feedback')||'[]');
+    list.unshift({
+      id:Date.now().toString()+Math.random().toString(36).slice(2,7),
+      date:new Date().toISOString(),
+      actionType:actionType||'',
+      label:label||'',
+      before:before||'',
+      exchange:exchange||'',
+      after:after||'',
+      patientNom:(meta&&meta.nom)||'',
+      patientPrenom:(meta&&meta.prenom)||'',
+      patientDdn:(meta&&meta.ddn)||'',
+      model:(meta&&meta.model)||''
+    });
+    // Limite de rétention : ces entrées sont volumineuses (transcriptions + documents complets),
+    // on garde donc un historique plus court que celui des consultations pour ne pas saturer
+    // le stockage du navigateur (même logique que le bug corrigé sur l'Historique/logo).
+    if(list.length>150) list.length=150;
+    safeSet('d3-ai-feedback',JSON.stringify(list));
+  }catch(e){ /* capture best-effort, ne doit jamais bloquer la génération IA */ }
+}
+function anonymizeFeedbackText(text,nom,prenom,ddn){
+  let out=text||'';
+  if(nom && nom.trim()){
+    const n=nom.trim();
+    out=out.split(n).join('Patient X').split(n.toLowerCase()).join('Patient X').split(n.toUpperCase()).join('Patient X');
+  }
+  if(prenom && prenom.trim()){
+    const p=prenom.trim();
+    out=out.split(p).join('X').split(p.toLowerCase()).join('X');
+  }
+  if(ddn && ddn.trim()) out=out.split(ddn.trim()).join('JJ/MM/AAAA');
+  return out;
+}
+function exportAIFeedback(id){
+  const list=JSON.parse(localStorage.getItem('d3-ai-feedback')||'[]');
+  const entry=list.find(e=>e.id===id);
+  if(!entry){ showToast('Entrée introuvable','error'); return; }
+  const anon=t=>anonymizeFeedbackText(t,entry.patientNom,entry.patientPrenom,entry.patientDdn);
+  const report=`=== RAPPORT TECHNIQUE DENTIA — FEEDBACK IA ===
+Action : ${entry.label}
+Date : ${new Date(entry.date).toLocaleString('fr-FR')}
+Modèle IA : ${entry.model||'non renseigné'}
+Patient : anonymisé
+
+--- AVANT ---
+${anon(entry.before)||'(néant)'}
+
+--- ÉCHANGE (transcription audio / instructions données) ---
+${anon(entry.exchange)||'(néant)'}
+
+--- APRÈS ---
+${anon(entry.after)||'(néant)'}
+=== FIN DU RAPPORT ===`;
+  navigator.clipboard.writeText(report)
+    .then(()=>showToast('✓ Rapport copié — vous pouvez le coller à Claude'))
+    .catch(()=>showToast('Erreur lors de la copie','error'));
+}
+function deleteAIFeedback(id){
+  let list=JSON.parse(localStorage.getItem('d3-ai-feedback')||'[]');
+  list=list.filter(e=>e.id!==id);
+  safeSet('d3-ai-feedback',JSON.stringify(list));
+  renderAIFeedbackList();
+}
+function renderAIFeedbackList(){
+  const el=document.getElementById('ai-feedback-list');
+  if(!el) return;
+  const list=JSON.parse(localStorage.getItem('d3-ai-feedback')||'[]');
+  if(!list.length){ el.innerHTML='<div class="empty">Aucune entrée pour le moment — chaque génération IA sera enregistrée automatiquement ici.</div>'; return; }
+  el.innerHTML=list.map(e=>`<div style="border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+      <div>
+        <div style="font-size:12px;font-weight:700">${escHtml(e.label)}</div>
+        <div style="font-size:11px;color:var(--ink3)">${new Date(e.date).toLocaleString('fr-FR')}</div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="act-btn" onclick="exportAIFeedback('${e.id}')">📋 Exporter</button>
+        <button class="act-btn" onclick="deleteAIFeedback('${e.id}')" style="color:var(--red)">🗑️</button>
+      </div>
+    </div>
+  </div>`).join('');
 }
 
 // Mise à jour en temps réel quand nom/prénom/DDN changent
@@ -4752,6 +5037,8 @@ async function genFicheEndoIA(p,hdr,date){
         const data = await res.json();
         let txt = data.choices?.[0]?.message?.content||'{}';
         saveStatEntry(0,'gpt-4o',docsTranscript||'',txt,1,0,0,'action','Fiche endo — analyse IA');
+        // v3.31 : capture Journal de Feedback IA
+        saveAIFeedback('fiche_endo','Fiche endo — analyse IA (Mes Documents)','',docsTranscript||'',txt,Object.assign({model:'gpt-4o'},p?{nom:p.nom,prenom:p.prenom,ddn:p.ddn}:{}));
         txt = txt.replace(/```json?/g,'').replace(/```/g,'').trim();
         const ia = JSON.parse(txt);
         // Remplir les champs
