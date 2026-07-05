@@ -1,5 +1,5 @@
 <!--
-  DentIA v3.31
+  DentIA v3.32
   © 2025 — Tous droits réservés
   Ce logiciel est protégé par le droit d'auteur.
   Toute reproduction ou redistribution à des fins commerciales
@@ -11,7 +11,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DentIA v3.31</title>
+<title>DentIA v3.32</title>
+<link rel="icon" type="image/png" href="DentIA_logo_2.png">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Palanquin&family=Roboto:wght@400;700&family=Poppins:wght@400;700&family=Merriweather:wght@400;700&family=Oswald:wght@400;700&family=Arvo:wght@400;700&family=Bitter:wght@400;700&family=Outfit:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -31,7 +32,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
 .sidebar{width:220px;background:var(--accent);display:flex;flex-direction:column;flex-shrink:0}
 .content{flex:1;overflow-y:auto;background:var(--bg)}
 .sb-logo{padding:22px 18px 18px;border-bottom:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:10px}
-.sb-logo .mark{width:32px;height:32px;background:rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.sb-logo .mark{width:32px;height:32px;background:rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;overflow:hidden}
+.sb-logo .mark img{width:100%;height:100%;object-fit:contain;border-radius:8px}
 .sb-logo h1{font-family:'DM Serif Display',serif;font-size:17px;color:#fff;line-height:1.1}
 .sb-logo small{font-size:10px;color:rgba(255,255,255,.5);display:block}
 .sb-nav{flex:1;padding:10px 8px;overflow-y:auto}
@@ -231,8 +233,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
 <div class="app">
 <div class="sidebar">
   <div class="sb-logo" onclick="goHome()" style="cursor:pointer" title="Retour à l'accueil">
-    <div class="mark">🦷</div>
-    <div><h1>DentIA</h1><small>v3.31</small></div>
+    <div class="mark"><img src="DentIA_logo_2.png" alt="DentIA"></div>
+    <div><h1>DentIA</h1><small>v3.32</small></div>
   </div>
   <nav class="sb-nav">
     <div class="sb-section">Consultation</div>
@@ -910,6 +912,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
              changelog — plus de fusion/remixage de plusieurs versions en un seul résumé groupé (la
              section "Version 3.19 – 3.22" ci-dessous est un reliquat d'avant cette règle, conservé
              tel quel pour ne rien perdre de l'historique déjà écrit). -->
+        <div style="margin-bottom:18px"><div style="font-size:13px;font-weight:700;margin-bottom:8px">Version 3.32</div><ul style="margin:0;padding-left:18px;font-size:12px;color:var(--ink2);line-height:1.9">
+          <li>Intégration du vrai logo DentIA : il remplace désormais la petite icône "dent" sur la page principale (en haut à gauche) ainsi que sur l'onglet du navigateur (favicon).</li>
+          <li>Le logo n'est pas intégré directement dans le code source (ce qui aurait alourdi le fichier de 2 Mo) : il est chargé depuis le fichier image "DentIA_logo_2.png" présent dans le même dossier GitHub que l'application. Ce fichier doit donc toujours rester présent à la racine du dépôt, à côté d'index.html.</li>
+        </ul></div>
         <div style="margin-bottom:18px"><div style="font-size:13px;font-weight:700;margin-bottom:8px">Version 3.31</div><ul style="margin:0;padding-left:18px;font-size:12px;color:var(--ink2);line-height:1.9">
           <li>"✨ Enrichir" — correction d'un bug important : sur les documents en tableau (ex. conseils post-opératoires), l'intégration d'une information pouvait casser la mise en page (tableau désorganisé, bout de code affiché en texte visible). Un contrôle de sécurité vérifie désormais, avant chaque remplacement, qu'il ne coupe pas une case de tableau ni ne laisse de mise en forme apparaître en texte ; si ce n'est pas sûr, l'information part automatiquement dans "Info personnalisée" au lieu d'être insérée dans le texte — rien n'est jamais perdu, mais le document n'est plus jamais cassé. Ce même contrôle protège aussi la passe de relecture de fluidité.</li>
           <li>"✨ Enrichir" — correction d'un bug de dépassement de limite IA ("This model's maximum context length is 128000 tokens…") : le logo du cabinet, intégré en base64 dans les documents, était envoyé en entier à l'IA lors de l'intégration, pouvant à lui seul saturer la limite. Le logo (et la signature) sont désormais retirés de la version envoyée à l'IA — le document réellement affiché et sauvegardé n'est absolument pas impacté.</li>
