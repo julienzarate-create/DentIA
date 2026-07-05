@@ -1,5 +1,5 @@
 <!--
-  DentIA v3.32
+  DentIA v3.33
   © 2025 — Tous droits réservés
   Ce logiciel est protégé par le droit d'auteur.
   Toute reproduction ou redistribution à des fins commerciales
@@ -11,7 +11,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DentIA v3.32</title>
+<title>DentIA v3.33</title>
 <link rel="icon" type="image/png" href="DentIA_logo_2.png">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Palanquin&family=Roboto:wght@400;700&family=Poppins:wght@400;700&family=Merriweather:wght@400;700&family=Oswald:wght@400;700&family=Arvo:wght@400;700&family=Bitter:wght@400;700&family=Outfit:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -234,7 +234,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
 <div class="sidebar">
   <div class="sb-logo" onclick="goHome()" style="cursor:pointer" title="Retour à l'accueil">
     <div class="mark"><img src="DentIA_logo_2.png" alt="DentIA"></div>
-    <div><h1>DentIA</h1><small>v3.32</small></div>
+    <div><h1>DentIA</h1><small>v3.33</small></div>
   </div>
   <nav class="sb-nav">
     <div class="sb-section">Consultation</div>
@@ -298,13 +298,29 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
         <button id="c-hist-save-btn" onclick="saveHistPatientEdit()" style="display:none;padding:3px 9px;background:var(--green);color:#fff;border:none;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:11px;cursor:pointer;text-transform:none;letter-spacing:0">✓ Enregistrer</button>
         <button id="c-hist-cancel-btn" onclick="cancelHistPatientEdit()" style="display:none;padding:3px 8px;background:var(--s2);border:1px solid var(--border);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:11px;cursor:pointer;text-transform:none;letter-spacing:0">✕</button>
         <button id="c-hist-regen-btn" onclick="regenerateDocsWithAI()" style="display:none;padding:3px 9px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:11px;cursor:pointer;text-transform:none;letter-spacing:0">🔄 Réactualiser avec l'IA</button>
+        <!-- v3.33 : import express des données patient depuis une capture d'écran du logiciel
+             métier (ex. Logos). L'utilisateur fait Windows+Maj+S sur la fiche patient, clique
+             ce bouton, puis Ctrl+V : l'image est envoyée à l'IA (GPT-4o vision) qui en extrait
+             nom/prénom/date de naissance/adresse/téléphone/email et remplit les champs. -->
+        <button id="c-logos-import-btn" onclick="activateLogosImportPaste()" title="Cliquez, puis faites Ctrl+V pour coller une capture d'écran de la fiche patient (ex. logiciel Logos)" style="padding:3px 9px;background:var(--s2);border:1px solid var(--border);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:11px;cursor:pointer;color:var(--ink2);text-transform:none;letter-spacing:0">📋 Coller depuis logiciel métier</button>
+        <span id="c-logos-import-status" style="display:none;font-size:11px;color:var(--ink3);font-style:italic"></span>
       </div>
+      <!-- v3.33 : zone invisible qui capte le Ctrl+V après activation du bouton ci-dessus -->
+      <div id="c-logos-import-zone" contenteditable="true" onpaste="handleLogosImportPaste(event)" onblur="deactivateLogosImportPaste()" style="position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none"></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <select id="c-civilite" onchange="syncPatientToDocs()" style="padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;color:var(--ink2)"><option value="">Civilité</option><option value="M">Monsieur</option><option value="Mme">Madame</option></select>
         <input type="text" id="c-nom" placeholder="Nom" autocomplete="off" oninput="syncPatientToDocs()" style="flex:1;min-width:110px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;color:var(--ink)">
         <input type="text" id="c-prenom" placeholder="Prénom" autocomplete="off" oninput="syncPatientToDocs()" style="flex:1;min-width:110px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;color:var(--ink)">
         <input type="date" id="c-ddn" autocomplete="off" onchange="syncPatientToDocs()" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;color:var(--ink2)">
         <button id="c-update-btn" onclick="updateDocsWithPatient()" style="display:none;padding:8px 14px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">🔄 Mettre à jour</button>
+      </div>
+      <!-- v3.33 : champs coordonnées patient — masqués par défaut, révélés automatiquement
+           uniquement si une capture d'écran importée en contient. Restent modifiables à la main
+           une fois affichés. -->
+      <div id="c-extra-fields" style="display:none;gap:8px;flex-wrap:wrap;margin-top:8px">
+        <input type="text" id="c-adresse" placeholder="Adresse" autocomplete="off" style="flex:2;min-width:180px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;color:var(--ink)">
+        <input type="text" id="c-telephone" placeholder="Téléphone" autocomplete="off" style="flex:1;min-width:120px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;color:var(--ink)">
+        <input type="text" id="c-email" placeholder="E-mail" autocomplete="off" style="flex:1;min-width:150px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;color:var(--ink)">
       </div>
     </div>
     <div class="card" id="c-rec-card">
@@ -912,6 +928,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
              changelog — plus de fusion/remixage de plusieurs versions en un seul résumé groupé (la
              section "Version 3.19 – 3.22" ci-dessous est un reliquat d'avant cette règle, conservé
              tel quel pour ne rien perdre de l'historique déjà écrit). -->
+        <div style="margin-bottom:18px"><div style="font-size:13px;font-weight:700;margin-bottom:8px">Version 3.33</div><ul style="margin:0;padding-left:18px;font-size:12px;color:var(--ink2);line-height:1.9">
+          <li>Nouveau : import express des données patient depuis le logiciel métier (ex. Logos) — sur l'écran "Nouvel enregistrement", un bouton "📋 Coller depuis logiciel métier" apparaît à côté du champ Patient. Après une capture d'écran de la fiche patient (raccourci natif Windows + Maj + S), un clic sur ce bouton puis un Ctrl+V suffisent : l'IA (GPT-4o vision) lit l'image et remplit automatiquement Nom, Prénom et Date de naissance.</li>
+          <li>Si l'adresse, le téléphone ou l'e-mail du patient sont également visibles et lisibles sur la capture, les champs correspondants apparaissent automatiquement (ils sont masqués par défaut) et sont pré-remplis ; ils restent modifiables normalement à la main, comme tout autre champ.</li>
+          <li>Toute donnée déjà saisie manuellement dans ces champs est écrasée par les nouvelles données importées.</li>
+          <li>Point de vigilance données patients : la capture d'écran collée (pouvant contenir nom, prénom, date de naissance, adresse, téléphone, e-mail) est envoyée à l'API OpenAI (GPT-4o) pour analyse, de la même façon que le sont déjà l'audio et le texte des consultations.</li>
+        </ul></div>
         <div style="margin-bottom:18px"><div style="font-size:13px;font-weight:700;margin-bottom:8px">Version 3.32</div><ul style="margin:0;padding-left:18px;font-size:12px;color:var(--ink2);line-height:1.9">
           <li>Intégration du vrai logo DentIA : il remplace désormais la petite icône "dent" sur la page principale (en haut à gauche) ainsi que sur l'onglet du navigateur (favicon).</li>
           <li>Le logo n'est pas intégré directement dans le code source (ce qui aurait alourdi le fichier de 2 Mo) : il est chargé depuis le fichier image "DentIA_logo_2.png" présent dans le même dossier GitHub que l'application. Ce fichier doit donc toujours rester présent à la racine du dépôt, à côté d'index.html.</li>
@@ -2901,6 +2923,10 @@ function cReset(){
   document.getElementById('c-stxt').textContent='Prêt à enregistrer';document.getElementById('c-timer').style.display='none';
   document.getElementById('c-nom').value='';document.getElementById('c-prenom').value='';document.getElementById('c-ddn').value='';
   const cCivEl=document.getElementById('c-civilite');if(cCivEl)cCivEl.value='';
+  // v3.33 : réinitialisation des coordonnées importées depuis une capture d'écran
+  ['c-adresse','c-telephone','c-email'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const cExtraEl=document.getElementById('c-extra-fields');if(cExtraEl)cExtraEl.style.display='none';
+  const cLogosStatusEl=document.getElementById('c-logos-import-status');if(cLogosStatusEl){cLogosStatusEl.style.display='none';cLogosStatusEl.textContent='';}
   document.getElementById('c-transcript-box').style.display='none';document.getElementById('c-transcript-box').textContent='';
   showResultsTranscript('');
   // v3.21 : reset de la boîte "Dicter la SmartNote" — elle restait affichée avec le contenu
@@ -2926,6 +2952,94 @@ async function callGPT(key,system,user){
   catch(netErr){throw new Error('Impossible de contacter OpenAI. Vérifiez votre connexion.');}
   if(!res.ok){const e=await res.json().catch(()=>({}));const msg=e.error?.message||'HTTP '+res.status;if(res.status===401)throw new Error('Clé API OpenAI invalide.');if(res.status===429)throw new Error('Quota OpenAI dépassé.');throw new Error('GPT-4o : '+msg);}
   return(await res.json()).choices[0].message.content;
+}
+
+// v3.33 : variante de callGPT acceptant une image (analyse GPT-4o vision) — utilisée pour
+// l'import express des données patient depuis une capture d'écran du logiciel métier.
+async function callGPTVision(key,system,imageDataUrl){
+  let res;
+  try{res=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({model:'gpt-4o',max_tokens:800,messages:[{role:'system',content:system},{role:'user',content:[{type:'image_url',image_url:{url:imageDataUrl}}]}]})});}
+  catch(netErr){throw new Error('Impossible de contacter OpenAI. Vérifiez votre connexion.');}
+  if(!res.ok){const e=await res.json().catch(()=>({}));const msg=e.error?.message||'HTTP '+res.status;if(res.status===401)throw new Error('Clé API OpenAI invalide.');if(res.status===429)throw new Error('Quota OpenAI dépassé.');throw new Error('GPT-4o vision : '+msg);}
+  return(await res.json()).choices[0].message.content;
+}
+
+// ══ IMPORT EXPRESS PATIENT DEPUIS CAPTURE D'ÉCRAN (v3.33) ══
+// Principe : l'utilisateur fait une capture d'écran native Windows (Win+Maj+S) de la fiche
+// patient dans son logiciel métier (ex. Logos), clique sur "Coller depuis logiciel métier",
+// puis fait Ctrl+V. L'image est envoyée à GPT-4o vision qui en extrait nom/prénom/date de
+// naissance/adresse/téléphone/email, et les champs de "Nouvel enregistrement" sont
+// automatiquement remplis (en écrasant toute valeur déjà saisie).
+function activateLogosImportPaste(){
+  const zone=document.getElementById('c-logos-import-zone');
+  const status=document.getElementById('c-logos-import-status');
+  zone.textContent='';
+  zone.focus();
+  status.style.display='inline';
+  status.textContent='Collez maintenant (Ctrl+V)…';
+}
+function deactivateLogosImportPaste(){
+  // v3.33 : léger délai pour laisser l'événement "paste" s'exécuter avant que le blur ne
+  // masque le message de statut (sinon le blur, déclenché par le Ctrl+V, efface le message
+  // "Analyse en cours…" affiché juste après).
+  setTimeout(()=>{
+    const status=document.getElementById('c-logos-import-status');
+    if(status && status.dataset.busy!=='1'){status.style.display='none';status.textContent='';}
+  },150);
+}
+function handleLogosImportPaste(event){
+  const items=(event.clipboardData||window.clipboardData).items;
+  let imageItem=null;
+  for(const item of items){if(item.type&&item.type.startsWith('image/')){imageItem=item;break;}}
+  event.preventDefault();
+  const status=document.getElementById('c-logos-import-status');
+  if(!imageItem){
+    status.style.display='inline';status.textContent='';
+    showErr('c-err','Aucune image trouvée dans le presse-papier. Faites d\'abord une capture d\'écran de la fiche patient (Windows + Maj + S), puis recommencez.');
+    document.getElementById('c-logos-import-zone').blur();
+    return;
+  }
+  const blob=imageItem.getAsFile();
+  const reader=new FileReader();
+  reader.onload=()=>{processLogosImportImage(reader.result);};
+  reader.readAsDataURL(blob);
+  document.getElementById('c-logos-import-zone').blur();
+}
+async function processLogosImportImage(dataUrl){
+  const status=document.getElementById('c-logos-import-status');
+  const key=getKey();
+  if(!key){showErr('c-err','⚠️ Clé API OpenAI manquante pour analyser la capture (à renseigner dans Paramètres).');return;}
+  status.dataset.busy='1';status.style.display='inline';status.textContent='⏳ Analyse de la capture en cours…';
+  document.getElementById('c-err').style.display='none';
+  try{
+    const system="Tu extrais des informations d'identité et de coordonnées d'un patient à partir d'une capture d'écran d'un logiciel de gestion de cabinet dentaire (fiche patient). Réponds UNIQUEMENT avec un objet JSON strict, sans aucun texte autour, sans balises markdown ni ```. Inclus uniquement les clés parmi nom, prenom, date_naissance (format JJ/MM/AAAA), adresse, telephone, email dont la valeur est clairement lisible sur l'image. N'invente jamais une valeur : si une information n'est pas visible ou pas certaine, omets simplement la clé.";
+    const raw=await callGPTVision(key,system,dataUrl);
+    const clean=raw.replace(/```json?/gi,'').replace(/```/g,'').trim();
+    let data;
+    try{data=JSON.parse(clean);}catch(parseErr){throw new Error('Réponse IA illisible, réessayez avec une capture plus nette.');}
+    applyLogosImportData(data);
+    status.dataset.busy='0';status.style.display='none';status.textContent='';
+    showToast('✓ Informations patient importées');
+  }catch(e){
+    status.dataset.busy='0';status.style.display='none';status.textContent='';
+    showErr('c-err','Import depuis capture échoué : '+e.message);
+  }
+}
+function applyLogosImportData(data){
+  if(!data||typeof data!=='object')return;
+  if(data.nom)document.getElementById('c-nom').value=data.nom;
+  if(data.prenom)document.getElementById('c-prenom').value=data.prenom;
+  if(data.date_naissance){
+    // conversion JJ/MM/AAAA -> AAAA-MM-JJ attendu par l'input type=date
+    const m=String(data.date_naissance).match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})/);
+    if(m)document.getElementById('c-ddn').value=`${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+  }
+  let hasExtra=false;
+  if(data.adresse){document.getElementById('c-adresse').value=data.adresse;hasExtra=true;}
+  if(data.telephone){document.getElementById('c-telephone').value=data.telephone;hasExtra=true;}
+  if(data.email){document.getElementById('c-email').value=data.email;hasExtra=true;}
+  if(hasExtra)document.getElementById('c-extra-fields').style.display='flex';
+  syncPatientToDocs();
 }
 
 // v3.21 : variante streaming de callGPT — modèle configurable (ex. gpt-4o-mini pour les tâches
