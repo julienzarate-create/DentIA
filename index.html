@@ -1,5 +1,5 @@
 <!--
-  DentIA v3.33
+  DentIA v3.34
   © 2025 — Tous droits réservés
   Ce logiciel est protégé par le droit d'auteur.
   Toute reproduction ou redistribution à des fins commerciales
@@ -11,7 +11,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DentIA v3.33</title>
+<title>DentIA v3.34</title>
 <link rel="icon" type="image/png" href="DentIA_logo_2.png">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Palanquin&family=Roboto:wght@400;700&family=Poppins:wght@400;700&family=Merriweather:wght@400;700&family=Oswald:wght@400;700&family=Arvo:wght@400;700&family=Bitter:wght@400;700&family=Outfit:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -234,7 +234,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
 <div class="sidebar">
   <div class="sb-logo" onclick="goHome()" style="cursor:pointer" title="Retour à l'accueil">
     <div class="mark"><img src="DentIA_logo_2.png" alt="DentIA"></div>
-    <div><h1>DentIA</h1><small>v3.33</small></div>
+    <div><h1>DentIA</h1><small>v3.34</small></div>
   </div>
   <nav class="sb-nav">
     <div class="sb-section">Consultation</div>
@@ -734,7 +734,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
             <label style="font-size:12px;color:var(--ink2)">jours</label>
           </div>
         </div>
-        <button class="btn-sec" onclick="exportData()">📤 Exporter toutes les données (JSON)</button>
+        <div style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:14px;margin-bottom:16px">
+          <div style="font-size:12px;font-weight:600;margin-bottom:6px">💾 Sauvegarde complète</div>
+          <p style="font-size:11px;color:var(--ink3);margin-bottom:10px">Solution transitoire en attendant une éventuelle solution serveur : exportez toutes vos données DentIA (correspondants, historique, réglages, dictionnaire, listes d'implants, etc.) dans un seul fichier, à conserver précieusement pour pouvoir tout restaurer en cas de perte (ex. vidage du cache du navigateur).</p>
+          <p style="font-size:11px;color:var(--red);margin-bottom:10px">⚠️ Ce fichier contient des données patients (historique des consultations, transcriptions, documents) : à conserver et transmettre avec la même prudence qu'un dossier médical (éviter l'envoi par e-mail non sécurisé).</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn-sec" onclick="exportData()">📤 Exporter toutes les données</button>
+            <button class="btn-sec" onclick="triggerImportData()">📥 Importer une sauvegarde</button>
+            <input type="file" id="s-import-file" accept="application/json" style="display:none" onchange="importData(this)">
+          </div>
+        </div>
       </div>
       <div class="panel-tab" id="stab-3" style="display:none">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
@@ -776,7 +785,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
       <button class="pnav-item" onclick="switchPanelTab('myai',1,this)">Documents</button>
       <button class="pnav-item" onclick="switchPanelTab('myai',2,this)">SmartNote</button>
       <button class="pnav-item" onclick="switchPanelTab('myai',3,this)">Implants</button>
-      <button class="pnav-item" onclick="switchPanelTab('myai',4,this)">Feedback IA</button>
     </nav>
     <div class="panel-body">
       <div class="panel-tab active" id="aitab-0">
@@ -843,15 +851,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
           <input type="text" id="implant-habit-input" placeholder="ex : pose implant 4.3x10mm Nobel replace" style="width:100%;border:1px solid var(--border2);border-radius:8px;padding:7px 10px;font-family:'DM Sans',sans-serif;font-size:12px;outline:none;color:var(--ink);background:var(--surface)">
         </div>
       </div>
-      <div class="panel-tab" id="aitab-4" style="display:none">
-        <!-- v3.31 : Journal de Feedback IA — capture automatique (avant / échange / après) de
-             chaque génération ou modification faite par l'IA, pour analyse ultérieure. -->
-        <p style="font-size:12px;color:var(--ink2);margin-bottom:6px">Chaque génération ou modification faite par l'IA est enregistrée automatiquement ici (document avant, transcription/instructions, document après). Cliquez sur "Exporter" sur une entrée pour copier un rapport technique complet à transmettre à Claude — les informations d'identité du patient (nom, prénom, date de naissance) sont automatiquement anonymisées à l'export.</p>
-        <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
-          <button class="act-btn" onclick="showConfirmModal('Vider tout le journal de feedback IA ? Cette action est irréversible.',()=>{safeSet('d3-ai-feedback','[]');renderAIFeedbackList();showToast('Journal vidé');})" style="color:var(--red)">🗑️ Vider le journal</button>
-        </div>
-        <div id="ai-feedback-list"></div>
-      </div>
     </div>
     <div class="panel-footer">
       <button class="btn-sec" onclick="closePanel('myai')">Annuler</button>
@@ -886,17 +885,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
   <div class="panel-backdrop" onclick="closePanel('retours')"></div>
   <div class="panel">
     <div class="panel-header">
-      <div><div class="panel-title">Feedback</div><div class="panel-sub">Historique des modifications IA et comparatifs SmartNote — pour affiner vos prompts</div></div>
+      <div><div class="panel-title">Feedback</div><div class="panel-sub">Tout le feedback IA au même endroit — pour affiner vos prompts</div></div>
       <button class="panel-close" onclick="closePanel('retours')">×</button>
     </div>
     <div class="panel-body">
-      <!-- v3.25 : fusion des anciens sous-onglets "Historique des modifications IA" et
-           "Comparatif SmartNote" en une seule liste chronologique mélangée, avec un seul
-           export et un seul vidage. Les deux mécanismes de stockage (retours / smartNoteCompares)
-           restent distincts en interne, seul l'affichage/export est unifié. -->
-      <p style="font-size:13px;color:var(--ink2);margin-bottom:16px">Chaque modification IA (documents et SmartNote) et chaque comparatif SmartNote (consultation complète vs dictée) sont enregistrés automatiquement ici, mélangés par ordre chronologique, pour affiner vos prompts.</p>
+      <!-- v3.34 : le Journal "Feedback IA" (autrefois onglet séparé de My DentIA) est désormais
+           fusionné ici avec les anciens retours et comparatifs SmartNote, en une seule liste. -->
+      <p style="font-size:13px;color:var(--ink2);margin-bottom:16px">Chaque modification IA (documents et SmartNote), chaque comparatif SmartNote, et chaque génération de document par l'IA sont enregistrés automatiquement ici, mélangés par ordre chronologique. Cliquez sur "📋 Exporter" sur un élément pour copier un rapport anonymisé à coller à Claude ; utilisez "Tout exporter" pour télécharger un fichier unique avec tout l'historique.</p>
       <div style="display:flex;gap:8px;margin-bottom:16px">
-        <button class="btn-green" onclick="exportFeedback()">📤 Exporter (JSON)</button>
+        <button class="btn-green" onclick="exportFeedback()">📤 Tout exporter (fichier)</button>
         <button class="btn-sec" onclick="clearFeedback()">🗑️ Vider</button>
       </div>
       <div id="feedback-list"></div>
@@ -928,6 +925,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
              changelog — plus de fusion/remixage de plusieurs versions en un seul résumé groupé (la
              section "Version 3.19 – 3.22" ci-dessous est un reliquat d'avant cette règle, conservé
              tel quel pour ne rien perdre de l'historique déjà écrit). -->
+        <div style="margin-bottom:18px"><div style="font-size:13px;font-weight:700;margin-bottom:8px">Version 3.34</div><ul style="margin:0;padding-left:18px;font-size:12px;color:var(--ink2);line-height:1.9">
+          <li>Correctif : à l'impression du Certificat, de la Lettre patient et du Courrier confrère, l'image de la signature était collée à gauche au lieu de suivre l'alignement à droite du nom du praticien juste au-dessus — corrigé.</li>
+          <li>Courrier confrère — refonte du destinataire : la mention "À l'attention de" n'est plus écrite par l'IA (elle pouvait apparaître deux fois, dans l'en-tête d'impression ET dans le corps du texte). Elle est désormais entièrement générée par l'application, une seule fois, au-dessus du corps du courrier : un encadré avec nom, spécialité, adresse, téléphone et e-mail pour un correspondant nommé, ou une simple phrase pour "Spécialiste en général" (le bug d'affichage "À l'attention de l'/du [spécialité]" est corrigé au passage).</li>
+          <li>Courrier confrère — nouveau bouton "📇 Changer le destinataire" dans "✏️ Modifier", pour changer de correspondant après la génération sans avoir à tout régénérer.</li>
+          <li>Correctif : le nom du praticien pouvait apparaître deux fois en fin de Courrier confrère et de Lettre patient (une fois écrit par l'IA, une fois via la signature automatique) — consignes renforcées auprès de l'IA pour ne plus jamais écrire de nom/signature dans ces deux documents.</li>
+          <li>Correctif : quand aucun nom de patient n'était renseigné, les fiches de "Mes Documents" affichaient littéralement "[Patient]" — elles n'affichent désormais que la date dans ce cas.</li>
+          <li>Correctif : les coordonnées du praticien étaient répétées en bas de page sur 6 fiches (HBD, Post-op chirurgie, Post-op implant, Blanchiment, Attestation de présence, Confirmation de faisabilité implantaire) alors qu'elles figurent déjà dans l'en-tête — pied de page dupliqué retiré.</li>
+          <li>Consentement implant : retrait de la mention "Document établi en deux exemplaires…".</li>
+          <li>Panneau Feedback : le Journal "Feedback IA" (autrefois onglet séparé dans My DentIA) est désormais fusionné dans ce même panneau, en une seule liste chronologique avec les anciens retours et comparatifs SmartNote. Chaque élément, quelle que soit son origine, dispose désormais de son propre bouton d'export individuel (copie presse-papier, anonymisée). L'export global ("Tout exporter") télécharge désormais un fichier texte unique au lieu d'une copie presse-papier ou d'un JSON, pour éviter tout risque avec un historique volumineux.</li>
+          <li>Nouveau : Sauvegarde complète (Paramètres → Clé API & Stockage) — un bouton "Exporter toutes les données" télécharge un fichier unique avec l'intégralité des données DentIA de ce navigateur (correspondants, historique, réglages, dictionnaire, listes d'implants, logo, signature, etc.), et un bouton "Importer une sauvegarde" permet de tout restaurer à partir de ce fichier (remplacement total des données actuelles, après confirmation). Solution transitoire en attendant une éventuelle architecture serveur à terme.</li>
+        </ul></div>
         <div style="margin-bottom:18px"><div style="font-size:13px;font-weight:700;margin-bottom:8px">Version 3.33</div><ul style="margin:0;padding-left:18px;font-size:12px;color:var(--ink2);line-height:1.9">
           <li>Nouveau : import express des données patient depuis le logiciel métier (ex. Logos) — sur l'écran "Nouvel enregistrement", un bouton "📋 Coller depuis logiciel métier" apparaît à côté du champ Patient. Après une capture d'écran de la fiche patient (raccourci natif Windows + Maj + S), un clic sur ce bouton puis un Ctrl+V suffisent : l'IA (GPT-4o vision) lit l'image et remplit automatiquement Nom, Prénom et Date de naissance.</li>
           <li>Si l'adresse, le téléphone ou l'e-mail du patient sont également visibles et lisibles sur la capture, les champs correspondants apparaissent automatiquement (ils sont masqués par défaut) et sont pré-remplis ; ils restent modifiables normalement à la main, comme tout autre champ.</li>
@@ -1332,11 +1340,12 @@ Règles :
 - Pas de titre "Courrier confrère" en début (un courrier n'a pas de titre)
 - Pas de pied de page avec les coordonnées du praticien entre crochets
 - Ne pas inclure la date dans le courrier (elle figure déjà dans l'en-tête à l'impression)
-- Commencer directement par la formule d'adresse
+- Ne jamais écrire de ligne "À l'attention de…" ni le nom/la civilité/la spécialité du destinataire nulle part dans le texte : cette information est ajoutée automatiquement par l'application juste au-dessus du courrier, ne jamais l'écrire soi-même ni la répéter sous quelque forme que ce soit
+- Commencer directement par "Bonjour," seul sur sa ligne (jamais "Cher/Chère...", jamais le nom du destinataire)
 - Ne mentionner que ce qui est dans la transcription
-- Ne jamais utiliser d'abréviations : toujours écrire les mots en entier — SEULE EXCEPTION (v3.22) : "Dr" reste abrégé dans la formule d'appel du destinataire (ex : "Dr Brossard,"), jamais "Docteur" en entier à cet endroit précis
+- Ne jamais utiliser d'abréviations : toujours écrire les mots en entier
 - Utiliser le vocabulaire médical dentaire précis et rigoureux
-- Terminer par "Confraternellement"`,
+- Terminer uniquement par "Confraternellement," — ne JAMAIS écrire son propre nom ni "Dr [nom]" après, la signature est ajoutée automatiquement par l'application (ne jamais l'écrire soi-même)`,
 
   patient:`Rédige une lettre adressée directement au patient (vouvoiement). Structure en 5 paragraphes :
 0. Première ligne, seule sur sa ligne : "Bonjour [CIVILITÉ] [NOM] [Prénom]," en utilisant EXACTEMENT la civilité, le nom (en majuscules) et le prénom du patient fournis en contexte (ex. "Bonjour Mr ROGERER Bernard,"). Si aucune civilité n'est fournie, écrire simplement "Bonjour [NOM] [Prénom],". Si aucun nom n'est fourni du tout, écrire "Bonjour," seul.
@@ -1344,7 +1353,9 @@ Règles :
 2. Le traitement proposé et pourquoi
 3. Le déroulement pratique (séances, anesthésie, durée)
 4. Les conseils post-opératoires et quand consulter en urgence
-Ton professionnel mais accessible, rassurant. 15 à 20 lignes max. Ne pas signer, pas d'en-tête (la signature est ajoutée automatiquement par l'application, ne jamais l'écrire soi-même). Ne mentionner que ce qui est dans la transcription.`,
+Ton professionnel mais accessible, rassurant. 15 à 20 lignes max. Ne mentionner que ce qui est dans la transcription.
+
+INTERDICTION ABSOLUE ET IMPÉRATIVE : ne jamais, sous aucun prétexte, écrire une formule de signature en fin de lettre (ni "Dr [nom]", ni le nom du praticien seul, ni "Cordialement" suivi d'un nom, ni aucun bloc de politesse final). La lettre doit se terminer directement après le dernier paragraphe de contenu, sans aucune ligne de signature ni de salutation finale : la signature (nom + image) est ajoutée automatiquement par l'application juste après. Écrire une signature ici créerait un doublon visible avec cet ajout automatique — c'est la règle la plus importante de ce document, à respecter systématiquement.`,
 
   certif:`Génère un certificat médical dentaire adapté au contexte mentionné dans la transcription.
 
@@ -1618,9 +1629,45 @@ function safeSet(key,value){
   catch(e){if(e.name==='QuotaExceededError'||e.code===22)showToast('⚠️ Stockage local plein ! Exportez et supprimez des consultations.','error');}
 }
 
+// v3.34 — Bug 8 : Sauvegarde complète (export/import), solution transitoire en attendant une
+// éventuelle architecture serveur à terme. L'ancien exportData() ne sauvegardait que quelques
+// types de données (réglages, patients, historique, dictionnaire) et oubliait tout le reste
+// (correspondants, logo, signature, listes d'implants, habitudes, Journal de Feedback IA...).
+// On exporte désormais TOUTES les clés localStorage utilisées par DentIA (préfixe "d3-") de façon
+// générique, pour que toute donnée actuelle ou future soit automatiquement incluse.
+function getAllDentiaStorage(){
+  const data={};
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    if(k&&k.indexOf('d3-')===0)data[k]=localStorage.getItem(k);
+  }
+  return data;
+}
 function exportData(){
-  const blob=new Blob([JSON.stringify({settings:getSettings(),patients,history:historyData,dict:dictEntries,exportDate:new Date().toISOString()},null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='dentai-export-'+new Date().toISOString().slice(0,10)+'.json';a.click();
+  const data=getAllDentiaStorage();
+  const blob=new Blob([JSON.stringify({dentiaBackup:true,exportDate:new Date().toISOString(),data},null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='dentia-sauvegarde-'+new Date().toISOString().slice(0,10)+'.json';a.click();
+}
+function triggerImportData(){const inp=document.getElementById('s-import-file');if(inp)inp.click();}
+function importData(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    let parsed;
+    try{parsed=JSON.parse(e.target.result);}catch(err){showToast('Fichier invalide (JSON illisible).','error');input.value='';return;}
+    if(!parsed||typeof parsed!=='object'||!parsed.data){showToast("Ce fichier ne semble pas être une sauvegarde DentIA valide.",'error');input.value='';return;}
+    const dateLabel=parsed.exportDate?new Date(parsed.exportDate).toLocaleDateString('fr-FR'):'date inconnue';
+    showConfirmModal(`Importer cette sauvegarde du ${dateLabel} ? Toutes les données actuellement présentes dans ce navigateur (correspondants, historique, réglages, dictionnaire, listes d'implants, etc.) seront définitivement remplacées par celles du fichier. Cette action est irréversible.`,()=>{
+      // Remplacement total (v3.34) : on vide d'abord toutes les clés DentIA existantes, puis on
+      // restaure uniquement celles présentes dans le fichier — aucune tentative de fusion.
+      Object.keys(localStorage).filter(k=>k.indexOf('d3-')===0).forEach(k=>localStorage.removeItem(k));
+      Object.keys(parsed.data).forEach(k=>localStorage.setItem(k,parsed.data[k]));
+      showToast('✓ Sauvegarde importée — rechargement…');
+      setTimeout(()=>location.reload(),1200);
+    },'⚠️ Remplacer toutes les données ?');
+    input.value='';
+  };
+  reader.readAsText(file);
 }
 
 function uploadLogo(input){
@@ -1952,7 +1999,6 @@ function switchPanelTab(panel,idx,btn){
   document.querySelectorAll(`[id^="${prefix}-"]`).forEach(t=>t.style.display='none');document.getElementById(prefix+'-'+idx).style.display='block';
   const nav=btn.closest('nav');nav.querySelectorAll('.pnav-item').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
   if(panel==='retours'&&idx===1)renderSmartNoteCompare();
-  if(panel==='myai'&&idx===4)renderAIFeedbackList(); // v3.31 : Journal de Feedback IA
 }
 
 // ══ PATIENTS ══
@@ -2047,9 +2093,11 @@ function openHistModal(id){
           <textarea id="aiedit-txt-rdc-${i}" placeholder="Ex : Remplace l'anesthésie par mépivacaïne 3%." rows="2" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();applyAiEdit('rdc',${i});}"></textarea>
           <button class="ai-edit-apply" onclick="applyAiEdit('rdc',${i})"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Appliquer</button>
         </div>
+        ${d==='courrier'?`<div style="margin-top:8px"><button class="act-btn" onclick="changerDestinataireCourrier(${i})">📇 Changer le destinataire</button></div>`:''}
         ${buildFontPicker()}
         <div class="suggestions-zone" id="sug-rdc-${i}" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)"></div>
       </div>
+      ${d==='courrier'?courrierDestBlockHtml(h.correspondant,i):''}
       <div class="doc-content" id="rdcc-${i}" contenteditable="true">${fmtDoc(docs[d])}</div>
     </div>`;
   });
@@ -2353,6 +2401,7 @@ function smartCompareRowHtml(c,idx){
           <div class="retour-date">${new Date(c.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'})}</div>
           <div class="retour-type">📋 Comparatif SmartNote${patient}</div>
         </div>
+        <button class="act-btn" onclick="event.stopPropagation();exportSmartCompareItem(${idx})">📋 Exporter</button>
         <button onclick="event.stopPropagation();deleteSmartNoteCompare(${idx})" style="flex-shrink:0;background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;color:var(--ink3);font-size:13px" title="Supprimer ce comparatif">🗑️</button>
       </div>
       <div id="smartcompare-detail-${idx}" style="display:none;margin-top:10px;padding:10px 12px;background:var(--s2);border-radius:8px">
@@ -2372,25 +2421,107 @@ function smartCompareRowHtml(c,idx){
 // séparés en interne ; seul l'affichage est mélangé. Les index utilisés dans les onclick
 // (openRetourModal, deleteRetour, toggleSmartCompareDetail, deleteSmartNoteCompare) pointent
 // toujours vers l'index réel dans le tableau d'origine, pas vers un index de la liste fusionnée.
+// v3.34 — Bug 7 : fusion du Journal "Feedback IA" (autrefois onglet séparé dans My DentIA) dans ce
+// même panneau Feedback. Les trois sources de données restent distinctes en interne (retours,
+// smartNoteCompares, et d3-ai-feedback lu directement depuis localStorage) — seuls l'affichage, la
+// suppression totale et l'export sont désormais unifiés.
 function renderFeedback(){
   const el=document.getElementById('feedback-list');
   if(!el)return;
+  const aiList=JSON.parse(localStorage.getItem('d3-ai-feedback')||'[]');
   const items=[
     ...retours.map((r,i)=>({date:r.date,html:retourRowHtml(r,i)})),
-    ...smartNoteCompares.map((c,i)=>({date:c.date,html:smartCompareRowHtml(c,i)}))
+    ...smartNoteCompares.map((c,i)=>({date:c.date,html:smartCompareRowHtml(c,i)})),
+    ...aiList.map((e)=>({date:e.date,html:aiFeedbackRowHtml(e)}))
   ].sort((a,b)=>new Date(b.date)-new Date(a.date));
-  if(!items.length){el.innerHTML='<div class="empty">Aucun retour enregistré. Les retours se créent automatiquement à chaque modification IA, correction de SmartNote, ou comparatif SmartNote.</div>';return;}
+  if(!items.length){el.innerHTML='<div class="empty">Aucun retour enregistré. Les retours se créent automatiquement à chaque modification IA, correction de SmartNote, comparatif SmartNote, ou génération de document.</div>';return;}
   el.innerHTML=items.map(it=>it.html).join('');
 }
+// Construit un rapport texte anonymisé pour UN élément de feedback, quelle que soit son origine.
+function feedbackItemToReport(origin,item){
+  let label,before,exchange,after,model='',anonFn=t=>t;
+  if(origin==='retour'){
+    label=item.docType==='smartnote'?'Correction manuelle — SmartNote':'Modification IA — '+(DOC_LABELS[item.docType]||item.docType);
+    before=item.avant||'';exchange=item.docType==='smartnote'?(item.transcription||''):(item.demande||'');after=item.apres||'';
+    if(item.patient)anonFn=t=>(t||'').split(item.patient).join('Patient X');
+  }else if(origin==='smartcompare'){
+    label='Comparatif SmartNote (consultation complète vs dictée)';
+    before=`Consultation :\n${item.smartConsult||''}\n\nTranscription (consultation) :\n${item.transcriptionConsult||''}`;
+    exchange='(comparatif automatique, pas d\'échange)';
+    after=`Dictée :\n${item.smartDictee||''}\n\nTranscription (dictée) :\n${item.transcriptionDictee||''}`;
+    if(item.patient)anonFn=t=>(t||'').split(item.patient).join('Patient X');
+  }else{
+    label=item.label||'';before=item.before||'';exchange=item.exchange||'';after=item.after||'';model=item.model||'';
+    anonFn=t=>anonymizeFeedbackText(t,item.patientNom,item.patientPrenom,item.patientDdn);
+  }
+  return`=== RAPPORT TECHNIQUE DENTIA — FEEDBACK ===
+Action : ${label}
+Date : ${new Date(item.date).toLocaleString('fr-FR')}
+${model?`Modèle IA : ${model}\n`:''}Patient : anonymisé
+
+--- AVANT ---
+${anonFn(before)||'(néant)'}
+
+--- ÉCHANGE (transcription / instructions) ---
+${anonFn(exchange)||'(néant)'}
+
+--- APRÈS ---
+${anonFn(after)||'(néant)'}
+=== FIN DU RAPPORT ===`;
+}
+function exportRetourItem(idx){
+  const r=retours[idx];if(!r)return;
+  navigator.clipboard.writeText(feedbackItemToReport('retour',r)).then(()=>showToast('✓ Rapport copié — vous pouvez le coller à Claude')).catch(()=>showToast('Erreur lors de la copie','error'));
+}
+function exportSmartCompareItem(idx){
+  const c=smartNoteCompares[idx];if(!c)return;
+  navigator.clipboard.writeText(feedbackItemToReport('smartcompare',c)).then(()=>showToast('✓ Rapport copié — vous pouvez le coller à Claude')).catch(()=>showToast('Erreur lors de la copie','error'));
+}
+// Affiche une entrée du Journal de Feedback IA dans la liste unifiée (remplace l'ancien
+// renderAIFeedbackList(), qui affichait ce Journal dans un onglet séparé).
+function aiFeedbackRowHtml(e){
+  return`<div class="retour-item" style="display:flex;align-items:center;gap:8px">
+    <div style="flex:1">
+      <div class="retour-date">${new Date(e.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'})}</div>
+      <div class="retour-type">🤖 ${escHtml(e.label||'')}</div>
+    </div>
+    <button class="act-btn" onclick="exportAIFeedback('${e.id}')">📋 Exporter</button>
+    <button onclick="deleteAIFeedback('${e.id}')" style="flex-shrink:0;background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;color:var(--ink3);font-size:13px" title="Supprimer cette entrée">🗑️</button>
+  </div>`;
+}
+function exportAIFeedback(id){
+  const list=JSON.parse(localStorage.getItem('d3-ai-feedback')||'[]');
+  const entry=list.find(e=>e.id===id);
+  if(!entry){showToast('Entrée introuvable','error');return;}
+  navigator.clipboard.writeText(feedbackItemToReport('aifeedback',entry)).then(()=>showToast('✓ Rapport copié — vous pouvez le coller à Claude')).catch(()=>showToast('Erreur lors de la copie','error'));
+}
+function deleteAIFeedback(id){
+  let list=JSON.parse(localStorage.getItem('d3-ai-feedback')||'[]');
+  list=list.filter(e=>e.id!==id);
+  safeSet('d3-ai-feedback',JSON.stringify(list));
+  renderFeedback();
+}
+// v3.34 — Export global : désormais un FICHIER TEXTE téléchargé (et non plus une copie dans le
+// presse-papier ni un JSON) pour éviter tout risque lié à un texte trop volumineux à coller
+// directement dans une conversation. L'export individuel (par élément), lui, reste une copie
+// presse-papier — un seul rapport reste toujours de taille raisonnable.
 function exportFeedback(){
-  if(!retours.length&&!smartNoteCompares.length){showToast('Aucun retour à exporter','error');return;}
-  const blob=new Blob([JSON.stringify({retours,smartNoteCompares,dictionnaire:dictEntries,exportDate:new Date().toISOString()},null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='dentai-feedback-'+new Date().toISOString().slice(0,10)+'.json';a.click();
+  const aiList=JSON.parse(localStorage.getItem('d3-ai-feedback')||'[]');
+  if(!retours.length&&!smartNoteCompares.length&&!aiList.length){showToast('Aucun retour à exporter','error');return;}
+  const allItems=[
+    ...retours.map(r=>({date:r.date,report:feedbackItemToReport('retour',r)})),
+    ...smartNoteCompares.map(c=>({date:c.date,report:feedbackItemToReport('smartcompare',c)})),
+    ...aiList.map(e=>({date:e.date,report:feedbackItemToReport('aifeedback',e)}))
+  ].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const fullText=`RAPPORT DE FEEDBACK DENTIA — EXPORT COMPLET\nGénéré le ${new Date().toLocaleString('fr-FR')}\n${allItems.length} entrée(s)\n\n`+allItems.map(it=>it.report).join('\n\n');
+  const blob=new Blob([fullText],{type:'text/plain'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='dentia-feedback-'+new Date().toISOString().slice(0,10)+'.txt';a.click();
 }
 function clearFeedback(){
-  if(!retours.length&&!smartNoteCompares.length)return;
-  showConfirmModal('Vider tout le feedback (modifications IA + comparatifs SmartNote) ?',()=>{
-    retours=[];smartNoteCompares=[];safeSet('d3-retours','[]');safeSet('d3-smartnote-compare','[]');renderFeedback();showToast('✓ Feedback vidé');
+  const aiList=JSON.parse(localStorage.getItem('d3-ai-feedback')||'[]');
+  if(!retours.length&&!smartNoteCompares.length&&!aiList.length)return;
+  showConfirmModal('Vider tout le feedback (modifications IA, comparatifs SmartNote et Journal de Feedback IA) ? Cette action est irréversible.',()=>{
+    retours=[];smartNoteCompares=[];safeSet('d3-retours','[]');safeSet('d3-smartnote-compare','[]');safeSet('d3-ai-feedback','[]');renderFeedback();showToast('✓ Feedback vidé');
   });
 }
 function toggleSmartCompareDetail(idx){
@@ -2785,9 +2916,11 @@ function buildResultUI(sel){
           <textarea id="aiedit-txt-rdc-${i}" placeholder="Ex : Remplace l'anesthésie par mépivacaïne 3%." rows="2" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();applyAiEdit('rdc',${i});}"></textarea>
           <button class="ai-edit-apply" onclick="applyAiEdit('rdc',${i})"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Appliquer</button>
         </div>
+        ${d==='courrier'?`<div style="margin-top:8px"><button class="act-btn" onclick="changerDestinataireCourrier(${i})">📇 Changer le destinataire</button></div>`:''}
         ${buildFontPicker()}
         <div class="suggestions-zone" id="sug-rdc-${i}" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)"></div>
       </div>
+      ${d==='courrier'?courrierDestBlockHtml(cCourrierCorrespondant,i):''}
       <div class="doc-content" id="rdcc-${i}" contenteditable="true">${fmtDoc(cGenDocs[d])}</div>
     </div>`;
   });
@@ -2819,7 +2952,7 @@ async function addDoc(d,btn){
     const tabsEl=document.getElementById('c-tabs');
     const nb=document.createElement('button');nb.className='rtab';nb.textContent=DOC_EMOJI[d]+' '+DOC_LABELS[d];nb.onclick=()=>switchTab(idx,'c-tabs','c-docs-list');tabsEl.appendChild(nb);
     const dl=document.getElementById('c-docs-list');const nd=document.createElement('div');nd.className='rdoc';nd.id='rdc-'+idx;nd.dataset.doc=d;
-    nd.innerHTML=`<div class="doc-hdr"><span class="badge ${DOC_BADGES[d]}">${DOC_EMOJI[d]} ${DOC_LABELS[d]}</span><div class="doc-actions"><button class="act-btn" onclick="copyRdc(${idx},this)">📋 Copier</button><button class="act-btn" id="rdc-edit-btn-${idx}" onclick="toggleAiEditBand('rdc',${idx},this)">✏️ Modifier</button><button class="act-btn" onclick="printRdc(${idx},'${DOC_LABELS[d]}')">🖨️ Imprimer</button></div></div><div class="ai-edit-band" id="aiedit-rdc-${idx}"><div class="ai-edit-hint">✨ Décrivez les modifications souhaitées</div><div class="ai-edit-band-row"><button class="ai-edit-mic" id="aiedit-mic-rdc-${idx}" onclick="toggleAiEditMic('rdc',${idx})">🎙️</button><textarea id="aiedit-txt-rdc-${idx}" rows="2"></textarea><button class="ai-edit-apply" onclick="applyAiEdit('rdc',${idx})"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Appliquer</button></div>${buildFontPicker()}</div><div class="doc-content" id="rdcc-${idx}" contenteditable="true">${fmtDoc(result)}</div>`;
+    nd.innerHTML=`<div class="doc-hdr"><span class="badge ${DOC_BADGES[d]}">${DOC_EMOJI[d]} ${DOC_LABELS[d]}</span><div class="doc-actions"><button class="act-btn" onclick="copyRdc(${idx},this)">📋 Copier</button><button class="act-btn" id="rdc-edit-btn-${idx}" onclick="toggleAiEditBand('rdc',${idx},this)">✏️ Modifier</button><button class="act-btn" onclick="printRdc(${idx},'${DOC_LABELS[d]}')">🖨️ Imprimer</button></div></div><div class="ai-edit-band" id="aiedit-rdc-${idx}"><div class="ai-edit-hint">✨ Décrivez les modifications souhaitées</div><div class="ai-edit-band-row"><button class="ai-edit-mic" id="aiedit-mic-rdc-${idx}" onclick="toggleAiEditMic('rdc',${idx})">🎙️</button><textarea id="aiedit-txt-rdc-${idx}" rows="2"></textarea><button class="ai-edit-apply" onclick="applyAiEdit('rdc',${idx})"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Appliquer</button></div>${d==='courrier'?`<div style="margin-top:8px"><button class="act-btn" onclick="changerDestinataireCourrier(${idx})">📇 Changer le destinataire</button></div>`:''}${buildFontPicker()}</div>${d==='courrier'?courrierDestBlockHtml(cCourrierCorrespondant,idx):''}<div class="doc-content" id="rdcc-${idx}" contenteditable="true">${fmtDoc(result)}</div>`;
     dl.appendChild(nd);
     // BUG-FIX v3.22 : ciblait toujours historyData[0] (la consultation la plus récente), ce qui
     // enregistrait le document ajouté au mauvais endroit si on l'ajoutait depuis une consultation
@@ -3223,7 +3356,7 @@ function retourRowHtml(r,idx){
   const label=r.docType==='smartnote'?'📋 SmartNote':(DOC_EMOJI[r.docType]||'📄')+' '+(DOC_LABELS[r.docType]||r.docType);
   const sub=r.docType==='smartnote'?'Correction manuelle':`"${(r.demande||'').substring(0,80)}${(r.demande||'').length>80?'…':''}"`;
   const patient=r.patient?`<span style="font-size:11px;color:var(--ink2);margin-left:6px">👤 ${r.patient}</span>`:(r.patientRenseigné===false?`<span style="font-size:11px;color:var(--ink3);margin-left:6px">Patient non renseigné</span>`:'');
-  return`<div class="retour-item" style="display:flex;align-items:center;gap:8px"><div style="flex:1;cursor:pointer" onclick="openRetourModal(${idx})"><div class="retour-date">${new Date(r.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'})}</div><div class="retour-type">${label}${patient}</div><div class="retour-demande">${sub}</div></div><button onclick="deleteRetour(${idx})" style="flex-shrink:0;background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;color:var(--ink3);font-size:13px;transition:all .15s" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--ink3)'" title="Supprimer ce retour">🗑️</button></div>`;
+  return`<div class="retour-item" style="display:flex;align-items:center;gap:8px"><div style="flex:1;cursor:pointer" onclick="openRetourModal(${idx})"><div class="retour-date">${new Date(r.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'})}</div><div class="retour-type">${label}${patient}</div><div class="retour-demande">${sub}</div></div><button class="act-btn" onclick="exportRetourItem(${idx})">📋 Exporter</button><button onclick="deleteRetour(${idx})" style="flex-shrink:0;background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;color:var(--ink3);font-size:13px;transition:all .15s" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--ink3)'" title="Supprimer ce retour">🗑️</button></div>`;
 }
 function deleteRetour(idx){
   showConfirmModal('Supprimer ce retour ?',()=>{
@@ -3488,28 +3621,65 @@ function renderCorrespondantsSettingsList(){
   </div>`).join('');
 }
 
-// Construit le texte "À l'attention de" + la formule d'appel, à partir de cCourrierCorrespondant
-function buildCorrespondantBlock(){
-  const cc=cCourrierCorrespondant;
-  if(!cc)return null;
+// v3.34 — Remplace l'ancien buildCorrespondantBlock() : le texte "À l'attention de" n'est plus
+// jamais écrit par l'IA (ni affiché dans l'en-tête d'impression), pour éviter tout doublon avec
+// le corps du texte. Il est désormais entièrement construit ici, par l'application, à partir des
+// données réelles du correspondant choisi, et affiché au-dessus du corps du courrier (écran +
+// impression) — voir courrierDestBlockHtml() et son insertion dans buildResultUI/printRdc/etc.
+// - Mode "correspondant nommé" : petit encadré avec nom, spécialité, adresse, téléphone, e-mail
+//   (uniquement les champs réellement renseignés).
+// - Mode "spécialiste en général" : simple phrase, pas d'encadré. Corrige au passage le bug de
+//   l'ancienne version qui affichait littéralement "À l'attention de l'/du [spécialité]" (les deux
+//   articles l'un à côté de l'autre) : on choisit désormais "de l'" si la spécialité commence par
+//   une voyelle (élision), sinon "du" — approximation raisonnable, l'accord de genre exact des noms
+//   de spécialité n'étant pas trivial à déterminer automatiquement.
+function buildDestinataireBlockHtml(cc){
+  if(!cc)return '';
   if(cc.mode==='specialite'){
-    return{attention:`À l'attention de l'/du ${cc.specialite}`};
+    const spec=(cc.specialite||'').trim();
+    if(!spec)return '';
+    const art=/^[aeiouhàâäéèêëïîôöùûü]/i.test(spec)?"de l'":'du ';
+    return `<p class="dest-block" style="margin:0 0 16px 0">À l'attention ${art}${escHtml(spec)},</p>`;
   }
-  // v3.24 : fusion nom + spécialité sur une seule ligne (au lieu de deux lignes séparées)
   const titre=cc.docteur?'Dr ':(cc.civilite==='M'?'Mr ':(cc.civilite==='Mme'?'Mme ':''));
-  return{
-    attention:`${titre}${cc.nom} ${cc.prenom}${cc.specialite?', '+cc.specialite:''}`,
-    habitudes:cc.habitudes||''
-  };
+  const nomComplet=`${titre}${cc.nom||''} ${cc.prenom||''}`.trim();
+  if(!nomComplet)return '';
+  const lignes=[];
+  if(cc.specialite)lignes.push(escHtml(cc.specialite));
+  const adresseLigne=[cc.adresse,[cc.cp,cc.ville].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+  if(adresseLigne)lignes.push(escHtml(adresseLigne));
+  if(cc.pays&&cc.pays.trim().toLowerCase()!=='france')lignes.push(escHtml(cc.pays));
+  if(cc.tel)lignes.push('Tél. : '+escHtml(cc.tel));
+  if(cc.email)lignes.push(escHtml(cc.email));
+  return `<div class="dest-block" style="border:1px solid #d8dde3;border-radius:8px;padding:10px 14px;margin:0 0 18px 0;font-size:inherit;line-height:1.6;display:inline-block"><div style="font-weight:700;margin-bottom:3px">À l'attention de</div><div>${escHtml(nomComplet)}</div>${lignes.map(l=>`<div>${l}</div>`).join('')}</div>`;
+}
+// v3.34 — Encadré/bloc source de vérité identifié par un id dédié (destblock-rdc-N), pour pouvoir
+// le retrouver et le reconstruire seul (bouton "Changer le destinataire"), sans jamais toucher au
+// reste du texte du courrier ni le faire repasser par l'IA.
+function courrierDestBlockHtml(cc,idx){
+  return `<div class="dest-block-wrap" id="destblock-rdc-${idx}">${buildDestinataireBlockHtml(cc)}</div>`;
+}
+// Ré-affiche le bloc destinataire à sa place et sauvegarde le nouveau correspondant choisi.
+function refreshCourrierDestBlock(idx,cc){
+  const el=document.getElementById('destblock-rdc-'+idx);
+  if(el)el.innerHTML=buildDestinataireBlockHtml(cc);
+}
+function changerDestinataireCourrier(idx){
+  openCorrespondantChoice(()=>{
+    refreshCourrierDestBlock(idx,cCourrierCorrespondant);
+    const hEntry=cCurrentHistId?historyData.find(x=>x.id===cCurrentHistId):historyData[0];
+    if(hEntry){hEntry.correspondant=cCourrierCorrespondant;safeSet('d3-history',JSON.stringify(historyData));}
+    showToast('✓ Destinataire mis à jour');
+  });
 }
 
-
 // Instructions supplémentaires injectées dans le prompt GPT du courrier confrère, à partir du
-// correspondant choisi (formule d'appel personnalisée + habitudes connues)
+// correspondant choisi (habitudes connues avec lui). v3.34 : la formule "À l'attention de..." n'est
+// plus mentionnée ici puisqu'elle n'est plus écrite par l'IA du tout (voir DOC_PROMPTS.courrier).
 function courrierExtraInstructions(){
-  const cb=buildCorrespondantBlock();
-  let s=`\nLe corps du courrier doit TOUJOURS commencer par "Bonjour," seul sur sa ligne (jamais le nom du destinataire, jamais "Cher/Chère...") — la ligne "À l'attention de" dans l'en-tête suffit déjà à identifier le destinataire, inutile de le répéter dans le corps du texte.`;
-  if(cb&&cb.habitudes)s+=`\nHabitudes connues avec ce correspondant : ${cb.habitudes}`;
+  const cc=cCourrierCorrespondant;
+  let s='';
+  if(cc&&cc.habitudes)s+=`\nHabitudes connues avec ce correspondant : ${cc.habitudes}`;
   return s;
 }
 
@@ -3541,10 +3711,18 @@ function toggleResultsTranscript(){
 }
 function copyRdc(i,btn){navigator.clipboard.writeText(document.getElementById('rdcc-'+i).innerText).then(()=>{btn.textContent='✓';setTimeout(()=>btn.textContent='📋 Copier',2000);});}
 function printRdc(i,title){
-  // v3.22 : le courrier confrère utilise une mise en page d'impression dédiée (À l'attention de + Patient)
+  // v3.22 : le courrier confrère utilise une mise en page d'impression dédiée (en-tête + Patient)
   const docType=document.getElementById('rdc-'+i)?document.getElementById('rdc-'+i).dataset.doc:null;
   let content=document.getElementById('rdcc-'+i).innerHTML;
-  if(docType==='courrier'){printCourrierContent(content,title);return;}
+  if(docType==='courrier'){
+    // v3.34 : le bloc "À l'attention de" (encadré ou phrase) n'est plus dans l'en-tête d'impression
+    // (il y faisait doublon avec le corps du texte) — il est désormais imprimé au-dessus du corps
+    // du courrier, à l'identique de ce qui est affiché à l'écran.
+    const destEl=document.getElementById('destblock-rdc-'+i);
+    const destHtml=destEl?destEl.innerHTML:'';
+    printCourrierContent(destHtml+content,title);
+    return;
+  }
   // v3.24 : signature automatique en bas à droite pour Certificat et Lettre patient
   if(docType==='certif'||docType==='patient')content+=printSignatureBlockHtml();
   printContent(content,title);
@@ -3564,21 +3742,22 @@ function printCourrierContent(content,title){
   const logo=localStorage.getItem('d3-logo'),s=getSettings(),fs=parseInt(s.fontsize||'13',10);
   const fontMain=s['font-main']||'DM Sans';
   const logoHtml=logo?`<img src="${logo}" style="max-height:55px;max-width:180px;object-fit:contain;display:block;margin-bottom:6px">`:'';
-  const cb=buildCorrespondantBlock();
-  const attentionHtml=cb?`<div style="margin-top:14px"><div style="font-weight:700;font-size:11px;margin-bottom:3px">À l'attention de</div><div>${escHtml(cb.attention).replace(/\n/g,'<br>')}</div></div>`:'';
   const nomEl=document.getElementById('c-nom'),prenomEl=document.getElementById('c-prenom'),ddnEl=document.getElementById('c-ddn');
   const nom=nomEl?nomEl.value.trim():'',prenom=prenomEl?prenomEl.value.trim():'',ddn=ddnEl?ddnEl.value:'';
   const patientNom=(nom||prenom)?`${nom} ${prenom}`.trim():buildPatientName();
   const ddnFmt=ddn&&ddn.includes('-')?(()=>{const p=ddn.split('-');return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:ddn;})():ddn;
   const patientHtml=`<div style="font-weight:700;font-size:11px;margin-bottom:3px">Patient</div><div>${escHtml(patientNom)}${ddnFmt?'<br>Date de naissance : '+escHtml(ddnFmt):''}</div>`;
-  if(!localStorage.getItem('d3-print-tip')){localStorage.setItem('d3-print-tip','1');showToast('💡 Pour une impression propre : décochez "En-têtes et pieds de page" dans Chrome');setTimeout(()=>doPrintCourrier(content+printSignatureBlockHtml(),title,header,today,logoHtml,fs,fontMain,attentionHtml,patientHtml),2800);return;}
-  doPrintCourrier(content+printSignatureBlockHtml(),title,header,today,logoHtml,fs,fontMain,attentionHtml,patientHtml);
+  if(!localStorage.getItem('d3-print-tip')){localStorage.setItem('d3-print-tip','1');showToast('💡 Pour une impression propre : décochez "En-têtes et pieds de page" dans Chrome');setTimeout(()=>doPrintCourrier(content+printSignatureBlockHtml(),title,header,today,logoHtml,fs,fontMain,patientHtml),2800);return;}
+  doPrintCourrier(content+printSignatureBlockHtml(),title,header,today,logoHtml,fs,fontMain,patientHtml);
 }
-function doPrintCourrier(content,title,header,today,logoHtml,fs,fontMain,attentionHtml,patientHtml){
+// v3.34 : le paramètre attentionHtml est retiré — le bloc "À l'attention de" (encadré/phrase)
+// n'est plus affiché dans l'en-tête (il fait maintenant partie du "content", juste au-dessus du
+// corps du courrier), pour éviter le doublon avec la mention équivalente qui existait dans le corps.
+function doPrintCourrier(content,title,header,today,logoHtml,fs,fontMain,patientHtml){
   const old=document.getElementById('_print_iframe');if(old)old.remove();
   const iframe=document.createElement('iframe');iframe.id='_print_iframe';iframe.style.cssText='position:fixed;top:-9999px;left:-9999px;width:210mm;height:297mm;border:none;visibility:hidden';
   document.body.appendChild(iframe);const doc=iframe.contentDocument||iframe.contentWindow.document;doc.open();
-  doc.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${title}</title><link href="https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontMain)}&display=swap" rel="stylesheet"><style>@page{size:A4 portrait;margin:18mm 16mm 18mm 16mm}*{box-sizing:border-box}body{font-family:'${fontMain}',sans-serif;font-size:${fs}px;line-height:1.75;color:#1a1612;margin:0;padding:0}.datebar{font-size:10.5px;color:#666;margin-bottom:14px}.cols{display:flex;justify-content:space-between;gap:20px;border-bottom:2px solid #1a3c5e;padding-bottom:14px;margin-bottom:22px}.colL{font-size:10.5px;color:#444;line-height:1.6;flex:1}.colR{font-size:10.5px;color:#444;line-height:1.6;flex:1}.content{font-size:${fs}px;line-height:1.75;color:#1a1612;}.content strong{font-weight:700;}.content h3{font-family:'${fontMain}',sans-serif;font-size:15px;font-weight:700;margin:12px 0 4px;color:#1a3c5e;}.content br{display:block;margin:2px 0;}</style></head><body><div class="datebar">Date : ${today}</div><div class="cols"><div class="colL">${logoHtml}${header.replace(/\n/g,'<br>')}${attentionHtml}</div><div class="colR">${patientHtml}</div></div><div class="content">${content}</div><script>window.onload=function(){setTimeout(function(){window.print();},300);};<\/script></body></html>`);
+  doc.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${title}</title><link href="https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontMain)}&display=swap" rel="stylesheet"><style>@page{size:A4 portrait;margin:18mm 16mm 18mm 16mm}*{box-sizing:border-box}body{font-family:'${fontMain}',sans-serif;font-size:${fs}px;line-height:1.75;color:#1a1612;margin:0;padding:0}.datebar{font-size:10.5px;color:#666;margin-bottom:14px}.cols{display:flex;justify-content:space-between;gap:20px;border-bottom:2px solid #1a3c5e;padding-bottom:14px;margin-bottom:22px}.colL{font-size:10.5px;color:#444;line-height:1.6;flex:1}.colR{font-size:10.5px;color:#444;line-height:1.6;flex:1}.content{font-size:${fs}px;line-height:1.75;color:#1a1612;}.content strong{font-weight:700;}.content h3{font-family:'${fontMain}',sans-serif;font-size:15px;font-weight:700;margin:12px 0 4px;color:#1a3c5e;}.content br{display:block;margin:2px 0;}.dest-block{font-size:${fs}px}</style></head><body><div class="datebar">Date : ${today}</div><div class="cols"><div class="colL">${logoHtml}${header.replace(/\n/g,'<br>')}</div><div class="colR">${patientHtml}</div></div><div class="content">${content}</div><script>window.onload=function(){setTimeout(function(){window.print();},300);};<\/script></body></html>`);
   doc.close();iframe.contentWindow.addEventListener('afterprint',()=>{setTimeout(()=>iframe.remove(),500);});setTimeout(()=>{if(document.getElementById('_print_iframe'))iframe.remove();},30000);
 }
 
@@ -4106,9 +4285,12 @@ function getDocPatient(){
   const nomMaj = nom.toUpperCase();
   const prenom = (document.getElementById('doc-prenom')||{}).value||'';
   const ddn = (document.getElementById('doc-ddn')||{}).value||'';
+  // v3.34 — Bug-fix : l'ancien fallback littéral '[Patient]' s'affichait tel quel dans les documents
+  // quand aucun nom n'était renseigné. On laisse désormais une chaîne vide dans ce cas ; chaque
+  // template affiche alors uniquement la date, sans la mention "Patient :" (voir les ${p.full?...} ci-dessous).
   return {civilite,civiliteLabel,nom:nomMaj,prenom,ddn,
-    full: [prenom,nomMaj].filter(Boolean).join(' ')||'[Patient]',
-    fullWithCivilite: [civiliteLabel,nomMaj,prenom].filter(Boolean).join(' ')||'[Patient]'};
+    full: [prenom,nomMaj].filter(Boolean).join(' '),
+    fullWithCivilite: [civiliteLabel,nomMaj,prenom].filter(Boolean).join(' ')};
 }
 
 function openDocsFromConsult(){
@@ -4320,8 +4502,12 @@ function getPraticienTitledName(){
 function printSignatureBlockHtml(){
   const nom=getPraticienTitledName();
   const sig=localStorage.getItem('d3-signature');
-  const sigImg=sig?`<img src="${sig}" style="max-height:50px;max-width:180px;object-fit:contain;display:block;margin-top:4px">`:'';
-  return `<div style="margin-top:36px;text-align:right;font-size:inherit">${escHtml(nom)}${sigImg}</div>`;
+  // v3.34 — Bug-fix : l'image (display:block) ignorait l'alignement à droite du conteneur parent
+  // et se collait donc à gauche, alors que le nom (texte) suivait bien l'alignement. En passant
+  // l'image en display:block MAIS à l'intérieur d'un conteneur lui-même en inline-block, elle suit
+  // désormais le text-align:right comme n'importe quel texte, tout en gardant son propre saut de ligne.
+  const sigImg=sig?`<div style="display:inline-block;margin-top:4px"><img src="${sig}" style="max-height:50px;max-width:180px;object-fit:contain;display:block"></div>`:'';
+  return `<div style="margin-top:36px;text-align:right;font-size:inherit">${escHtml(nom)}<br>${sigImg}</div>`;
 }
 
 function genFiche(type, enriched){
@@ -4697,54 +4883,9 @@ function anonymizeFeedbackText(text,nom,prenom,ddn){
   if(ddn && ddn.trim()) out=out.split(ddn.trim()).join('JJ/MM/AAAA');
   return out;
 }
-function exportAIFeedback(id){
-  const list=JSON.parse(localStorage.getItem('d3-ai-feedback')||'[]');
-  const entry=list.find(e=>e.id===id);
-  if(!entry){ showToast('Entrée introuvable','error'); return; }
-  const anon=t=>anonymizeFeedbackText(t,entry.patientNom,entry.patientPrenom,entry.patientDdn);
-  const report=`=== RAPPORT TECHNIQUE DENTIA — FEEDBACK IA ===
-Action : ${entry.label}
-Date : ${new Date(entry.date).toLocaleString('fr-FR')}
-Modèle IA : ${entry.model||'non renseigné'}
-Patient : anonymisé
-
---- AVANT ---
-${anon(entry.before)||'(néant)'}
-
---- ÉCHANGE (transcription audio / instructions données) ---
-${anon(entry.exchange)||'(néant)'}
-
---- APRÈS ---
-${anon(entry.after)||'(néant)'}
-=== FIN DU RAPPORT ===`;
-  navigator.clipboard.writeText(report)
-    .then(()=>showToast('✓ Rapport copié — vous pouvez le coller à Claude'))
-    .catch(()=>showToast('Erreur lors de la copie','error'));
-}
-function deleteAIFeedback(id){
-  let list=JSON.parse(localStorage.getItem('d3-ai-feedback')||'[]');
-  list=list.filter(e=>e.id!==id);
-  safeSet('d3-ai-feedback',JSON.stringify(list));
-  renderAIFeedbackList();
-}
-function renderAIFeedbackList(){
-  const el=document.getElementById('ai-feedback-list');
-  if(!el) return;
-  const list=JSON.parse(localStorage.getItem('d3-ai-feedback')||'[]');
-  if(!list.length){ el.innerHTML='<div class="empty">Aucune entrée pour le moment — chaque génération IA sera enregistrée automatiquement ici.</div>'; return; }
-  el.innerHTML=list.map(e=>`<div style="border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px">
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
-      <div>
-        <div style="font-size:12px;font-weight:700">${escHtml(e.label)}</div>
-        <div style="font-size:11px;color:var(--ink3)">${new Date(e.date).toLocaleString('fr-FR')}</div>
-      </div>
-      <div style="display:flex;gap:6px">
-        <button class="act-btn" onclick="exportAIFeedback('${e.id}')">📋 Exporter</button>
-        <button class="act-btn" onclick="deleteAIFeedback('${e.id}')" style="color:var(--red)">🗑️</button>
-      </div>
-    </div>
-  </div>`).join('');
-}
+// v3.34 : exportAIFeedback, deleteAIFeedback et renderAIFeedbackList sont désormais définies plus
+// haut dans le fichier (voir la section "Bug 7 : fusion du Journal Feedback IA"), et affichent
+// leurs entrées dans la liste unifiée du panneau Feedback au lieu d'un onglet séparé.
 
 // Mise à jour en temps réel quand nom/prénom/DDN changent
 function onDocPatientChange(){
@@ -4768,7 +4909,7 @@ function renderHBD(p,hdr,date){
   const qr5='https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=https://www.youtube.com/watch?v=zNL0E4VHMTY';
   showDocResult('Fiche HBD',`${hdr}
   <h2 style="font-size:17px;font-weight:700;text-align:center;margin-bottom:4px">Fiche complémentaire d'enseignement bucco-dentaire</h2>
-  <p style="font-size:12px;color:#555;text-align:center;margin-bottom:16px">Patient : <strong>${escHtml(p.full)}</strong> — ${date}</p>
+  <p style="font-size:12px;color:#555;text-align:center;margin-bottom:16px">${p.full?`Patient : <strong>${escHtml(p.full)}</strong> — `:''}${date}</p>
   <p style="font-size:12px;line-height:1.7;margin-bottom:10px">Je vous mets les liens de vidéos explicatives afin d'améliorer votre hygiène bucco-dentaire. Cela aura pour but de prévenir des maladies dentaires (carie et gingivite principalement).</p>
   <p style="font-size:12px;line-height:1.7;margin-bottom:10px">Si vous suivez consciencieusement ces conseils, le risque d'avoir des problèmes dentaires sera considérablement réduit.</p>
   <p style="font-size:12px;line-height:1.7;margin-bottom:16px">Le but est qu'à chaque contrôle annuel, je ne constate pas de carie, pas de gingivite, et une hygiène bucco-dentaire correcte. Le contrôle se résumerait alors normalement à un simple détartrage dentaire, et peut-être un contrôle radiographique.</p>
@@ -4783,15 +4924,14 @@ function renderHBD(p,hdr,date){
       <td style="padding:12px;text-align:center;border:1px solid #ccc"><img src="${qr5}" style="display:block;margin:0 auto 6px;width:90px;height:90px"><div style="font-size:11px;font-weight:600">Cours sur la carie dentaire (15min, très bien expliqué)</div></td>
       <td style="padding:12px;border:1px solid #ccc"></td>
     </tr>
-  </table>
-  <p style="font-size:11px;color:#666;margin-top:14px;text-align:right">Dr Julien ZARATE — Chirurgien-Dentiste</p>`);
+  </table>`);
 }
 
 // ─── POST-OP CHIRURGIE ────────────────────────────────────────────────────────
 function renderPostopChirurgie(p,hdr,date){
   showDocResult('Recommandations post-op — Chirurgie buccale',`${hdr}
   <h2 style="font-size:17px;font-weight:700;text-align:center;margin-bottom:4px">Recommandations post-opératoires en chirurgie buccale</h2>
-  <p style="font-size:12px;margin-bottom:14px">Patient : <strong>${escHtml(p.full)}</strong> — ${date}</p>
+  <p style="font-size:12px;margin-bottom:14px">${p.full?`Patient : <strong>${escHtml(p.full)}</strong> — `:''}${date}</p>
   <p style="font-size:12px;line-height:1.7;margin-bottom:14px">L'intervention chirurgicale que vous venez de subir peut être suivie de manifestations diverses. Dans des conditions d'évolution normales, vous ne ressentirez que des douleurs post-opératoires très légères, mais la cicatrisation implique une surveillance. Nous vous indiquons ici un certain nombre de mesures que vous pouvez prendre vous-même pour éviter des complications.</p>
   <table style="width:100%;border-collapse:collapse">
     <tr><th style="padding:8px 10px;background:#f0f4f8;border:1px solid #ccc;width:22%;text-align:left;font-size:12px">Hémostase</th><td style="padding:8px 10px;border:1px solid #ccc;font-size:12px">Un saignement discret qui teinte la salive est normal le premier jour. En cas de persistance du saignement, nettoyer la région à l'aide d'une compresse sèche puis mordre sur des compresses pendant 1h. Recommencer si nécessaire plusieurs fois. Dans tous les cas, éviter de cracher et de vous rincer la bouche pendant 24h.</td></tr>
@@ -4804,8 +4944,7 @@ function renderPostopChirurgie(p,hdr,date){
     <tr><th style="padding:8px 10px;background:#f0f4f8;border:1px solid #ccc;text-align:left;font-size:12px">Alcool / Tabac</th><td style="padding:8px 10px;border:1px solid #ccc;font-size:12px">Ils sont <u>formellement contre-indiqués pendant 1 semaine</u> car ils perturbent la coagulation et la cicatrisation.</td></tr>
     <tr><th style="padding:8px 10px;background:#f0f4f8;border:1px solid #ccc;text-align:left;font-size:12px">Ultérieurement</th><td style="padding:8px 10px;border:1px solid #ccc;font-size:12px">N'oubliez pas votre visite de contrôle et de dépose des sutures 8-15 jours après l'intervention.</td></tr>
   </table>
-  <p style="font-size:12px;color:#555;margin-top:14px;font-style:italic">En cas d'urgence, de complications importantes ou persistantes malgré ces mesures, n'hésitez pas à nous contacter.</p>
-  <p style="font-size:11px;color:#666;margin-top:10px;text-align:right">ZARATE Julien — Chirurgien-dentiste — 57 rue Charles de Gaulle — Tél. : 03 82 58 10 33</p>`);
+  <p style="font-size:12px;color:#555;margin-top:14px;font-style:italic">En cas d'urgence, de complications importantes ou persistantes malgré ces mesures, n'hésitez pas à nous contacter.</p>`);
 }
 
 // ─── POST-OP IMPLANT ──────────────────────────────────────────────────────────
@@ -4813,7 +4952,7 @@ function renderPostopImplant(p,hdr,date){
   showDocResult('Recommandations post-op — Implant',`${hdr}
   <h2 style="font-size:17px;font-weight:700;text-align:center;margin-bottom:4px">Vous venez de subir une intervention implantaire</h2>
   <p style="font-size:12px;text-align:center;color:#555;margin-bottom:16px">Pour éviter les complications et assurer une bonne cicatrisation :</p>
-  <p style="font-size:12px;margin-bottom:14px">Patient : <strong>${escHtml(p.full)}</strong> — ${date}</p>
+  <p style="font-size:12px;margin-bottom:14px">${p.full?`Patient : <strong>${escHtml(p.full)}</strong> — `:''}${date}</p>
   <table style="width:100%;border-collapse:collapse">
     <tr><th style="padding:8px 10px;background:#f0f4f8;border:1px solid #ccc;width:22%;text-align:left;font-size:12px">Il est recommandé</th><td style="padding:8px 10px;border:1px solid #ccc;font-size:12px">• De ne pas faire de bain de bouche pendant les premières 24 heures<br>• De prendre les médicaments prescrits<br>• De ne pas se livrer à une activité physique importante<br>• De ne pas fumer</td></tr>
     <tr><th style="padding:8px 10px;background:#f0f4f8;border:1px solid #ccc;text-align:left;font-size:12px">La douleur</th><td style="padding:8px 10px;border:1px solid #ccc;font-size:12px">Celle-ci peut survenir dès la fin de l'intervention ou quelque temps après. Elle peut être d'une intensité variable selon les individus.<br>• Éviter l'aspirine<br>• Prendre les antalgiques prescrits, suivre l'ordonnance prescrite</td></tr>
@@ -4821,15 +4960,14 @@ function renderPostopImplant(p,hdr,date){
     <tr><th style="padding:8px 10px;background:#f0f4f8;border:1px solid #ccc;text-align:left;font-size:12px">L'œdème</th><td style="padding:8px 10px;border:1px solid #ccc;font-size:12px">Après une chirurgie, l'œdème apparaît de façon plus ou moins importante selon les individus. Il peut survenir le jour même, parfois le lendemain ou le surlendemain, ce qui est tout à fait normal.<br>• Appliquer une poche de glace, la garder 10 min puis l'enlever 10 min, renouveler 3 à 4 fois ou plus le jour même et le lendemain.</td></tr>
     <tr><th style="padding:8px 10px;background:#f0f4f8;border:1px solid #ccc;text-align:left;font-size:12px">Hygiène buccale</th><td style="padding:8px 10px;border:1px solid #ccc;font-size:12px">• Ne pas faire de bain de bouche le jour de l'intervention<br>• Commencer le jour suivant le bain de bouche<br>• Ne pas brosser la zone opérée ou éventuellement avec une brosse post-opératoire si le praticien le décide</td></tr>
     <tr><th style="padding:8px 10px;background:#f0f4f8;border:1px solid #ccc;text-align:left;font-size:12px">Alimentation</th><td style="padding:8px 10px;border:1px solid #ccc;font-size:12px">Ne pas mastiquer sur la zone opérée. Éviter les produits liquides chauds la première semaine.</td></tr>
-  </table>
-  <p style="font-size:11px;color:#666;margin-top:14px;text-align:right">ZARATE Julien — Chirurgien-dentiste — 57 rue Charles de Gaulle — Tél. : 03 82 58 10 33</p>`);
+  </table>`);
 }
 
 // ─── BLANCHIMENT ─────────────────────────────────────────────────────────────
 function renderBlanchiment(p,hdr,date){
   showDocResult('Protocole blanchiment',`${hdr}
   <h2 style="font-size:17px;font-weight:700;text-align:center;margin-bottom:4px">Traitement par éclaircissement en gouttière</h2>
-  <p style="font-size:12px;color:#555;text-align:center;margin-bottom:14px">Patient : <strong>${escHtml(p.full)}</strong> — ${date}</p>
+  <p style="font-size:12px;color:#555;text-align:center;margin-bottom:14px">${p.full?`Patient : <strong>${escHtml(p.full)}</strong> — `:''}${date}</p>
   <p style="font-size:12px;line-height:1.7;margin-bottom:12px">Les différentes informations ci-dessous vous récapitulent le protocole du traitement d'éclaircissement de vos dents avec l'aide de gouttières personnalisées, comme cela vous a été expliqué.</p>
   <ol style="font-size:12px;line-height:1.9;padding-left:18px;margin-bottom:14px">
     <li>Brossez les dents avec le dentifrice fourni. Le gel d'éclaircissement donnera de meilleurs résultats lorsqu'il est utilisé sur des dents propres.</li>
@@ -4848,8 +4986,7 @@ function renderBlanchiment(p,hdr,date){
   <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:6px;padding:10px 14px;font-size:11px;line-height:1.7;color:#555;margin-bottom:10px">
     <strong>VOUS NE DEVEZ PAS EMPLOYER CE PRODUIT SI VOUS ÊTES ENCEINTE, SI VOUS AVEZ DES PROBLÈMES DE SANTÉ, UNE MALADIE PARODONTALE OU DES GENCIVES EN MAUVAIS ÉTAT, DES DENTS DÉLABRÉES OU DES PROBLÈMES DE MÂCHOIRE, OU SI VOUS AVEZ MOINS DE 16 ANS.</strong><br>
     VEUILLEZ CONSULTER VOTRE CHIRURGIEN-DENTISTE AVANT DE COMMENCER TOUT TRAITEMENT D'ÉCLAIRCISSEMENT DENTAIRE.
-  </div>
-  <p style="font-size:11px;color:#666;text-align:right">ZARATE Julien — Chirurgien-dentiste — 57 rue Charles de Gaulle — Tél. : 03 82 58 10 33</p>`);
+  </div>`);
 }
 
 // ─── ATTESTATION DE PRÉSENCE ──────────────────────────────────────────────────
@@ -4858,12 +4995,11 @@ function renderAttestation(p,hdr,date){
   <h2 style="font-size:20px;font-weight:700;text-align:center;margin:24px 0 36px">Attestation de présence</h2>
   <p style="font-size:13px;line-height:2.2;margin-bottom:30px">
     Je soussigné, Docteur Julien ZARATE, chirurgien-dentiste,<br>
-    certifie que <strong>${escHtml(p.full)}</strong>${p.ddn ? `, né(e) le ${escHtml(p.ddn)},` : ''} est venu(e) au cabinet dentaire le <strong>${date}</strong>.
+    certifie que <strong>${escHtml(p.full)||'le/la patient(e)'}</strong>${p.ddn ? `, né(e) le ${escHtml(p.ddn)},` : ''} est venu(e) au cabinet dentaire le <strong>${date}</strong>.
   </p>
   <p style="font-size:13px;margin-bottom:50px">Établie à la demande de l'intéressé(e) pour faire valoir ce que de droit.</p>
   <p style="font-size:13px;margin-top:30px">Dr Julien ZARATE</p>
-  ${getSig()}
-  <p style="font-size:11px;color:#666;margin-top:50px;text-align:right">ZARATE Julien — Chirurgien-Dentiste — 57 rue Charles de Gaulle — Tél. : 03 82 58 10 33</p>`);
+  ${getSig()}`);
 }
 
 // ─── DIPLÔME ENFANT COURAGEUX ─────────────────────────────────────────────────
@@ -4947,7 +5083,7 @@ function renderDiplome(p,hdr,date){
 function renderFaisabiliteImplant(p,hdr,date){
   showDocResult('Confirmation faisabilité implantaire',`${hdr}
   <h2 style="font-size:17px;font-weight:700;text-align:center;margin-bottom:16px">Confirmation de la faisabilité implantaire</h2>
-  <p style="font-size:12px;margin-bottom:10px">Patient : <strong>${escHtml(p.full)}</strong> — ${date}</p>
+  <p style="font-size:12px;margin-bottom:10px">${p.full?`Patient : <strong>${escHtml(p.full)}</strong> — `:''}${date}</p>
   <p style="font-size:12px;line-height:1.7;margin-bottom:10px">Un plan de traitement (rendez-vous), devis, consentement ainsi qu'une ordonnance vous sont remis.</p>
   <div style="border:1.5px solid #1a3c5e;border-radius:8px;padding:14px 18px;margin-bottom:18px;text-align:center">
     <div style="font-size:13px;font-weight:700;margin-bottom:6px">Le rendez-vous pour la pose d'implant est pris :</div>
@@ -4968,15 +5104,14 @@ function renderFaisabiliteImplant(p,hdr,date){
     <p style="font-size:12px;line-height:1.7;margin-bottom:6px">Il vous sera remis des instructions post-opératoires, lisez-les à votre retour chez vous à tête reposée.</p>
     <p style="font-size:12px;line-height:1.7">Si vous désirez changer votre rendez-vous opératoire, ayez l'obligeance de le faire le plus tôt possible.</p>
   </div>
-  <p style="font-size:12px;color:#555;font-style:italic">D'une façon générale, n'hésitez pas à nous appeler pour toute information complémentaire avant ou après votre intervention.</p>
-  <p style="font-size:11px;color:#666;margin-top:14px;text-align:right">ZARATE Julien — Chirurgien-Dentiste — 57 rue Charles de Gaulle — Tél. : 03 82 58 10 33</p>`);
+  <p style="font-size:12px;color:#555;font-style:italic">D'une façon générale, n'hésitez pas à nous appeler pour toute information complémentaire avant ou après votre intervention.</p>`);
 }
 
 // ─── CONTRAT DE SOINS ─────────────────────────────────────────────────────────
 function renderContratSoins(p,hdr,date){
   showDocResult('Contrat de soins',`${hdr}
   <h2 style="font-size:17px;font-weight:700;text-align:center;margin-bottom:16px">Contrat de soins</h2>
-  <p style="font-size:12px;margin-bottom:14px">Patient : <strong>${escHtml(p.full)}</strong> — ${date}</p>
+  <p style="font-size:12px;margin-bottom:14px">${p.full?`Patient : <strong>${escHtml(p.full)}</strong> — `:''}${date}</p>
   <p style="font-size:12px;line-height:1.7;margin-bottom:14px">Les points suivants ont pour but de vous informer sur le fonctionnement du docteur ZARATE afin de mieux vous prendre en charge.</p>
   <ul style="font-size:12px;line-height:2;padding-left:18px;margin-bottom:20px">
     <li>Prendre un rendez-vous est un <strong>engagement de votre part</strong>.</li>
@@ -5008,7 +5143,7 @@ function renderContratSoins(p,hdr,date){
 function renderConsentementDDS(p,hdr,date){
   showDocResult('Consentement — Dents de sagesse',`${hdr}
   <h2 style="font-size:14px;font-weight:700;text-align:center;margin-bottom:3px">Information médicale concernant l'avulsion des dents de sagesse</h2>
-  <p style="font-size:10px;margin-bottom:8px">Patient : <strong>${escHtml(p.full)}</strong>${p.ddn?` — Né(e) le ${escHtml(p.ddn)}`:''} — ${date}</p>
+  <p style="font-size:10px;margin-bottom:8px">${p.full?`Patient : <strong>${escHtml(p.full)}</strong>${p.ddn?` — Né(e) le ${escHtml(p.ddn)}`:''} — `:''}${date}</p>
   <p style="font-size:10px;line-height:1.5;margin-bottom:7px">Les avulsions des dents de sagesse ou troisième molaires, (appelées germes lorsque les racines sont absentes ou incomplètes) sont indiquées en raison d'un mauvais positionnement, d'un manque de place, d'accidents douloureux, inflammatoires, infectieux, tumoraux...</p>
   <p style="font-size:10px;line-height:1.5;margin-bottom:7px">L'intervention peut s'effectuer sous anesthésie locale ou sous anesthésie générale, en fonction du caractère invasif de l'acte (nombre de dents, profondeur d'inclusion, situation anormale...) et/ou du statut médical du patient (pathologie médicale, coopération, état psychologique...).</p>
   <p style="font-size:10px;line-height:1.5;margin-bottom:7px">Les suites opératoires normales sont : l'œdème (gonflement des joues), la douleur, la limitation de l'ouverture de la bouche, ainsi qu'un petit saignement de quelques heures.</p>
@@ -5053,7 +5188,7 @@ function renderConsentementPAC(p,hdr,date){
   showDocResult('Consentement — Prothèse amovible complète',`${hdr}
   <h2 style="font-size:16px;font-weight:700;text-align:center;margin-bottom:4px">Formulaire de consentement éclairé</h2>
   <h3 style="font-size:13px;font-weight:500;text-align:center;color:#555;margin-bottom:14px">(prothèse amovible complète)</h3>
-  <p style="font-size:12px;margin-bottom:14px">Patient : <strong>${escHtml(p.full)}</strong>${p.ddn?` — Né(e) le ${escHtml(p.ddn)}`:''} — ${date}</p>
+  <p style="font-size:12px;margin-bottom:14px">${p.full?`Patient : <strong>${escHtml(p.full)}</strong>${p.ddn?` — Né(e) le ${escHtml(p.ddn)}`:''} — `:''}${date}</p>
   <p style="font-size:12px;line-height:1.7;margin-bottom:12px">Je soussigné(e) <strong>${escHtml(p.full)||'___________________________'}</strong> donne mon consentement éclairé, après avoir reçu les informations nécessaires concernant le plan de traitement dans la réalisation de prothèse amovible complète qui sera réalisé par le Dr ZARATE Julien.</p>
   <p style="font-size:12px;font-weight:600;margin-bottom:8px">Il a été précisé que :</p>
   <ul style="font-size:12px;line-height:1.9;padding-left:18px;margin-bottom:16px">
@@ -5122,8 +5257,7 @@ function renderConsentementImplant(p,hdr,date){
       <div style="font-size:10px;font-weight:600;margin-bottom:4px">Signature du praticien</div>
       ${getSig()}
     </div>
-  </div>
-  <p style="font-size:10px;color:#888;margin-top:10px;text-align:center">Document établi en deux exemplaires — un remis au patient, un conservé au cabinet.</p>`);
+  </div>`);
 }
 
 // ─── FICHE ENDO (interactive + IA) ───────────────────────────────────────────
