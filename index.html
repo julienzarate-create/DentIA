@@ -1,5 +1,5 @@
 <!--
-  DentIA v3.35
+  DentIA v3.36
   © 2025 — Tous droits réservés
   Ce logiciel est protégé par le droit d'auteur.
   Toute reproduction ou redistribution à des fins commerciales
@@ -11,7 +11,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DentIA v3.35</title>
+<title>DentIA v3.36</title>
 <link rel="icon" type="image/png" href="DentIA_logo_2.png">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Palanquin&family=Roboto:wght@400;700&family=Poppins:wght@400;700&family=Merriweather:wght@400;700&family=Oswald:wght@400;700&family=Arvo:wght@400;700&family=Bitter:wght@400;700&family=Outfit:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -227,16 +227,21 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
 /* modal confrères */
 .confreres-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;display:flex;align-items:center;justify-content:center}
 .confreres-modal{background:var(--surface);border-radius:16px;padding:28px;max-width:480px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
-/* v3.35 : frise du Planning du jour */
-.planning-hourline{position:absolute;left:0;right:0;border-top:1px dashed var(--border);font-size:10px;color:var(--ink3)}
-.planning-hourline span{position:relative;top:-7px;background:var(--surface);padding-right:6px}
-.planning-block{position:absolute;left:52px;right:6px;border-radius:9px;padding:6px 10px;overflow:hidden;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.12);transition:transform .12s,box-shadow .12s;border:1px solid rgba(0,0,0,.06)}
-.planning-block:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(0,0,0,.18);z-index:5}
-.planning-block .pb-name{font-size:12px;font-weight:700;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.planning-block .pb-meta{font-size:10.5px;color:#333;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.planning-block .pb-done{position:absolute;top:4px;right:6px;font-size:13px;background:#fff;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.2)}
-.planning-nowline{position:absolute;left:0;right:0;height:0;border-top:2px solid var(--red);z-index:6;pointer-events:none}
-.planning-nowline::before{content:'';position:absolute;left:44px;top:-4px;width:8px;height:8px;border-radius:50%;background:var(--red)}
+/* v3.36 : liste compacte du Planning du jour (remplace la frise proportionnelle au temps —
+   retour utilisateur : il ne veut que l'ordre chronologique, pas la durée réelle des rendez-vous,
+   pour que tout tienne à l'écran sans avoir besoin de scroller). */
+.planning-list{display:flex;flex-direction:column;gap:8px}
+.planning-row{position:relative;border-radius:9px;padding:8px 34px 8px 12px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.10);transition:transform .12s,box-shadow .12s;border:1px solid rgba(0,0,0,.07)}
+.planning-row:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(0,0,0,.16);z-index:2}
+.planning-row.current{border:2px solid var(--red);box-shadow:0 0 0 3px rgba(192,57,43,.15)}
+.planning-row .pr-time{font-size:11px;font-weight:700;color:#333;opacity:.75}
+.planning-row .pr-name{font-size:13px;font-weight:700;color:#1a1a1a}
+.planning-row .pr-meta{font-size:11px;color:#333;opacity:.8;margin-top:2px}
+.planning-row .pr-done{position:absolute;top:8px;right:8px;font-size:13px;background:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.planning-current-tag{display:inline-block;background:var(--red);color:#fff;font-size:9.5px;font-weight:700;border-radius:5px;padding:2px 6px;margin-left:6px;letter-spacing:.3px}
+/* v3.36 : civilité pré-remplie par déduction IA mais incertaine — surlignage jaune jusqu'à ce que
+   l'utilisateur clique sur le champ pour signaler qu'il a vérifié. */
+#c-civilite.civilite-uncertain{background:#fef9c3;border-color:#fde047}
 </style>
 </head>
 <body>
@@ -244,7 +249,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
 <div class="sidebar">
   <div class="sb-logo" onclick="goHome()" style="cursor:pointer" title="Retour à l'accueil">
     <div class="mark"><img src="DentIA_logo_2.png" alt="DentIA"></div>
-    <div><h1>DentIA</h1><small>v3.35</small></div>
+    <div><h1>DentIA</h1><small>v3.36</small></div>
   </div>
   <nav class="sb-nav">
     <div class="sb-section">Consultation</div>
@@ -336,18 +341,20 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
           <button onclick="dismissPlanningSuggestion()" style="padding:7px 12px;background:none;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;color:var(--ink2)">Ignorer</button>
         </div>
       </div>
-      <!-- v3.35 : badge d'âge — affiché uniquement quand l'âge vient du Planning du jour (on n'a
-           alors pas de date de naissance exacte, donc on ne remplit pas le champ date). -->
-      <div id="c-planning-age-badge" style="display:none;margin-top:6px;font-size:11px;color:var(--ink3);font-style:italic"></div>
       <!-- v3.33 : zone invisible qui capte le Ctrl+V après activation du bouton ci-dessus -->
       <div id="c-logos-import-zone" contenteditable="true" onpaste="handleLogosImportPaste(event)" onblur="deactivateLogosImportPaste()" style="position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none"></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <select id="c-civilite" onchange="syncPatientToDocs()" style="padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;color:var(--ink2)"><option value="">Civilité</option><option value="M">Monsieur</option><option value="Mme">Madame</option></select>
+        <select id="c-civilite" onchange="clearCiviliteUncertain();syncPatientToDocs()" onclick="clearCiviliteUncertain()" style="padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;color:var(--ink2)"><option value="">Civilité</option><option value="M">Monsieur</option><option value="Mme">Madame</option></select>
         <input type="text" id="c-nom" placeholder="Nom" autocomplete="off" oninput="syncPatientToDocs()" style="flex:1;min-width:110px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;color:var(--ink)">
         <input type="text" id="c-prenom" placeholder="Prénom" autocomplete="off" oninput="syncPatientToDocs()" style="flex:1;min-width:110px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;color:var(--ink)">
-        <input type="date" id="c-ddn" autocomplete="off" onchange="syncPatientToDocs()" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;color:var(--ink2)">
+        <input type="number" id="c-age" placeholder="Âge" min="0" max="130" autocomplete="off" onchange="syncPatientToDocs()" style="width:80px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;color:var(--ink2)">
         <button id="c-update-btn" onclick="updateDocsWithPatient()" style="display:none;padding:8px 14px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">🔄 Mettre à jour</button>
       </div>
+      <!-- v3.36 : remplace l'ancien badge d'âge (l'âge remplit désormais directement le champ
+           Âge, la date de naissance ayant été retirée de toute l'application) — encart de rappel
+           discret SOUS les champs patient, listant les infos du planning utilisées comme contexte
+           par l'IA (heure, e-mail, notes de soin). -->
+      <div id="c-planning-context-recap" style="display:none;margin-top:8px;background:var(--s2);border-radius:8px;padding:8px 10px;font-size:11px;color:var(--ink2);line-height:1.6"></div>
       <!-- v3.33 : champs coordonnées patient — masqués par défaut, révélés automatiquement
            uniquement si une capture d'écran importée en contient. Restent modifiables à la main
            une fois affichés. -->
@@ -485,8 +492,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
     </div>
   </div>
   <!-- v3.35 : nouvel onglet "Planning du jour" — import d'une capture d'écran du planning
-       journalier du logiciel métier (analysée par GPT-4o vision), affiché sous forme de frise
-       horaire stylisée avec une ligne rouge représentant l'heure actuelle. -->
+       journalier du logiciel métier (analysée par GPT-4o vision). v3.36 : affichage revu en
+       liste compacte dans l'ordre chronologique (au lieu d'une frise proportionnelle au temps),
+       avec le patient en cours signalé par un encadré rouge, recalculé chaque minute. -->
   <div class="cpage" id="page-planning">
     <div class="pg-title">Planning du jour</div>
     <div class="pg-sub">Importez une capture d'écran de votre planning pour préparer vos dossiers patient.</div>
@@ -507,8 +515,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
       <div style="font-size:13px">Aucun planning importé pour aujourd'hui.</div>
       <div style="font-size:12px;margin-top:4px">Cliquez sur "📸 Importer une capture d'écran du planning" ci-dessus.</div>
     </div>
-    <div id="planning-timeline-wrap" class="card" style="display:none;padding:0;overflow:hidden">
-      <div id="planning-timeline" style="position:relative;overflow-y:auto;max-height:650px;padding:10px 14px"></div>
+    <div id="planning-timeline-wrap" class="card" style="display:none">
+      <div id="planning-timeline" style="padding:2px"></div>
     </div>
   </div>
   <div class="cpage" id="page-historique">
@@ -539,8 +547,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
           <input type="text" id="doc-prenom" placeholder="Martin" oninput="onDocPatientChange()" style="width:100%;padding:8px 10px;border:1px solid var(--border2);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink);background:var(--surface);outline:none;box-sizing:border-box">
         </div>
         <div style="flex:1;min-width:140px">
-          <label style="font-size:11px;color:var(--ink2);display:block;margin-bottom:4px">Date de naissance</label>
-          <input type="text" id="doc-ddn" placeholder="01011980" oninput="onDocPatientChange()" style="width:100%;padding:8px 10px;border:1px solid var(--border2);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink);background:var(--surface);outline:none;box-sizing:border-box">
+          <label style="font-size:11px;color:var(--ink2);display:block;margin-bottom:4px">Âge</label>
+          <input type="number" id="doc-age" placeholder="Âge" min="0" max="130" oninput="onDocPatientChange()" style="width:100%;padding:8px 10px;border:1px solid var(--border2);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink);background:var(--surface);outline:none;box-sizing:border-box">
         </div>
       </div>
       <div id="doc-audio-info" style="display:none;margin-top:12px;padding:8px 12px;background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);border-radius:8px;font-size:12px;color:var(--accent)">
@@ -986,6 +994,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
              changelog — plus de fusion/remixage de plusieurs versions en un seul résumé groupé (la
              section "Version 3.19 – 3.22" ci-dessous est un reliquat d'avant cette règle, conservé
              tel quel pour ne rien perdre de l'historique déjà écrit). -->
+        <div style="margin-bottom:18px"><div style="font-size:13px;font-weight:700;margin-bottom:8px">Version 3.36</div><ul style="margin:0;padding-left:18px;font-size:12px;color:var(--ink2);line-height:1.9">
+          <li>Planning du jour — affichage revu en liste compacte (ordre chronologique) au lieu d'une frise proportionnelle au temps, pour que toute la journée tienne à l'écran sans avoir besoin de scroller. Le patient "en cours" est signalé par un encadré rouge et une étiquette "EN COURS", recalculés chaque minute.</li>
+          <li>Planning du jour — l'IA devine désormais aussi une couleur approximative par patient (proche de celle affichée sur la capture d'écran d'origine), au lieu d'une couleur générée aléatoirement par l'application.</li>
+          <li>Planning du jour — fiabilité de l'import renforcée : l'analyse se fait désormais en deux passages IA (d'abord la liste complète des noms/heures dans l'ordre, puis les détails de chaque patient), pour éviter qu'un patient soit oublié ou qu'une note de soin soit tronquée ou mélangée sur un planning chargé. Les notes de soin sont recopiées mot pour mot, sans reformulation.</li>
+          <li>Nouveau : déduction automatique de la civilité (Monsieur/Madame) à partir du prénom, au moment du pré-remplissage depuis le Planning du jour ou la suggestion automatique. Si l'IA n'est pas certaine (prénom rare, mixte ou ambigu), le champ Civilité est pré-rempli mais surligné en jaune ; cliquer dessus efface le surlignage pour confirmer la vérification.</li>
+          <li>Les informations du Planning du jour (heure du rendez-vous, e-mail, notes de soin prévu) sont désormais transmises à l'IA comme contexte pour TOUS les documents générés (SmartNote, compte rendu, certificat, courrier confrère, etc.), et plus seulement stockées pour affichage.</li>
+          <li>Nouveau : encart discret sous les champs patient de "Nouvel enregistrement", listant les informations du Planning du jour effectivement récupérées pour le patient sélectionné (heure, e-mail, notes de soin) — confirme visuellement qu'elles seront utilisées comme contexte par l'IA.</li>
+          <li>Remplacement complet de la date de naissance par l'âge dans toute l'application (champs "Nouvel enregistrement" et "Mes Documents", ainsi que le Certificat, la Lettre patient, le Consentement implant, le Consentement dents de sagesse, le Consentement PAC, l'Attestation de présence et le Courrier confrère). L'âge s'affiche entre parenthèses juste après le nom du patient (ex. "Mr DUPONT Jean (45 ans)"). Les consultations déjà présentes dans l'Historique avant cette version ne sont pas modifiées rétroactivement.</li>
+          <li>L'import individuel "📋 Coller depuis logiciel métier" calcule désormais automatiquement un âge si le logiciel métier n'affiche qu'une date de naissance — DentIA ne conserve plus jamais de date de naissance exacte, uniquement l'âge qui en découle.</li>
+        </ul></div>
         <div style="margin-bottom:18px"><div style="font-size:13px;font-weight:700;margin-bottom:8px">Version 3.35</div><ul style="margin:0;padding-left:18px;font-size:12px;color:var(--ink2);line-height:1.9">
           <li>Nouveau : onglet "📅 Planning du jour" (entre "Nouvel enregistrement" et "Historique") — importez une capture d'écran de votre planning journalier (logiciel métier) grâce au bouton "📸 Importer une capture d'écran du planning" (Ctrl+V après capture). L'IA (GPT-4o vision) analyse l'image et prépare les dossiers de tous les patients de la journée, sans créer de fiche patient automatiquement.</li>
           <li>Affichage sous forme de frise horaire stylisée qui s'adapte aux informations réellement lues (nom, prénom, heure, âge — ou date de naissance si c'est ce qui est affiché sur votre planning —, e-mail, motif/soin prévu), avec une ligne rouge qui avance en temps réel (rafraîchie chaque minute) pour repérer où vous en êtes dans la journée.</li>
@@ -1439,7 +1457,7 @@ Règles strictes :
 
 Identité du praticien et du patient à insérer dans la première phrase (voir "Je soussigné(e)" ci-dessous) :
 - Praticien : utiliser EXACTEMENT le nom et le titre fournis en contexte (ex. "Docteur Julien ZARATE"), et accorder "soussigné"/"soussignée" selon le genre du praticien fourni en contexte (Homme → "soussigné", Femme → "soussignée") — ne jamais laisser "(e)" entre parenthèses, toujours trancher.
-- Patient : insérer EXACTEMENT la civilité (Mr/Mme si fournie), le nom en majuscules, le prénom, et la date de naissance si fournie, du patient donnés en contexte (ex. "Mr ROGERER Bernard, né le 04/05/1988"). Si le genre du patient n'est pas déductible de la civilité fournie, accorder "né(e)" au masculin par défaut ("né le") sauf civilité "Mme" auquel cas utiliser "née le". Si aucun patient n'est fourni, écrire "le patient/la patiente" sans forcer de genre.
+- Patient : insérer EXACTEMENT la civilité (Mr/Mme si fournie), le nom en majuscules, le prénom, et l'âge entre parenthèses si fourni, du patient donnés en contexte (ex. "Mr ROGERER Bernard (36 ans)"). Si aucun patient n'est fourni, écrire "le patient/la patiente" sans forcer de genre.
 
 Structure du certificat médical initial :
 1. **Circonstances** (si mentionnées) : date, heure, mécanisme
@@ -1450,7 +1468,7 @@ Structure du certificat médical initial :
 6. **Conclusion** : ITT proposée (uniquement si mentionnée)
 
 Structure des autres types :
-1. Je soussigné(e) [Titre + Nom du praticien, accordé selon son genre — voir ci-dessus], certifie avoir examiné ce jour [civilité + nom + prénom du patient, avec date de naissance si fournie]…
+1. Je soussigné(e) [Titre + Nom du praticien, accordé selon son genre — voir ci-dessus], certifie avoir examiné ce jour [civilité + nom + prénom du patient, avec âge entre parenthèses si fourni]…
 2. Constatations cliniques objectives
 3. Conclusion adaptée au type
 4. "Certificat établi à la demande de l'intéressé(e) et remis en main propre"`,
@@ -2115,14 +2133,13 @@ function openHistModal(id){
   document.querySelectorAll('.sb-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-consult').classList.add('active');
 
-  // Pré-remplir le nom du patient (+ date de naissance si connue via la fiche patient)
+  // Pré-remplir le nom du patient (+ âge si connu via la fiche patient)
   const parts=(h.patient||'').split(' ');
   document.getElementById('c-nom').value=parts[0]||'';
   document.getElementById('c-prenom').value=parts.slice(1).join(' ')||'';
-  // Note : la date de naissance est stockée en texte libre (cohérent avec les documents
-  // générés) et n'est pas rattachée à cette consultation précise — le champ reste vide ici,
-  // comme c'était déjà le cas.
-  document.getElementById('c-ddn').value='';
+  // Note : l'âge n'est pas rattaché à cette consultation précise (il change chaque année) —
+  // le champ reste vide ici, comme c'était déjà le cas pour la date de naissance auparavant.
+  document.getElementById('c-age').value='';
   // v3.21 : protection — le nom/prénom d'une consultation déjà enregistrée ne doit pas
   // pouvoir être modifié en un simple clic accidentel, contrairement à un nouvel enregistrement.
   setHistPatientProtection(true);
@@ -2226,7 +2243,7 @@ function openHistModal(id){
 // branché de l'ancienne modale Historique). Par défaut, les champs sont verrouillés en
 // lecture seule et un bouton "✏️ Modifier nom" permet de les déverrouiller explicitement.
 function setHistPatientProtection(protect){
-  ['c-nom','c-prenom','c-ddn'].forEach(id=>{const el=document.getElementById(id);if(el)el.readOnly=protect;});
+  ['c-nom','c-prenom','c-age'].forEach(id=>{const el=document.getElementById(id);if(el)el.readOnly=protect;});
   document.getElementById('c-hist-edit-btn').style.display=protect?'inline-block':'none';
   document.getElementById('c-hist-save-btn').style.display='none';
   document.getElementById('c-hist-cancel-btn').style.display='none';
@@ -2234,8 +2251,8 @@ function setHistPatientProtection(protect){
 }
 let _histPatientBackup=null;
 function toggleHistPatientEdit(){
-  _histPatientBackup={nom:document.getElementById('c-nom').value,prenom:document.getElementById('c-prenom').value,ddn:document.getElementById('c-ddn').value};
-  ['c-nom','c-prenom','c-ddn'].forEach(id=>document.getElementById(id).readOnly=false);
+  _histPatientBackup={nom:document.getElementById('c-nom').value,prenom:document.getElementById('c-prenom').value,age:document.getElementById('c-age').value};
+  ['c-nom','c-prenom','c-age'].forEach(id=>document.getElementById(id).readOnly=false);
   document.getElementById('c-hist-edit-btn').style.display='none';
   document.getElementById('c-hist-save-btn').style.display='inline-block';
   document.getElementById('c-hist-cancel-btn').style.display='inline-block';
@@ -2245,7 +2262,7 @@ function cancelHistPatientEdit(){
   if(_histPatientBackup){
     document.getElementById('c-nom').value=_histPatientBackup.nom;
     document.getElementById('c-prenom').value=_histPatientBackup.prenom;
-    document.getElementById('c-ddn').value=_histPatientBackup.ddn;
+    document.getElementById('c-age').value=_histPatientBackup.age;
   }
   setHistPatientProtection(true);
 }
@@ -2533,7 +2550,7 @@ function feedbackItemToReport(origin,item){
     if(item.patient)anonFn=t=>(t||'').split(item.patient).join('Patient X');
   }else{
     label=item.label||'';before=item.before||'';exchange=item.exchange||'';after=item.after||'';model=item.model||'';
-    anonFn=t=>anonymizeFeedbackText(t,item.patientNom,item.patientPrenom,item.patientDdn);
+    anonFn=t=>anonymizeFeedbackText(t,item.patientNom,item.patientPrenom,item.patientAge);
   }
   return`=== RAPPORT TECHNIQUE DENTIA — FEEDBACK ===
 Action : ${label}
@@ -2865,7 +2882,7 @@ async function cGenerate(){
       if(!docSel.length)return;
       const sep='|||DOCSEP|||';
       const docInstr=docSel.map((d,i)=>{const customRules=aiDocRules[d]?'\nRègles spécifiques : '+aiDocRules[d]:'';const extra=d==='courrier'?courrierExtraInstructions():'';return`DOCUMENT ${i+1} — ${DOC_LABELS[d].toUpperCase()} :\n${DOC_PROMPTS[d]}${customRules}${extra}`;}).join('\n\n');
-      const prompt=`Praticien :\n${header}\nTitre et nom du praticien : ${getPraticienTitledName()}\nGenre du praticien : ${buildPraticienGenreLine()}\nDate : ${today}\nPatient : ${patient}\nPatient (civilité/nom majuscule/DDN) : ${buildPatientContextLine()}${aiGeneral?'\n\nHabitudes de rédaction :\n'+aiGeneral:''}\n\nÀ partir de la transcription ci-dessous, génère ${docSel.length} document(s) séparés UNIQUEMENT par "${sep}".\n\n${docInstr}\n\nCommence directement par le contenu du premier document, SANS répéter le libellé "DOCUMENT X — NOM :" dans le contenu.\n\nTRANSCRIPTION :\n${transcript}`;
+      const prompt=`Praticien :\n${header}\nTitre et nom du praticien : ${getPraticienTitledName()}\nGenre du praticien : ${buildPraticienGenreLine()}\nDate : ${today}\nPatient : ${patient}\nPatient (civilité/nom majuscule/âge) : ${buildPatientContextLine()}${buildPlanningContextBlock()}${aiGeneral?'\n\nHabitudes de rédaction :\n'+aiGeneral:''}\n\nÀ partir de la transcription ci-dessous, génère ${docSel.length} document(s) séparés UNIQUEMENT par "${sep}".\n\n${docInstr}\n\nCommence directement par le contenu du premier document, SANS répéter le libellé "DOCUMENT X — NOM :" dans le contenu.\n\nTRANSCRIPTION :\n${transcript}`;
       const result=await callGPT(openAIKey,sys,prompt);
       const parts=result.split(sep);
       docSel.forEach((d,i)=>{let text=(parts[i]||'').trim();text=text.replace(/^DOCUMENT\s+\d+\s*[—-]\s*.+\n?/i,'').trim();cGenDocs[d]=text;});
@@ -2952,19 +2969,19 @@ async function cGenerateDictee(){
 
 function buildPatientName(){const n=document.getElementById('c-nom').value.trim(),p=document.getElementById('c-prenom').value.trim();return[n,p].filter(Boolean).join(' ')||'Patient non renseigné';}
 
-// v3.24 : ligne de contexte patient enrichie (civilité + NOM en majuscules + prénom + date de
-// naissance) transmise à l'IA pour le Certificat et la Lettre patient, afin qu'elle puisse
-// composer correctement leur première phrase ("Bonjour Mr X," / "Je soussigné(e)... Mr X né le...").
+// v3.24 : ligne de contexte patient enrichie (civilité + NOM en majuscules + prénom + âge)
+// transmise à l'IA pour le Certificat et la Lettre patient, afin qu'elle puisse composer
+// correctement leur première phrase ("Bonjour Mr X," / "Je soussigné(e)... Mr X (45 ans)...").
+// v3.36 : la date de naissance a été retirée de toute l'application, remplacée par l'âge —
+// formulation retenue : l'âge entre parenthèses juste après le nom, plus discret.
 function buildPatientContextLine(){
   const civ=(document.getElementById('c-civilite')||{}).value||'';
   const civLabel=civ==='M'?'Mr':(civ==='Mme'?'Mme':'');
   const nom=(document.getElementById('c-nom')||{}).value.trim().toUpperCase();
   const prenom=(document.getElementById('c-prenom')||{}).value.trim();
-  const ddnRaw=(document.getElementById('c-ddn')||{}).value||'';
-  let ddnFmt='';
-  if(ddnRaw&&ddnRaw.includes('-')){const p=ddnRaw.split('-');if(p.length===3)ddnFmt=`${p[2]}/${p[1]}/${p[0]}`;}
+  const age=(document.getElementById('c-age')||{}).value||'';
   if(!nom&&!prenom)return'Patient non renseigné';
-  return[civLabel,nom,prenom].filter(Boolean).join(' ')+(ddnFmt?`, né(e) le ${ddnFmt}`:'');
+  return[civLabel,nom,prenom].filter(Boolean).join(' ')+(age?` (${age} ans)`:'');
 }
 // v3.24 : genre du praticien (Homme/Femme), utilisé uniquement pour accorder "soussigné(e)" dans le Certificat
 function buildPraticienGenreLine(){
@@ -3026,7 +3043,7 @@ async function addDoc(d,btn){
     const today=new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
     const aiGeneral=localStorage.getItem('d3-ai-general')||'',customRules=aiDocRules[d]?'\nRègles : '+aiDocRules[d]:'';
     const extra=d==='courrier'?courrierExtraInstructions():'';
-    const result=await callGPT(key,'Tu es un assistant expert en chirurgie dentaire. Tu génères des documents médicaux professionnels, précis et conformes aux pratiques françaises. Règle de style transversale (v3.24) : les mots \'Monsieur\', \'Madame\' et \'Docteur\' peuvent être abrégés (respectivement \'Mr\', \'Mme\', \'Dr\') partout où ils apparaissent ; tous les autres mots doivent toujours être écrits en entier, sans abréviation. Le nom de famille du patient s\'écrit toujours entièrement en MAJUSCULES partout où son identité apparaît dans un document (ex. \'Mr ROGERER Bernard\'), jamais le prénom. Règle d\'accord (v3.28) : le contexte fourni au-dessus contient \'Genre du praticien\' (Homme ou Femme) — accorder systématiquement en genre tout mot, participe ou adjectif se rapportant au praticien lui-même dans le document (ex. \'soussigné\'/\'soussignée\', \'certain\'/\'certaine\'), quel que soit le type de document, sans jamais laisser de forme non tranchée entre parenthèses comme \'(e)\'.',`Praticien :\n${header}\nTitre et nom du praticien : ${getPraticienTitledName()}\nGenre du praticien : ${buildPraticienGenreLine()}\nDate : ${today}\nPatient : ${patient}\nPatient (civilité/nom majuscule/DDN) : ${buildPatientContextLine()}${aiGeneral?'\n\nHabitudes :\n'+aiGeneral:''}\n\n${DOC_PROMPTS[d]}${customRules}${extra}\n\nTRANSCRIPTION :\n${cTranscript}`);
+    const result=await callGPT(key,'Tu es un assistant expert en chirurgie dentaire. Tu génères des documents médicaux professionnels, précis et conformes aux pratiques françaises. Règle de style transversale (v3.24) : les mots \'Monsieur\', \'Madame\' et \'Docteur\' peuvent être abrégés (respectivement \'Mr\', \'Mme\', \'Dr\') partout où ils apparaissent ; tous les autres mots doivent toujours être écrits en entier, sans abréviation. Le nom de famille du patient s\'écrit toujours entièrement en MAJUSCULES partout où son identité apparaît dans un document (ex. \'Mr ROGERER Bernard\'), jamais le prénom. Règle d\'accord (v3.28) : le contexte fourni au-dessus contient \'Genre du praticien\' (Homme ou Femme) — accorder systématiquement en genre tout mot, participe ou adjectif se rapportant au praticien lui-même dans le document (ex. \'soussigné\'/\'soussignée\', \'certain\'/\'certaine\'), quel que soit le type de document, sans jamais laisser de forme non tranchée entre parenthèses comme \'(e)\'.',`Praticien :\n${header}\nTitre et nom du praticien : ${getPraticienTitledName()}\nGenre du praticien : ${buildPraticienGenreLine()}\nDate : ${today}\nPatient : ${patient}\nPatient (civilité/nom majuscule/âge) : ${buildPatientContextLine()}${buildPlanningContextBlock()}${aiGeneral?'\n\nHabitudes :\n'+aiGeneral:''}\n\n${DOC_PROMPTS[d]}${customRules}${extra}\n\nTRANSCRIPTION :\n${cTranscript}`);
     saveStatEntry(0,'gpt-4o',cTranscript||'',result,1,0,0,'action','Ajout document supplémentaire');
     cGenDocs[d]=result.trim();
     const idx=document.getElementById('c-tabs').querySelectorAll('.rtab').length;
@@ -3045,9 +3062,9 @@ async function addDoc(d,btn){
 }
 
 function saveHistory(patient,docs,smartNote,transcript,resume=''){
-  const nom=document.getElementById('c-nom').value.trim(),prenom=document.getElementById('c-prenom').value.trim(),ddn=document.getElementById('c-ddn').value;
+  const nom=document.getElementById('c-nom').value.trim(),prenom=document.getElementById('c-prenom').value.trim(),age=document.getElementById('c-age').value;
   let patientId=null;
-  if(nom){let p=patients.find(x=>x.nom.toLowerCase()===nom.toLowerCase());if(!p){p={id:Date.now().toString(),nom,prenom,ddn};patients.push(p);localStorage.setItem('d3-patients',JSON.stringify(patients));}patientId=p.id;}
+  if(nom){let p=patients.find(x=>x.nom.toLowerCase()===nom.toLowerCase());if(!p){p={id:Date.now().toString(),nom,prenom,age};patients.push(p);localStorage.setItem('d3-patients',JSON.stringify(patients));}patientId=p.id;}
   // Sauvegarder les versions de chaque document
   const versions={};
   Object.keys(docs).forEach((d,i)=>{const vKey='rdc_'+i;if(docVersions[vKey])versions[d]=docVersions[vKey].versions;});
@@ -3095,7 +3112,7 @@ function resumeHistDraft(id){
   const parts=(h.patient||'').split(' ');
   document.getElementById('c-nom').value=parts[0]||'';
   document.getElementById('c-prenom').value=parts.slice(1).join(' ')||'';
-  document.getElementById('c-ddn').value='';
+  document.getElementById('c-age').value='';
   setHistPatientProtection(false); // v3.28 : documents pas encore générés, patient encore librement modifiable
 
   document.getElementById('c-rec-card').style.display='block';
@@ -3135,14 +3152,15 @@ function cReset(){
   document.getElementById('c-err').style.display='none';document.getElementById('c-transcribing').style.display='none';
   document.getElementById('c-transcribed-ok').style.display='none';
   document.getElementById('c-stxt').textContent='Prêt à enregistrer';document.getElementById('c-timer').style.display='none';
-  document.getElementById('c-nom').value='';document.getElementById('c-prenom').value='';document.getElementById('c-ddn').value='';
+  document.getElementById('c-nom').value='';document.getElementById('c-prenom').value='';document.getElementById('c-age').value='';
   const cCivEl=document.getElementById('c-civilite');if(cCivEl)cCivEl.value='';
+  setCiviliteUncertain(false);
   // v3.33 : réinitialisation des coordonnées importées depuis une capture d'écran
   ['c-adresse','c-telephone','c-email'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   const cExtraEl=document.getElementById('c-extra-fields');if(cExtraEl)cExtraEl.style.display='none';
   const cLogosStatusEl=document.getElementById('c-logos-import-status');if(cLogosStatusEl){cLogosStatusEl.style.display='none';cLogosStatusEl.textContent='';}
-  // v3.35 : remise à zéro du badge d'âge (Planning du jour) et de la suggestion automatique
-  const cPlanningBadge=document.getElementById('c-planning-age-badge');if(cPlanningBadge){cPlanningBadge.style.display='none';cPlanningBadge.textContent='';}
+  // v3.36 : remise à zéro de l'encart de rappel contextuel (Planning du jour) et de la suggestion automatique
+  const cPlanningRecap=document.getElementById('c-planning-context-recap');if(cPlanningRecap){cPlanningRecap.style.display='none';cPlanningRecap.innerHTML='';}
   const cPlanningSugg=document.getElementById('c-planning-suggestion');if(cPlanningSugg)cPlanningSugg.style.display='none';
   document.getElementById('c-transcript-box').style.display='none';document.getElementById('c-transcript-box').textContent='';
   showResultsTranscript('');
@@ -3232,7 +3250,7 @@ async function processLogosImportImage(dataUrl){
   status.dataset.busy='1';status.style.display='inline';status.textContent='⏳ Analyse de la capture en cours…';
   document.getElementById('c-err').style.display='none';
   try{
-    const system="Tu extrais des informations d'identité et de coordonnées d'un patient à partir d'une capture d'écran d'un logiciel de gestion de cabinet dentaire (fiche patient). Réponds UNIQUEMENT avec un objet JSON strict, sans aucun texte autour, sans balises markdown ni ```. Inclus uniquement les clés parmi nom, prenom, date_naissance (format JJ/MM/AAAA), adresse, telephone, email dont la valeur est clairement lisible sur l'image. N'invente jamais une valeur : si une information n'est pas visible ou pas certaine, omets simplement la clé.";
+    const system="Tu extrais des informations d'identité et de coordonnées d'un patient à partir d'une capture d'écran d'un logiciel de gestion de cabinet dentaire (fiche patient). Réponds UNIQUEMENT avec un objet JSON strict, sans aucun texte autour, sans balises markdown ni ```. Inclus uniquement les clés parmi nom, prenom, age (nombre), date_naissance (format JJ/MM/AAAA), adresse, telephone, email dont la valeur est clairement lisible sur l'image. Le patient peut être affiché avec un âge ou une date de naissance selon la configuration du logiciel — renseigne celui des deux qui est visible, laisse l'autre de côté. N'invente jamais une valeur : si une information n'est pas visible ou pas certaine, omets simplement la clé.";
     const raw=await callGPTVision(key,system,dataUrl);
     const clean=raw.replace(/```json?/gi,'').replace(/```/g,'').trim();
     let data;
@@ -3249,10 +3267,14 @@ function applyLogosImportData(data){
   if(!data||typeof data!=='object')return;
   if(data.nom)document.getElementById('c-nom').value=data.nom;
   if(data.prenom)document.getElementById('c-prenom').value=data.prenom;
-  if(data.date_naissance){
-    // conversion JJ/MM/AAAA -> AAAA-MM-JJ attendu par l'input type=date
-    const m=String(data.date_naissance).match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})/);
-    if(m)document.getElementById('c-ddn').value=`${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+  // v3.36 : la date de naissance a été retirée de l'application, remplacée par l'âge partout —
+  // si le logiciel métier affiche une date de naissance plutôt qu'un âge, on calcule l'âge à
+  // partir de cette date (aucune date exacte n'est jamais conservée dans DentIA).
+  if(typeof data.age==='number'||(data.age&&!isNaN(parseInt(data.age)))){
+    document.getElementById('c-age').value=parseInt(data.age);
+  }else if(data.date_naissance){
+    const computedAge=computeAgeFromDateStr(data.date_naissance);
+    if(computedAge!==null)document.getElementById('c-age').value=computedAge;
   }
   let hasExtra=false;
   if(data.adresse){document.getElementById('c-adresse').value=data.adresse;hasExtra=true;}
@@ -3272,6 +3294,23 @@ function applyLogosImportData(data){
 let planningClockInterval=null;
 
 function todayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+
+// v3.36 : calcule un âge (en années révolues) à partir d'une date de naissance textuelle
+// JJ/MM/AAAA (ou variantes avec - . comme séparateur) — utilisé uniquement pour convertir une
+// date de naissance lue par l'IA sur une capture d'écran ; DentIA ne conserve plus jamais la
+// date exacte, seulement l'âge qui en découle.
+function computeAgeFromDateStr(str){
+  const m=String(str).match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})/);
+  if(!m)return null;
+  const day=parseInt(m[1]),month=parseInt(m[2]),year=parseInt(m[3]);
+  if(!year||year<1900||year>new Date().getFullYear())return null;
+  const birth=new Date(year,month-1,day);
+  const today=new Date();
+  let age=today.getFullYear()-birth.getFullYear();
+  const hasHadBirthdayThisYear=(today.getMonth()>birth.getMonth())||(today.getMonth()===birth.getMonth()&&today.getDate()>=birth.getDate());
+  if(!hasHadBirthdayThisYear)age--;
+  return(age>=0&&age<130)?age:null;
+}
 
 // Lit le planning stocké ; le vide automatiquement s'il ne correspond pas au jour courant (le
 // praticien colle systématiquement sa capture en début de journée — on ne doit jamais laisser
@@ -3325,26 +3364,62 @@ async function processPlanningImportImage(dataUrl){
   const status=document.getElementById('planning-import-status');
   const key=getKey();
   if(!key){showErr('planning-err','⚠️ Clé API OpenAI manquante pour analyser la capture (à renseigner dans Paramètres).');return;}
-  status.dataset.busy='1';status.style.display='inline';status.textContent='⏳ Analyse du planning en cours…';
+  status.dataset.busy='1';status.style.display='inline';
   document.getElementById('planning-err').style.display='none';
   try{
-    const system="Tu extrais la liste des patients d'une capture d'écran de planning journalier d'un logiciel de gestion de cabinet dentaire. Réponds UNIQUEMENT avec un objet JSON strict, sans aucun texte autour, sans balises markdown ni ```, au format exact : {\"patients\":[{\"nom\":\"...\",\"prenom\":\"...\",\"heure\":\"HH:MM\",\"age\":nombre ou null,\"date_naissance\":\"JJ/MM/AAAA\" ou null,\"email\":\"...\" ou null,\"notes\":\"...\" ou null}]}. Un patient peut être affiché avec un âge (ex. \"63 ans\") ou une date de naissance selon la configuration du logiciel — renseigne celui des deux qui est visible, laisse l'autre à null. Le champ \"notes\" doit reprendre brièvement le motif ou soin prévu tel qu'affiché (ex. \"assainissement paro bas\"). N'invente jamais une valeur : si une information n'est pas clairement lisible, mets null. Ignore toute case vide ou tout créneau sans nom de patient. Conserve l'ordre chronologique du planning.";
-    const raw=await callGPTVision(key,system,dataUrl,3000);
-    const clean=raw.replace(/```json?/gi,'').replace(/```/g,'').trim();
-    let data;
-    try{data=JSON.parse(clean);}catch(parseErr){throw new Error('Réponse IA illisible, réessayez avec une capture plus nette.');}
-    const list=Array.isArray(data.patients)?data.patients:[];
-    if(!list.length)throw new Error('Aucun patient détecté sur cette capture.');
-    // normalisation + tri chronologique (heure manquante = envoyée en fin de liste)
-    const cleaned=list.map(p=>({
-      nom:(p.nom||'').trim(),
-      prenom:(p.prenom||'').trim(),
-      heure:(p.heure&&/^\d{1,2}:\d{2}$/.test(p.heure.trim()))?p.heure.trim():null,
-      age:(typeof p.age==='number')?p.age:(p.age&&!isNaN(parseInt(p.age))?parseInt(p.age):null),
-      dateNaissance:p.date_naissance||null,
-      email:p.email||null,
-      notes:p.notes||null
-    })).filter(p=>p.nom||p.prenom);
+    // v3.36 : import en DEUX passages IA distincts, pour fiabiliser la retranscription (retour
+    // utilisateur : un patient manquant, une lettre inversée dans un nom, des notes mélangées).
+    // Passage 1 — tâche volontairement simple (juste la liste ordonnée nom/prénom/heure) : plus
+    // fiable pour ne perdre AUCUN patient, même sur un planning très chargé.
+    status.textContent='⏳ Étape 1/2 — lecture de la liste des patients…';
+    const system1="Tu listes, dans l'ordre chronologique, TOUS les patients visibles sur cette capture d'écran de planning journalier d'un logiciel de gestion de cabinet dentaire, sans exception. Réponds UNIQUEMENT avec un objet JSON strict, sans aucun texte autour, sans balises markdown ni ```, au format exact : {\"patients\":[{\"nom\":\"...\",\"prenom\":\"...\",\"heure\":\"HH:MM\"}]}. Recopie EXACTEMENT le nom et le prénom tels qu'écrits sur l'image, caractère pour caractère, sans corriger l'orthographe ni reformuler. N'oublie AUCUN patient visible, même si un créneau semble incomplet ou peu lisible (dans ce cas, mets ce que tu peux lire quand même, sans l'omettre). Ignore uniquement les créneaux réellement vides, sans aucun nom.";
+    const raw1=await callGPTVision(key,system1,dataUrl,2500);
+    const clean1=raw1.replace(/```json?/gi,'').replace(/```/g,'').trim();
+    let data1;
+    try{data1=JSON.parse(clean1);}catch(parseErr){throw new Error('Réponse IA illisible (étape 1/2), réessayez avec une capture plus nette.');}
+    const list1=Array.isArray(data1.patients)?data1.patients:[];
+    if(!list1.length)throw new Error('Aucun patient détecté sur cette capture.');
+
+    // Passage 2 — détails complets par patient (âge/date de naissance, e-mail, notes, couleur
+    // approximative du bloc, déduction de civilité). Reste tolérant si ce passage échoue : on
+    // affiche quand même la liste fiable du passage 1, simplement sans les détails enrichis.
+    status.textContent='⏳ Étape 2/2 — lecture des détails patients…';
+    const system2="Tu extrais, pour CHAQUE patient visible sur cette capture d'écran de planning journalier d'un logiciel de gestion de cabinet dentaire, un maximum de détails. Réponds UNIQUEMENT avec un objet JSON strict, sans aucun texte autour, sans balises markdown ni ```, au format exact : {\"patients\":[{\"nom\":\"...\",\"prenom\":\"...\",\"heure\":\"HH:MM\",\"age\":nombre ou null,\"date_naissance\":\"JJ/MM/AAAA\" ou null,\"email\":\"...\" ou null,\"notes\":\"...\" ou null,\"couleur\":\"#rrggbb\" ou null,\"civilite\":\"M\" ou \"Mme\" ou null,\"civilite_certaine\":true ou false}]}. Le champ \"notes\" (motif ou soin prévu) doit être recopié EXACTEMENT tel qu'affiché, mot pour mot, SANS reformuler ni résumer ni raccourcir. Le champ \"couleur\" est ta meilleure estimation de la couleur de fond du bloc de ce patient sur l'image, en code hexadécimal — fais de ton mieux même sans certitude absolue. Le champ \"civilite\" est ta déduction de \"M\" ou \"Mme\" à partir du prénom ; mets \"civilite_certaine\":false si le prénom est rare, mixte ou ambigu, sinon true. Un patient peut être affiché avec un âge ou une date de naissance selon la configuration du logiciel — renseigne celui des deux qui est visible. N'invente jamais une valeur : si une information n'est pas clairement lisible, mets null. Conserve l'ordre chronologique.";
+    let list2=[];
+    try{
+      const raw2=await callGPTVision(key,system2,dataUrl,4000);
+      const clean2=raw2.replace(/```json?/gi,'').replace(/```/g,'').trim();
+      const data2=JSON.parse(clean2);
+      list2=Array.isArray(data2.patients)?data2.patients:[];
+    }catch(e){ /* passage 2 best-effort : on continue avec la liste simple et fiable du passage 1 */ }
+
+    // Fusion : la liste du passage 1 fait foi pour l'ordre et pour ne perdre personne ; on
+    // l'enrichit avec les détails du passage 2 quand on retrouve le même patient (par nom, puis
+    // par nom+heure en repli).
+    const norm=s=>(s||'').toString().trim().toLowerCase();
+    const cleaned=list1.map(p1=>{
+      const match=list2.find(p2=>norm(p2.nom)===norm(p1.nom)&&norm(p2.prenom)===norm(p1.prenom))
+                ||list2.find(p2=>norm(p2.nom)===norm(p1.nom)&&p1.heure&&p2.heure===p1.heure)
+                ||null;
+      const heure=(p1.heure&&/^\d{1,2}:\d{2}$/.test(String(p1.heure).trim()))?String(p1.heure).trim():null;
+      let age=null;
+      if(match){
+        if(typeof match.age==='number')age=match.age;
+        else if(match.age&&!isNaN(parseInt(match.age)))age=parseInt(match.age);
+        else if(match.date_naissance){const computed=computeAgeFromDateStr(match.date_naissance);if(computed!==null)age=computed;}
+      }
+      return{
+        nom:(p1.nom||'').trim(),
+        prenom:(p1.prenom||'').trim(),
+        heure,
+        age,
+        email:(match&&match.email)?match.email:null,
+        notes:(match&&match.notes)?match.notes:null,
+        couleur:(match&&match.couleur&&/^#[0-9a-fA-F]{6}$/.test(match.couleur))?match.couleur:null,
+        civilite:(match&&(match.civilite==='M'||match.civilite==='Mme'))?match.civilite:null,
+        civiliteCertaine:match?!!match.civilite_certaine:true
+      };
+    }).filter(p=>p.nom||p.prenom);
     cleaned.sort((a,b)=>{if(!a.heure)return 1;if(!b.heure)return -1;return a.heure.localeCompare(b.heure);});
     savePlanningData(cleaned);
     status.dataset.busy='0';status.style.display='none';status.textContent='';
@@ -3370,6 +3445,7 @@ function isPlanningPatientDone(nom,prenom){
   });
 }
 
+// Palette de repli utilisée uniquement si l'IA n'a pas pu deviner de couleur approximative pour un patient
 const PLANNING_COLORS=['#dbeafe','#fef3c7','#d1fae5','#fce7f3','#e0e7ff','#fee2e2','#ede9fe','#fef9c3'];
 
 function renderPlanningPage(){
@@ -3388,74 +3464,44 @@ function renderPlanningPage(){
 
 function planningMinutes(heure){const[h,m]=heure.split(':').map(Number);return h*60+m;}
 
+// v3.36 : liste compacte au lieu d'une frise proportionnelle au temps (retour utilisateur : il ne
+// veut que l'ordre chronologique, pas la durée réelle des rendez-vous — l'objectif est que tout
+// tienne à l'écran sans avoir besoin de scroller). Le patient "en cours" est simplement repéré
+// par un encadré rouge + une étiquette, recalculé chaque minute.
 function buildPlanningTimeline(patients){
   const el=document.getElementById('planning-timeline');
+  const nowMin=new Date().getHours()*60+new Date().getMinutes();
   const timed=patients.filter(p=>p.heure);
-  const untimed=patients.filter(p=>!p.heure);
-  if(!timed.length){el.innerHTML='<div style="padding:20px;color:var(--ink3);font-size:12px">Aucun horaire n\'a pu être lu sur cette capture.</div>';return;}
-  const minMinutes=Math.min(...timed.map(p=>planningMinutes(p.heure)));
-  const maxMinutes=Math.max(...timed.map(p=>planningMinutes(p.heure)));
-  const dayStart=Math.max(0,Math.floor(minMinutes/60)-1)*60;
-  const dayEnd=Math.min(24*60,(Math.ceil(maxMinutes/60)+1)*60+60);
-  const pxPerMin=2.2;
-  const totalHeight=(dayEnd-dayStart)*pxPerMin;
-  let html='';
-  for(let h=Math.floor(dayStart/60);h<=Math.ceil(dayEnd/60);h++){
-    const top=(h*60-dayStart)*pxPerMin;
-    html+=`<div class="planning-hourline" style="top:${top}px"><span>${String(h).padStart(2,'0')}:00</span></div>`;
-  }
-  timed.forEach((p,i)=>{
-    const startMin=planningMinutes(p.heure);
-    let endMin;
-    if(i+1<timed.length)endMin=Math.max(startMin+20,planningMinutes(timed[i+1].heure));
-    else endMin=startMin+45;
-    const top=(startMin-dayStart)*pxPerMin;
-    const height=Math.max(34,(endMin-startMin)*pxPerMin-3);
-    const color=PLANNING_COLORS[i%PLANNING_COLORS.length];
+  let currentRef=null;
+  timed.forEach(p=>{if(planningMinutes(p.heure)<=nowMin)currentRef=p;});
+  let html='<div class="planning-list">';
+  patients.forEach((p,idx)=>{
     const done=isPlanningPatientDone(p.nom,p.prenom);
-    const ageTxt=p.age?` - ${p.age} ans`:'';
+    const isCurrent=p===currentRef;
+    const color=p.couleur||PLANNING_COLORS[idx%PLANNING_COLORS.length];
     const nameTxt=escHtml([p.nom,p.prenom].filter(Boolean).join(' '));
-    const metaParts=[];
-    if(p.notes)metaParts.push(escHtml(p.notes));
-    const origIdx=patients_indexOf(patients,p);
-    html+=`<div class="planning-block" style="top:${top}px;height:${height}px;background:${color}" onclick="startConsultFromPlanning(${origIdx})" title="Cliquer pour démarrer une nouvelle consultation avec ce patient">
-      <div class="pb-name">${p.heure} — ${nameTxt}${escHtml(ageTxt)}</div>
-      ${metaParts.length?`<div class="pb-meta">${metaParts.join(' · ')}</div>`:''}
-      ${done?'<div class="pb-done">✅</div>':''}
+    const ageTxt=p.age?` (${p.age} ans)`:'';
+    const metaBits=[];
+    if(p.notes)metaBits.push(escHtml(p.notes));
+    html+=`<div class="planning-row${isCurrent?' current':''}" style="background:${color}" onclick="startConsultFromPlanning(${idx})" title="Cliquer pour démarrer une nouvelle consultation avec ce patient">
+      <div class="pr-time">${p.heure||'Sans horaire lisible'}${isCurrent?'<span class="planning-current-tag">EN COURS</span>':''}</div>
+      <div class="pr-name">${nameTxt}${escHtml(ageTxt)}</div>
+      ${metaBits.length?`<div class="pr-meta">${metaBits.join(' · ')}</div>`:''}
+      ${done?'<div class="pr-done">✅</div>':''}
     </div>`;
   });
-  if(untimed.length){
-    const untimedHtml=untimed.map(p=>{
-      const idx=patients_indexOf(patients,p);
-      return `<span onclick="startConsultFromPlanning(${idx})" style="cursor:pointer;text-decoration:underline;color:var(--accent)">${escHtml([p.nom,p.prenom].filter(Boolean).join(' '))}</span>`;
-    }).join(', ');
-    html+=`<div style="position:absolute;left:52px;right:6px;top:${totalHeight+10}px;font-size:11px;color:var(--ink3)">Sans horaire lisible : ${untimedHtml}</div>`;
-  }
-  el.style.height=(totalHeight+ (untimed.length?30:0))+'px';
-  el.innerHTML=html+'<div class="planning-nowline" id="planning-nowline"></div>';
-  updatePlanningNowLine(dayStart,pxPerMin);
+  html+='</div>';
+  el.innerHTML=html;
   if(planningClockInterval)clearInterval(planningClockInterval);
   planningClockInterval=setInterval(()=>{
-    // on regénère toute la frise (pas juste la ligne) pour que les coches "fait" se mettent
-    // aussi à jour automatiquement si l'utilisateur enchaîne des consultations sans quitter l'onglet
+    // on regénère toute la liste (pas juste le repère "en cours") pour que les coches "fait" se
+    // mettent aussi à jour automatiquement si l'utilisateur enchaîne des consultations sans quitter l'onglet
     renderPlanningPage();
   },60000);
 }
-// petit utilitaire : retrouve l'index d'un patient (par référence) dans le tableau original
-// stocké en localStorage, pour que le clic sur un bloc trié sache quel patient démarrer
-function patients_indexOf(arr,item){return arr.indexOf(item);}
-
-function updatePlanningNowLine(dayStart,pxPerMin){
-  const line=document.getElementById('planning-nowline');
-  if(!line)return;
-  const now=new Date();
-  const nowMin=now.getHours()*60+now.getMinutes();
-  const top=(nowMin-dayStart)*pxPerMin;
-  line.style.top=Math.max(0,top)+'px';
-}
 
 // Démarre "Nouvel enregistrement" avec la fiche pré-remplie depuis un patient du planning
-// (clic direct sur la frise). Respecte le même garde-fou que newEnregistrement() si un
+// (clic direct sur la liste). Respecte le même garde-fou que newEnregistrement() si un
 // enregistrement est en cours.
 function startConsultFromPlanning(idx){
   const data=getPlanningData();
@@ -3471,14 +3517,45 @@ function _startConsultFromPlanningExecute(p){
   _newEnregistrementExecute();
   fillPatientFromPlanning(p);
 }
+// v3.36 : l'âge remplit désormais directement le champ Âge (il n'y a plus de champ date de
+// naissance dans l'application). La civilité est également pré-remplie par déduction du
+// prénom ; si l'IA n'était pas certaine, le champ reste en surbrillance jaune jusqu'à ce que
+// l'utilisateur clique dessus pour confirmer qu'il a vérifié.
 function fillPatientFromPlanning(p){
   document.getElementById('c-nom').value=p.nom||'';
   document.getElementById('c-prenom').value=p.prenom||'';
-  const badge=document.getElementById('c-planning-age-badge');
-  if(p.age){badge.style.display='block';badge.textContent='ℹ️ Âge indiqué sur le planning : '+p.age+' ans (date de naissance non renseignée)';}
-  else{badge.style.display='none';badge.textContent='';}
+  document.getElementById('c-age').value=p.age||'';
+  if(p.civilite){
+    document.getElementById('c-civilite').value=p.civilite;
+    setCiviliteUncertain(p.civiliteCertaine===false);
+  }else{
+    setCiviliteUncertain(false);
+  }
+  renderPlanningContextRecap(p);
   dismissPlanningSuggestion();
   syncPatientToDocs();
+}
+
+function setCiviliteUncertain(uncertain){
+  const el=document.getElementById('c-civilite');
+  if(!el)return;
+  el.classList.toggle('civilite-uncertain',!!uncertain);
+}
+function clearCiviliteUncertain(){setCiviliteUncertain(false);}
+
+// v3.36 : encart discret listant les informations du Planning du jour effectivement récupérées
+// pour ce patient (heure, e-mail, notes de soin) — confirme visuellement à l'utilisateur que ces
+// éléments seront bien transmis à l'IA comme contexte lors de la génération des documents.
+function renderPlanningContextRecap(p){
+  const box=document.getElementById('c-planning-context-recap');
+  if(!box)return;
+  const bits=[];
+  if(p.heure)bits.push('🕐 Rendez-vous prévu à '+escHtml(p.heure));
+  if(p.email)bits.push('✉️ E-mail détecté : '+escHtml(p.email));
+  if(p.notes)bits.push('📝 '+escHtml(p.notes));
+  if(!bits.length){box.style.display='none';box.innerHTML='';return;}
+  box.innerHTML='<strong>📅 Infos planning (transmises comme contexte à l\'IA) :</strong><br>'+bits.join('<br>');
+  box.style.display='block';
 }
 
 // Efface les champs patient — permet de repartir sur une fiche vierge même si un pré-remplissage
@@ -3486,11 +3563,12 @@ function fillPatientFromPlanning(p){
 function resetPatientFields(){
   document.getElementById('c-nom').value='';
   document.getElementById('c-prenom').value='';
-  document.getElementById('c-ddn').value='';
+  document.getElementById('c-age').value='';
   const civEl=document.getElementById('c-civilite');if(civEl)civEl.value='';
+  setCiviliteUncertain(false);
   ['c-adresse','c-telephone','c-email'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   const extraEl=document.getElementById('c-extra-fields');if(extraEl)extraEl.style.display='none';
-  const badge=document.getElementById('c-planning-age-badge');if(badge){badge.style.display='none';badge.textContent='';}
+  const recapEl=document.getElementById('c-planning-context-recap');if(recapEl){recapEl.style.display='none';recapEl.innerHTML='';}
   syncPatientToDocs();
   showToast('✓ Fiche patient réinitialisée');
 }
@@ -3527,6 +3605,31 @@ function applyPlanningSuggestion(){
 function dismissPlanningSuggestion(){
   document.getElementById('c-planning-suggestion').style.display='none';
 }
+
+// v3.36 : recherche, dans le planning du jour, une entrée correspondant au patient actuellement
+// saisi sur "Nouvel enregistrement" (par nom+prénom) — permet d'injecter heure/e-mail/notes comme
+// contexte IA même si le patient a été saisi à la main (et pas uniquement via clic/suggestion).
+function findPlanningPatientMatch(){
+  const data=getPlanningData();
+  if(!data||!data.patients)return null;
+  const nom=(document.getElementById('c-nom')||{}).value.trim().toLowerCase();
+  const prenom=(document.getElementById('c-prenom')||{}).value.trim().toLowerCase();
+  if(!nom&&!prenom)return null;
+  return data.patients.find(p=>(p.nom||'').trim().toLowerCase()===nom&&(p.prenom||'').trim().toLowerCase()===prenom)||null;
+}
+// v3.36 : bloc de contexte transmis à l'IA — utilisé pour TOUS les documents générés (SmartNote
+// ET documents classiques), pas seulement affiché à titre de rappel visuel.
+function buildPlanningContextBlock(){
+  const p=findPlanningPatientMatch();
+  if(!p)return'';
+  const parts=[];
+  if(p.heure)parts.push(`rendez-vous prévu à ${p.heure}`);
+  if(p.notes)parts.push(`motif/soin prévu indiqué sur le planning : "${p.notes}"`);
+  if(p.email)parts.push(`e-mail : ${p.email}`);
+  if(!parts.length)return'';
+  return `\nContexte issu du Planning du jour pour ce patient (${parts.join(', ')}) — sert uniquement de contexte, ne pas le recopier littéralement s'il ne correspond pas à ce qui a été réellement dit dans la transcription.\n`;
+}
+
 
 // v3.21 : variante streaming de callGPT — modèle configurable (ex. gpt-4o-mini pour les tâches
 // rapides) et callback onChunk(fragment, texteComplet) appelé à chaque morceau reçu, pour un
@@ -3591,8 +3694,11 @@ async function genSmartNote(openAIKey,transcript,patient,today,isDictee=false){
   // modes (consultation ET dictée) — corrige l'absence totale de prise en compte des listes
   // d'implants configurées dans My DentIA lors de la génération de la SmartNote.
   const implantBlock=buildImplantContextBlock();
+  // v3.36 : le contexte du Planning du jour (heure, e-mail, notes de soin prévu) est également
+  // transmis à la SmartNote — c'est l'usage principal souhaité par l'utilisateur pour ce contexte.
+  const planningBlock=buildPlanningContextBlock();
   const rawPrompt=localStorage.getItem(promptKey)||defaultPrompt;
-  const logosPrompt=rawPrompt.replace('[COLLER ICI LE TEXTE]',implantBlock+'[COLLER ICI LE TEXTE]').replace('[COLLER ICI LE TEXTE]',transcript);
+  const logosPrompt=rawPrompt.replace('[COLLER ICI LE TEXTE]',implantBlock+planningBlock+'[COLLER ICI LE TEXTE]').replace('[COLLER ICI LE TEXTE]',transcript);
   // BUG-FIX v3.22 : on n'envoie plus patient/date/praticien en contexte à l'IA — ces infos
   // étaient parfois reprises telles quelles dans la SmartNote alors qu'elles sont déjà
   // connues par ailleurs (dossier patient). Voir aussi la nouvelle règle dans DEFAULT_LOGOS_PROMPT.
@@ -3672,7 +3778,7 @@ async function applySuggestions(btn){
   const docInstr=docsToUpdate.map((d,i)=>{const customRules=aiDocRules[d]?'\nRègles spécifiques : '+aiDocRules[d]:'';return`DOCUMENT ${i+1} — ${DOC_LABELS[d].toUpperCase()} (document actuel à mettre à jour) :\n${cGenDocs[d]}\n\nPrompt de base : ${DOC_PROMPTS[d]}${customRules}`;}).join('\n\n');
   const instrInclure=checked.length?`ÉLÉMENTS À INCLURE (ajouter s'ils sont absents) : ${checked.join(', ')}`:'';
   const instrExclure=unchecked.length?`ÉLÉMENTS À EXCLURE (retirer s'ils sont présents) : ${unchecked.join(', ')}`:'';
-  const prompt=`Praticien :\n${header}\nTitre et nom du praticien : ${getPraticienTitledName()}\nGenre du praticien : ${buildPraticienGenreLine()}\nDate : ${today}\nPatient : ${patient}\nPatient (civilité/nom majuscule/DDN) : ${buildPatientContextLine()}${aiGeneral?'\n\nHabitudes de rédaction :\n'+aiGeneral:''}\n\nMets à jour les documents ci-dessous selon ces instructions :\n${instrInclure}${instrInclure&&instrExclure?'\n':''}${instrExclure}\n\n${docInstr}\n\nRetourne les ${docsToUpdate.length} documents mis à jour séparés UNIQUEMENT par "${sep}". Commence directement par le contenu du premier document.`;
+  const prompt=`Praticien :\n${header}\nTitre et nom du praticien : ${getPraticienTitledName()}\nGenre du praticien : ${buildPraticienGenreLine()}\nDate : ${today}\nPatient : ${patient}\nPatient (civilité/nom majuscule/âge) : ${buildPatientContextLine()}${buildPlanningContextBlock()}${aiGeneral?'\n\nHabitudes de rédaction :\n'+aiGeneral:''}\n\nMets à jour les documents ci-dessous selon ces instructions :\n${instrInclure}${instrInclure&&instrExclure?'\n':''}${instrExclure}\n\n${docInstr}\n\nRetourne les ${docsToUpdate.length} documents mis à jour séparés UNIQUEMENT par "${sep}". Commence directement par le contenu du premier document.`;
   try{
     const beforeDocs=docsToUpdate.map(d=>cGenDocs[d]).join('\n\n---\n\n');
     const result=await callGPT(key,sys,prompt);
@@ -4095,11 +4201,10 @@ function printCourrierContent(content,title){
   const logo=localStorage.getItem('d3-logo'),s=getSettings(),fs=parseInt(s.fontsize||'13',10);
   const fontMain=s['font-main']||'DM Sans';
   const logoHtml=logo?`<img src="${logo}" style="max-height:55px;max-width:180px;object-fit:contain;display:block;margin-bottom:6px">`:'';
-  const nomEl=document.getElementById('c-nom'),prenomEl=document.getElementById('c-prenom'),ddnEl=document.getElementById('c-ddn');
-  const nom=nomEl?nomEl.value.trim():'',prenom=prenomEl?prenomEl.value.trim():'',ddn=ddnEl?ddnEl.value:'';
+  const nomEl=document.getElementById('c-nom'),prenomEl=document.getElementById('c-prenom'),ageEl=document.getElementById('c-age');
+  const nom=nomEl?nomEl.value.trim():'',prenom=prenomEl?prenomEl.value.trim():'',age=ageEl?ageEl.value:'';
   const patientNom=(nom||prenom)?`${nom} ${prenom}`.trim():buildPatientName();
-  const ddnFmt=ddn&&ddn.includes('-')?(()=>{const p=ddn.split('-');return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:ddn;})():ddn;
-  const patientHtml=`<div style="font-weight:700;font-size:11px;margin-bottom:3px">Patient</div><div>${escHtml(patientNom)}${ddnFmt?'<br>Date de naissance : '+escHtml(ddnFmt):''}</div>`;
+  const patientHtml=`<div style="font-weight:700;font-size:11px;margin-bottom:3px">Patient</div><div>${escHtml(patientNom)}${age?' ('+escHtml(String(age))+' ans)':''}</div>`;
   if(!localStorage.getItem('d3-print-tip')){localStorage.setItem('d3-print-tip','1');showToast('💡 Pour une impression propre : décochez "En-têtes et pieds de page" dans Chrome');setTimeout(()=>doPrintCourrier(content+printSignatureBlockHtml(),title,header,today,logoHtml,fs,fontMain,patientHtml),2800);return;}
   doPrintCourrier(content+printSignatureBlockHtml(),title,header,today,logoHtml,fs,fontMain,patientHtml);
 }
@@ -4612,15 +4717,15 @@ function switchDocsTab(tab, btn){
 // n'est jamais vrai : modifier le patient depuis "Mes Documents" n'affecte jamais "Nouvel
 // enregistrement", et "Nouvel enregistrement" repart toujours à zéro via cReset().
 function syncPatientToDocs(){
-  const civEl=document.getElementById('doc-civilite'),nomEl=document.getElementById('doc-nom'),prenomEl=document.getElementById('doc-prenom'),ddnEl=document.getElementById('doc-ddn');
+  const civEl=document.getElementById('doc-civilite'),nomEl=document.getElementById('doc-nom'),prenomEl=document.getElementById('doc-prenom'),ageEl=document.getElementById('doc-age');
   const cCiv=(document.getElementById('c-civilite')||{}).value||'';
   const cNom=(document.getElementById('c-nom')||{}).value||'';
   const cPrenom=(document.getElementById('c-prenom')||{}).value||'';
-  const cDdnRaw=(document.getElementById('c-ddn')||{}).value||''; // format YYYY-MM-DD
+  const cAge=(document.getElementById('c-age')||{}).value||'';
   if(civEl)civEl.value=cCiv;
   if(nomEl)nomEl.value=cNom;
   if(prenomEl)prenomEl.value=cPrenom;
-  if(ddnEl){if(cDdnRaw&&cDdnRaw.includes('-')){const[y,m,d]=cDdnRaw.split('-');ddnEl.value=`${d}/${m}/${y}`;}else{ddnEl.value=cDdnRaw;}}
+  if(ageEl)ageEl.value=cAge;
   if(currentFicheType && currentFicheType!=='fiche_endo')refreshDoc();
 }
 // v3.31 : infos patient du formulaire "consultation" (pour anonymisation du Journal de Feedback IA)
@@ -4628,7 +4733,7 @@ function getConsultPatientMeta(){
   return {
     nom:(document.getElementById('c-nom')||{}).value||'',
     prenom:(document.getElementById('c-prenom')||{}).value||'',
-    ddn:(document.getElementById('c-ddn')||{}).value||''
+    age:(document.getElementById('c-age')||{}).value||''
   };
 }
 function getDocPatient(){
@@ -4637,11 +4742,11 @@ function getDocPatient(){
   const nom = (document.getElementById('doc-nom')||{}).value||'';
   const nomMaj = nom.toUpperCase();
   const prenom = (document.getElementById('doc-prenom')||{}).value||'';
-  const ddn = (document.getElementById('doc-ddn')||{}).value||'';
+  const age = (document.getElementById('doc-age')||{}).value||'';
   // v3.34 — Bug-fix : l'ancien fallback littéral '[Patient]' s'affichait tel quel dans les documents
   // quand aucun nom n'était renseigné. On laisse désormais une chaîne vide dans ce cas ; chaque
   // template affiche alors uniquement la date, sans la mention "Patient :" (voir les ${p.full?...} ci-dessous).
-  return {civilite,civiliteLabel,nom:nomMaj,prenom,ddn,
+  return {civilite,civiliteLabel,nom:nomMaj,prenom,age,
     full: [prenom,nomMaj].filter(Boolean).join(' '),
     fullWithCivilite: [civiliteLabel,nomMaj,prenom].filter(Boolean).join(' ')};
 }
@@ -4972,7 +5077,7 @@ ${docsTranscript}`
     catch(e){ parsed = {suggestions:[]}; }
     saveStatEntry(0,'gpt-4o',docsTranscript||'',extractResult,1,0,0,'action','Enrichir — extraction');
     // v3.31 : capture Journal de Feedback IA
-    saveAIFeedback('enrich_extract','Enrichir — extraction des suggestions','',docsTranscript||'',extractResult,{model:'gpt-4o',nom:p.nom,prenom:p.prenom,ddn:p.ddn});
+    saveAIFeedback('enrich_extract','Enrichir — extraction des suggestions','',docsTranscript||'',extractResult,{model:'gpt-4o',nom:p.nom,prenom:p.prenom,age:p.age});
 
     if(!parsed.suggestions || parsed.suggestions.length === 0){
       sugPanel.innerHTML = '<div style="font-size:12px;color:#92400e;padding:4px 0">✨ Aucune information personnalisable trouvée dans la transcription pour ce type de document.</div>';
@@ -5187,7 +5292,7 @@ function saveMesDocumentsHistory(type,contentHtml){
   let patientId=null;
   const nomTrim=p.nom.trim();
   let pat=patients.find(x=>x.nom.toLowerCase()===nomTrim.toLowerCase());
-  if(!pat){pat={id:Date.now().toString(),nom:nomTrim,prenom:p.prenom.trim(),ddn:p.ddn||''};patients.push(pat);localStorage.setItem('d3-patients',JSON.stringify(patients));}
+  if(!pat){pat={id:Date.now().toString(),nom:nomTrim,prenom:p.prenom.trim(),age:p.age||''};patients.push(pat);localStorage.setItem('d3-patients',JSON.stringify(patients));}
   patientId=pat.id;
   // v3.31 : on ne sauvegarde plus le logo/la signature en clair dans l'Historique (ils sont
   // remplacés par un repère, restitué dynamiquement à l'affichage) — évite de saturer le stockage.
@@ -5213,7 +5318,7 @@ function saveAIFeedback(actionType,label,before,exchange,after,meta){
       after:after||'',
       patientNom:(meta&&meta.nom)||'',
       patientPrenom:(meta&&meta.prenom)||'',
-      patientDdn:(meta&&meta.ddn)||'',
+      patientAge:(meta&&meta.age)||'',
       model:(meta&&meta.model)||''
     });
     // Limite de rétention : ces entrées sont volumineuses (transcriptions + documents complets),
@@ -5223,7 +5328,11 @@ function saveAIFeedback(actionType,label,before,exchange,after,meta){
     safeSet('d3-ai-feedback',JSON.stringify(list));
   }catch(e){ /* capture best-effort, ne doit jamais bloquer la génération IA */ }
 }
-function anonymizeFeedbackText(text,nom,prenom,ddn){
+// v3.36 : l'anonymisation de l'âge ne remplace plus un nombre "nu" (un âge comme 45 ou 26
+// coïncide très souvent avec un numéro de dent en notation FDI — remplacer tout "45" isolé
+// aurait corrompu massivement les documents anonymisés). On ne redacte donc que le motif
+// complet "(NN ans)" tel qu'il apparaît réellement dans les documents.
+function anonymizeFeedbackText(text,nom,prenom,age){
   let out=text||'';
   if(nom && nom.trim()){
     const n=nom.trim();
@@ -5233,23 +5342,18 @@ function anonymizeFeedbackText(text,nom,prenom,ddn){
     const p=prenom.trim();
     out=out.split(p).join('X').split(p.toLowerCase()).join('X');
   }
-  if(ddn && ddn.trim()) out=out.split(ddn.trim()).join('JJ/MM/AAAA');
+  if(age && String(age).trim()){
+    const a=String(age).trim();
+    out=out.split(`(${a} ans)`).join('(XX ans)');
+  }
   return out;
 }
 // v3.34 : exportAIFeedback, deleteAIFeedback et renderAIFeedbackList sont désormais définies plus
 // haut dans le fichier (voir la section "Bug 7 : fusion du Journal Feedback IA"), et affichent
 // leurs entrées dans la liste unifiée du panneau Feedback au lieu d'un onglet séparé.
 
-// Mise à jour en temps réel quand nom/prénom/DDN changent
+// Mise à jour en temps réel quand nom/prénom/âge changent
 function onDocPatientChange(){
-  // Format DDN automatique
-  const ddnEl = document.getElementById('doc-ddn');
-  if(ddnEl){
-    let v = ddnEl.value.replace(/\D/g,'');
-    if(v.length > 2) v = v.slice(0,2)+'/'+v.slice(2);
-    if(v.length > 5) v = v.slice(0,5)+'/'+v.slice(5,9);
-    if(ddnEl.value !== v) ddnEl.value = v;
-  }
   if(currentFicheType && currentFicheType !== 'fiche_endo') refreshDoc();
 }
 
@@ -5348,7 +5452,7 @@ function renderAttestation(p,hdr,date){
   <h2 style="font-size:20px;font-weight:700;text-align:center;margin:24px 0 36px">Attestation de présence</h2>
   <p style="font-size:13px;line-height:2.2;margin-bottom:30px">
     Je soussigné, Docteur Julien ZARATE, chirurgien-dentiste,<br>
-    certifie que <strong>${escHtml(p.full)||'le/la patient(e)'}</strong>${p.ddn ? `, né(e) le ${escHtml(p.ddn)},` : ''} est venu(e) au cabinet dentaire le <strong>${date}</strong>.
+    certifie que <strong>${escHtml(p.full)||'le/la patient(e)'}</strong>${p.age ? ` (${escHtml(String(p.age))} ans)` : ''} est venu(e) au cabinet dentaire le <strong>${date}</strong>.
   </p>
   <p style="font-size:13px;margin-bottom:50px">Établie à la demande de l'intéressé(e) pour faire valoir ce que de droit.</p>
   <p style="font-size:13px;margin-top:30px">Dr Julien ZARATE</p>
@@ -5496,7 +5600,7 @@ function renderContratSoins(p,hdr,date){
 function renderConsentementDDS(p,hdr,date){
   showDocResult('Consentement — Dents de sagesse',`${hdr}
   <h2 style="font-size:14px;font-weight:700;text-align:center;margin-bottom:3px">Information médicale concernant l'avulsion des dents de sagesse</h2>
-  <p style="font-size:10px;margin-bottom:8px">${p.full?`Patient : <strong>${escHtml(p.full)}</strong>${p.ddn?` — Né(e) le ${escHtml(p.ddn)}`:''} — `:''}${date}</p>
+  <p style="font-size:10px;margin-bottom:8px">${p.full?`Patient : <strong>${escHtml(p.full)}</strong>${p.age?` (${escHtml(String(p.age))} ans)`:''} — `:''}${date}</p>
   <p style="font-size:10px;line-height:1.5;margin-bottom:7px">Les avulsions des dents de sagesse ou troisième molaires, (appelées germes lorsque les racines sont absentes ou incomplètes) sont indiquées en raison d'un mauvais positionnement, d'un manque de place, d'accidents douloureux, inflammatoires, infectieux, tumoraux...</p>
   <p style="font-size:10px;line-height:1.5;margin-bottom:7px">L'intervention peut s'effectuer sous anesthésie locale ou sous anesthésie générale, en fonction du caractère invasif de l'acte (nombre de dents, profondeur d'inclusion, situation anormale...) et/ou du statut médical du patient (pathologie médicale, coopération, état psychologique...).</p>
   <p style="font-size:10px;line-height:1.5;margin-bottom:7px">Les suites opératoires normales sont : l'œdème (gonflement des joues), la douleur, la limitation de l'ouverture de la bouche, ainsi qu'un petit saignement de quelques heures.</p>
@@ -5541,7 +5645,7 @@ function renderConsentementPAC(p,hdr,date){
   showDocResult('Consentement — Prothèse amovible complète',`${hdr}
   <h2 style="font-size:16px;font-weight:700;text-align:center;margin-bottom:4px">Formulaire de consentement éclairé</h2>
   <h3 style="font-size:13px;font-weight:500;text-align:center;color:#555;margin-bottom:14px">(prothèse amovible complète)</h3>
-  <p style="font-size:12px;margin-bottom:14px">${p.full?`Patient : <strong>${escHtml(p.full)}</strong>${p.ddn?` — Né(e) le ${escHtml(p.ddn)}`:''} — `:''}${date}</p>
+  <p style="font-size:12px;margin-bottom:14px">${p.full?`Patient : <strong>${escHtml(p.full)}</strong>${p.age?` (${escHtml(String(p.age))} ans)`:''} — `:''}${date}</p>
   <p style="font-size:12px;line-height:1.7;margin-bottom:12px">Je soussigné(e) <strong>${escHtml(p.full)||'___________________________'}</strong> donne mon consentement éclairé, après avoir reçu les informations nécessaires concernant le plan de traitement dans la réalisation de prothèse amovible complète qui sera réalisé par le Dr ZARATE Julien.</p>
   <p style="font-size:12px;font-weight:600;margin-bottom:8px">Il a été précisé que :</p>
   <ul style="font-size:12px;line-height:1.9;padding-left:18px;margin-bottom:16px">
@@ -5575,7 +5679,7 @@ function renderConsentementImplant(p,hdr,date){
   <h3 style="font-size:12px;font-weight:500;text-align:center;color:#555;margin-bottom:10px">Pose d'implant(s) dentaire(s)</h3>
   <table style="width:100%;border-collapse:collapse;margin-bottom:10px">
     <tr><td style="padding:5px 8px;border:1px solid #ccc;font-size:11px;width:50%">Nom : <strong>${escHtml(p.nom||'_______________')}</strong></td><td style="padding:5px 8px;border:1px solid #ccc;font-size:11px">Prénom : <strong>${escHtml(p.prenom||'_______________')}</strong></td></tr>
-    <tr><td style="padding:5px 8px;border:1px solid #ccc;font-size:11px">Date de naissance : <strong>${escHtml(p.ddn||'_______________')}</strong></td><td style="padding:5px 8px;border:1px solid #ccc;font-size:11px">Date : <strong>${date}</strong></td></tr>
+    <tr><td style="padding:5px 8px;border:1px solid #ccc;font-size:11px">Âge : <strong>${p.age?escHtml(String(p.age))+' ans':'_______________'}</strong></td><td style="padding:5px 8px;border:1px solid #ccc;font-size:11px">Date : <strong>${date}</strong></td></tr>
   </table>
   <p style="font-size:11px;font-weight:600;margin-bottom:4px">Information sur le traitement</p>
   <p style="font-size:11px;line-height:1.5;margin-bottom:8px">Le traitement implantaire consiste à poser un ou plusieurs implants en titane dans l'os de la mâchoire, afin de remplacer une ou plusieurs dents absentes. L'implant sert de racine artificielle sur laquelle sera fixée une prothèse (couronne, bridge ou prothèse amovible). Les alternatives thérapeutiques (bridge conventionnel, prothèse amovible) m'ont été présentées. J'ai choisi en pleine connaissance de cause la solution implantaire.</p>
@@ -5645,7 +5749,7 @@ async function genFicheEndoIA(p,hdr,date){
         let txt = data.choices?.[0]?.message?.content||'{}';
         saveStatEntry(0,'gpt-4o',docsTranscript||'',txt,1,0,0,'action','Fiche endo — analyse IA');
         // v3.31 : capture Journal de Feedback IA
-        saveAIFeedback('fiche_endo','Fiche endo — analyse IA (Mes Documents)','',docsTranscript||'',txt,Object.assign({model:'gpt-4o'},p?{nom:p.nom,prenom:p.prenom,ddn:p.ddn}:{}));
+        saveAIFeedback('fiche_endo','Fiche endo — analyse IA (Mes Documents)','',docsTranscript||'',txt,Object.assign({model:'gpt-4o'},p?{nom:p.nom,prenom:p.prenom,age:p.age}:{}));
         txt = txt.replace(/```json?/g,'').replace(/```/g,'').trim();
         const ia = JSON.parse(txt);
         // Remplir les champs
@@ -5704,8 +5808,8 @@ function buildFicheEndoHTML(p,hdr,date){
       <td style="padding:6px 10px;border:1px solid #ccc;font-size:12px">${escHtml(p.prenom)}</td>
     </tr>
     <tr>
-      <td style="padding:6px 10px;border:1px solid #ccc;font-size:12px;font-weight:600;background:#f5f5f5">Date de naissance</td>
-      <td style="padding:6px 10px;border:1px solid #ccc;font-size:12px">${escHtml(p.ddn)}</td>
+      <td style="padding:6px 10px;border:1px solid #ccc;font-size:12px;font-weight:600;background:#f5f5f5">Âge</td>
+      <td style="padding:6px 10px;border:1px solid #ccc;font-size:12px">${p.age?escHtml(String(p.age))+' ans':''}</td>
       <td style="padding:6px 10px;border:1px solid #ccc;font-size:12px;font-weight:600;background:#f5f5f5">Mail</td>
       <td style="padding:6px 10px;border:1px solid #ccc">${field('endo-mail','mail@exemple.com')}</td>
     </tr>
